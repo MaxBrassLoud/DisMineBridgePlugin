@@ -1,90 +1,176 @@
 # DisMineBridge
 
-DisMineBridge is a powerful management and moderation plugin for **Minecraft Java (Paper 1.21.8)**.  
-It connects your Minecraft server with a Discord server and provides a unified system for communication, moderation, and administration.
+DisMineBridge is a comprehensive management and moderation plugin for **Minecraft Java Edition (Paper 1.21.8)** that bridges your Minecraft server with Discord, providing unified communication, moderation, and administration capabilities.
 
----
+-----
 
-## General Information
+## Overview
 
-> [!IMPORTANT]
-> This plugin delivers a complete and synchronized moderation system for both Minecraft and Discord.
+**DisMineBridge delivers a complete, synchronized moderation system that works seamlessly across both Minecraft and Discord platforms.**
 
-DisMineBridge includes:
-- Temporary bans and mutes, fully synchronized with **Simple Voice Chat**  
-  (voice mutes and chat mutes stay perfectly aligned).
-- Warnings and kicks.
-- An advanced **Admin Mode**:
-  - Automatically stores your entire inventory in the database.
-  - Switches you to Creative Mode for administrative work.
-  - Restores your previous inventory, location, and game mode perfectly once disabled.
-- A professional **Vanish System** with hidden join/quit messages.
-- A **Maintenance Mode** restricting access to permitted players only.
-- A built-in **whitelist system**.
-- MOTD management directly through the plugin configuration — no manual server editing required.
+The plugin addresses a critical gap in server management: the lack of unified moderation tools across platforms. Whether you’re managing chat violations, voice abuse, or general misconduct, DisMineBridge ensures your moderation actions remain consistent and synchronized.
 
-> [!NOTE]
-> One of the main goals of this project is to eliminate the lack of synchronized moderation between Discord and Minecraft.
+-----
 
----
+## Core Features
 
-## Technologies Used
+### Unified Moderation System
 
-- Java
+**Temporary Bans and Mutes**
 
----
+- Full synchronization with Simple Voice Chat integration
+- Voice mutes and text chat mutes remain perfectly aligned
+- Time-based restrictions with flexible duration syntax
 
-## Features
+**Warning and Kick System**
 
-### Moderation & Management Commands
-- `/adminmode`
-- `/vanish`
-- `/warn <Player> <Reason>`
-- `/kick <Player> <Reason>`
-- `/ban <Player> <Reason> <1h30m>`
-- `/mute <Player> <Reason> <1h30m>`
-- `/maintenance`
-- `/whitelist`
+- Progressive discipline tracking
+- Automated escalation options
+- Complete action history
 
----
+### Administrative Tools
 
-## Setup
+**Advanced Admin Mode**
 
-> [!WARNING]
-> The plugin currently **requires** Simple Voice Chat to function.  
-> Future updates will make this dependency optional.
+- Automatic inventory backup to database
+- Seamless Creative Mode switching for administrative tasks
+- Perfect restoration of inventory, location, and game mode upon exit
+- Zero risk of item loss or state corruption
 
----
+**Professional Vanish System**
 
-## Usage
+- Complete invisibility to regular players
+- Hidden join and quit messages
+- Silent movement and interaction
+- Ideal for monitoring and investigation
 
-Use this plugin if your server — small or large — interacts with a Discord community and you need synchronized moderation and management tools.
+**Maintenance Mode**
 
----
+- Server access restriction during updates or configuration
+- Permission-based allowlist for staff
+- Customizable maintenance messages
 
-## Project Status
+**Integrated Whitelist Management**
 
-> [!IMPORTANT]
-> The project is currently **in active development**.
+- Built-in whitelist system
+- No external plugin dependencies
+- Simple command-based control
 
----
+**MOTD Configuration**
 
-## Current Limitations
+- Direct MOTD management through plugin configuration
+- No manual server.properties editing required
+- Dynamic message updates without server restart
 
-> [!CAUTION]
-> Discord integration is **not implemented yet**.
+-----
 
----
+## Technical Specifications
 
-## Planned Features
+### Requirements
 
-- Integration of the **Handshaker Mod**
-- Built-in **Anticheat system**
-- A **web interface** for moderation actions
+**Platform:** Minecraft Java Edition (Paper 1.21.8)
 
----
+**Dependencies:**
 
-## Contact
+- Simple Voice Chat (currently required)
 
-You can find more of my work here:  
-[**GitHub – MaxBrassLoud**](https://github.com/MaxBrassLoud)
+**Language:** Java
+
+### Command Reference
+
+```
+/adminmode          Toggle administrative mode
+/vanish             Toggle visibility status
+/warn <player> <reason>                Issue a warning
+/kick <player> <reason>                Remove player from server
+/ban <player> <reason> <duration>      Temporary or permanent ban
+/mute <player> <reason> <duration>     Restrict chat and voice
+/maintenance        Toggle maintenance mode
+/whitelist          Manage server whitelist
+```
+
+**Duration Syntax:** Flexible time formats (e.g., `1h30m`, `2d`, `45m`)
+
+-----
+
+## Installation
+
+1. Download the latest DisMineBridge release
+1. Install Simple Voice Chat on your server
+1. Place DisMineBridge.jar in your plugins folder
+1. Restart your server
+1. Configure the plugin using the generated config files
+
+**Note:** Future releases will make Simple Voice Chat optional rather than mandatory.
+
+-----
+
+## Use Cases
+
+DisMineBridge is designed for:
+
+- Servers of any size operating alongside a Discord community
+- Communities requiring synchronized moderation across platforms
+- Administrators seeking professional-grade management tools
+- Teams needing reliable inventory and state management during administrative work
+
+-----
+
+## Development Status
+
+**Current Phase:** Active Development
+
+### Known Limitations
+
+- Discord integration is not yet implemented
+- Simple Voice Chat is currently a hard dependency
+
+### Roadmap
+
+**Upcoming Features:**
+
+- Handshaker Mod integration for enhanced client-server communication
+- Built-in anticheat system with customizable detection rules
+- Web-based interface for remote moderation and server management
+- Optional Simple Voice Chat dependency
+- Full Discord bot integration with bidirectional communication
+
+-----
+
+## Project Structure
+
+```
+DisMineBridge/
+├── Core moderation engine
+├── Database management layer
+├── Admin mode inventory system
+├── Vanish implementation
+├── Maintenance mode controller
+└── Configuration system
+```
+
+-----
+
+## Contributing
+
+Contributions, bug reports, and feature requests are welcome. Please visit the GitHub repository to get involved.
+
+-----
+
+## License
+
+[Include your license information here]
+
+-----
+
+## Author
+
+**MaxBrassLoud**
+
+Explore more projects: [GitHub Profile](https://github.com/MaxBrassLoud)
+
+-----
+
+## Support
+
+For issues, questions, or feature requests, please use the GitHub issue tracker or contact the developer through the repository.
