@@ -1,0 +1,138 @@
+# DisMineBridge Configuration
+# Diese Datei wird automatisch erstellt beim ersten Start
+
+# ============================================================
+#  DATABASE SETTINGS
+# ============================================================
+
+database:
+  # Datenbank-Typ: "sqlite" oder "mysql"
+  # sqlite = Lokale Datenbank (Standard, keine Konfiguration nötig)
+  # mysql  = Externer MySQL/MariaDB Server
+  type: sqlite
+
+  # MySQL Einstellungen (nur relevant wenn type: mysql)
+  mysql:
+    host: localhost
+    port: 3306
+    database: disminebridge
+    username: root
+    password: ""
+
+# ============================================================
+#  DISCORD INTEGRATION
+# ============================================================
+
+discord:
+  # Discord Bot aktivieren
+  enabled: false
+
+  # Discord Bot Token (von https://discord.com/developers/applications)
+  token: "DEIN_BOT_TOKEN_HIER"
+
+  # Discord Server (Guild) ID
+  guild-id: "DEINE_SERVER_ID"
+
+  # Rollen für Commands (ID der Discord-Rolle)
+  roles:
+    admin: "ADMIN_ROLE_ID"          # Voller Zugriff
+    moderator: "MODERATOR_ROLE_ID"  # Moderation Commands
+    supporter: "SUPPORTER_ROLE_ID"  # Ticket-System
+
+  # Automatische Rollen
+  auto-roles:
+    banned: "GEBANNT_ROLE_ID"       # Rolle für gebannte Spieler
+    muted: "GEMUTET_ROLE_ID"        # Rolle für gemutete Spieler
+
+  # Channels
+  channels:
+    # Tickets
+    ticket-category: "TICKET_CATEGORY_ID"
+    whitelist-requests: "WHITELIST_CHANNEL_ID"
+
+    # Entbannungsanträge
+    unban-requests-category: "UNBAN_CATEGORY_ID"
+    unban-channel: "UNBAN_ANFRAGE_CHANNEL_ID"
+
+    # Entmute-Anträge
+    unmute-requests-category: "UNMUTE_CATEGORY_ID"
+    unmute-channel: "UNMUTE_ANFRAGE_CHANNEL_ID"
+
+    # Logs
+    log-channel: "LOG_CHANNEL_ID"
+
+  # Ticket System
+  tickets:
+    # Ticket-Panel Channel
+    panel-channel: "TICKET_PANEL_CHANNEL_ID"
+
+  # Nachrichten
+  messages:
+    unban-request: |
+      **Entbannungsantrag von {user}**
+      
+      **Minecraft Name:** {minecraft}
+      **Ban-Grund:** {reason}
+      **Verbleibende Zeit:** {remaining}
+      
+      **Begründung:**
+      {message}
+
+    unmute-request: |
+      **Entmute-Antrag von {user}**
+      
+      **Minecraft Name:** {minecraft}
+      **Mute-Grund:** {reason}
+      **Verbleibende Zeit:** {remaining}
+      
+      **Begründung:**
+      {message}
+
+# ============================================================
+#  WHITELIST SYSTEM
+# ============================================================
+
+whitelist:
+  # Aktiviert/Deaktiviert die Whitelist
+  enabled: false
+
+
+servermotd:
+  motd: Willkommen auf dem Server
+
+# ============================================================
+#  WARTUNGSMODUS
+# ============================================================
+
+maintenance:
+  # Aktiviert/Deaktiviert den Wartungsmodus
+  enabled: false
+
+  # Nachricht in der Serverliste die während des Warungsmoduses angezeigt wird
+  motd: §c§lWARTUNGSMODUS
+
+  # Nachricht beim Kick (unterstützt § Color Codes und \n für neue Zeilen)
+  kick-message: |
+    §c§lWARTUNGSMODUS
+    
+    §7Der Server befindet sich aktuell im Wartungsmodus.
+    §7Bitte versuche es später erneut.
+    
+    §8Für weitere Informationen besuche unseren Discord.
+
+# ============================================================
+#  NACHRICHTEN
+# ============================================================
+
+messages:
+  # Prefix für alle Plugin-Nachrichten
+  prefix: "&6[DMB] &r"
+
+  # Ban Nachricht
+  ban-message: |
+    &cDu bist gebannt!
+    &7Grund: &f{reason}
+    &7Verbleibend: &e{duration}
+
+  # Mute Nachricht
+  mute-message: "&cDu bist gemutet und kannst nicht schreiben."
