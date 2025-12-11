@@ -115,10 +115,10 @@ DisMineBridge is designed for:
 - Teams needing reliable inventory and state management during administrative work
 
 -----
+>[!IMPORTANT]
+>## Development Status
 
-## Development Status
-
-**Current Phase:** Active Development
+>**Current Phase:** Active Development
 
 ### Known Limitations
 
