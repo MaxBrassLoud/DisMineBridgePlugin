@@ -117,7 +117,6 @@ DisMineBridge is designed for:
 -----
 >[!IMPORTANT]
 >## Development Status
-
 >**Current Phase:** Active Development
 
 ### Known Limitations
