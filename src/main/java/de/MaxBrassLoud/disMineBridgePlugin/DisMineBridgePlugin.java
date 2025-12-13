@@ -25,7 +25,7 @@ public final class DisMineBridgePlugin extends JavaPlugin {
         // Config erstellen falls nicht vorhanden
         saveDefaultConfig();
         FileConfiguration config = getConfig();
-        ServerlistManager.setMOTD(config.getString("maintenance.motd"));
+        ServerlistManager.setMOTD(config.getString("servermotd.motd"));
         // ============================================================
         //  DATENBANK INITIALISIEREN (ZENTRAL)
         // ============================================================
@@ -85,6 +85,10 @@ public final class DisMineBridgePlugin extends JavaPlugin {
         getCommand("vanish").setExecutor(vanishCmd);
         getCommand("vanish").setTabCompleter(vanishCmd);
 
+        PunishCommand punishCmd = new PunishCommand();
+        getCommand("punish").setExecutor(punishCmd);
+        //getCommand("punish").setTabCompleter(punishCmd);
+
         // ============================================================
         //  LISTENER REGISTRIEREN
         // ============================================================
@@ -99,6 +103,13 @@ public final class DisMineBridgePlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new LoginListener(), this);
         getServer().getPluginManager().registerEvents(quitListener, this);
         getServer().getPluginManager().registerEvents(new VanishJoinQuitListener(), this);
+        getServer().getPluginManager().registerEvents(new PunishmentGUIListener(), this);
+        getServer().getPluginManager().registerEvents(new LoginNotificationListener(), this);
+        getServer().getPluginManager().registerEvents(new PunishmentGUIListener(), this);
+
+        PunishmentReasonsCommand reasonsCmd = new PunishmentReasonsCommand();
+        getCommand("punishreasons").setExecutor(reasonsCmd);
+        getCommand("punishreasons").setTabCompleter(reasonsCmd);
 
         // ============================================================
         //  VOICECHAT INTEGRATION

@@ -7,11 +7,8 @@
 
 database:
   # Datenbank-Typ: "sqlite" oder "mysql"
-  # sqlite = Lokale Datenbank (Standard, keine Konfiguration nötig)
-  # mysql  = Externer MySQL/MariaDB Server
   type: sqlite
 
-  # MySQL Einstellungen (nur relevant wenn type: mysql)
   mysql:
     host: localhost
     port: 3306
@@ -24,78 +21,16 @@ database:
 # ============================================================
 
 discord:
-  # Discord Bot aktivieren
   enabled: false
-
-  # Discord Bot Token (von https://discord.com/developers/applications)
   token: "DEIN_BOT_TOKEN_HIER"
-
-  # Discord Server (Guild) ID
   guild-id: "DEINE_SERVER_ID"
-
-  # Rollen für Commands (ID der Discord-Rolle)
-  roles:
-    admin: "ADMIN_ROLE_ID"          # Voller Zugriff
-    moderator: "MODERATOR_ROLE_ID"  # Moderation Commands
-    supporter: "SUPPORTER_ROLE_ID"  # Ticket-System
-
-  # Automatische Rollen
-  auto-roles:
-    banned: "GEBANNT_ROLE_ID"       # Rolle für gebannte Spieler
-    muted: "GEMUTET_ROLE_ID"        # Rolle für gemutete Spieler
-
-  # Channels
-  channels:
-    # Tickets
-    ticket-category: "TICKET_CATEGORY_ID"
-    whitelist-requests: "WHITELIST_CHANNEL_ID"
-
-    # Entbannungsanträge
-    unban-requests-category: "UNBAN_CATEGORY_ID"
-    unban-channel: "UNBAN_ANFRAGE_CHANNEL_ID"
-
-    # Entmute-Anträge
-    unmute-requests-category: "UNMUTE_CATEGORY_ID"
-    unmute-channel: "UNMUTE_ANFRAGE_CHANNEL_ID"
-
-    # Logs
-    log-channel: "LOG_CHANNEL_ID"
-
-  # Ticket System
-  tickets:
-    # Ticket-Panel Channel
-    panel-channel: "TICKET_PANEL_CHANNEL_ID"
-
-  # Nachrichten
-  messages:
-    unban-request: |
-      **Entbannungsantrag von {user}**
-      
-      **Minecraft Name:** {minecraft}
-      **Ban-Grund:** {reason}
-      **Verbleibende Zeit:** {remaining}
-      
-      **Begründung:**
-      {message}
-
-    unmute-request: |
-      **Entmute-Antrag von {user}**
-      
-      **Minecraft Name:** {minecraft}
-      **Mute-Grund:** {reason}
-      **Verbleibende Zeit:** {remaining}
-      
-      **Begründung:**
-      {message}
 
 # ============================================================
 #  WHITELIST SYSTEM
 # ============================================================
 
 whitelist:
-  # Aktiviert/Deaktiviert die Whitelist
   enabled: false
-
 
 servermotd:
   motd: Willkommen auf dem Server
@@ -105,34 +40,288 @@ servermotd:
 # ============================================================
 
 maintenance:
-  # Aktiviert/Deaktiviert den Wartungsmodus
   enabled: false
-
-  # Nachricht in der Serverliste die während des Warungsmoduses angezeigt wird
   motd: §c§lWARTUNGSMODUS
-
-  # Nachricht beim Kick (unterstützt § Color Codes und \n für neue Zeilen)
   kick-message: |
     §c§lWARTUNGSMODUS
     
     §7Der Server befindet sich aktuell im Wartungsmodus.
     §7Bitte versuche es später erneut.
-    
-    §8Für weitere Informationen besuche unseren Discord.
 
 # ============================================================
-#  NACHRICHTEN
+#  NACHRICHTEN - ALLE TEXTE ANPASSBAR
 # ============================================================
 
 messages:
-  # Prefix für alle Plugin-Nachrichten
   prefix: "&6[DMB] &r"
 
-  # Ban Nachricht
-  ban-message: |
-    &cDu bist gebannt!
-    &7Grund: &f{reason}
-    &7Verbleibend: &e{duration}
+  # ===== BAN MESSAGES =====
+  ban:
+    success: "&aErfolgreich gebannt: &e{player}"
+    already-banned: "&cDieser Spieler ist bereits gebannt!"
+    kick-message: |
+      &c&lDU WURDEST GEBANNT!
+      
+      &7Grund: &f{reason}
+      &7Von: &e{banner}
+      &7Verbleibend: &e{duration}
+      &7Gebannt am: &e{date}
+    broadcast: "&e{player} &cwurde gebannt!"
 
-  # Mute Nachricht
-  mute-message: "&cDu bist gemutet und kannst nicht schreiben."
+  unban:
+    success: "&aDer Spieler &e{player} &awurde entbannt."
+    not-banned: "&cDieser Spieler ist nicht gebannt."
+    broadcast: "&e{player} &awurde entbannt!"
+
+  # ===== KICK MESSAGES =====
+  kick:
+    success: "&aErfolgreich gekickt: &e{player}"
+    kick-message: |
+      &c&lDU WURDEST GEKICKT!
+      
+      &7Grund: &f{reason}
+      &7Von: &e{kicker}
+    broadcast: "&e{player} &cwurde gekickt!"
+
+  # ===== WARN MESSAGES =====
+  warn:
+    success: "&aVerwarnung ausgesprochen für &e{player}"
+    warn-message: |
+      &c&lDU WURDEST VERWARNT!
+      
+      &7Grund: &f{reason}
+      &7Von: &e{warner}
+      &7Verwarnungen insgesamt: &e{count}
+    broadcast: "&e{player} &cwurde verwarnt!"
+
+  # ===== MUTE MESSAGES =====
+  mute:
+    success: "&aErfolgreich gemutet: &e{player} &7für &e{duration}"
+    already-muted: "&cDieser Spieler ist bereits gemutet!"
+    mute-message: |
+      &c&lDU WURDEST GEMUTET!
+      
+      &7Grund: &f{reason}
+      &7Von: &e{muter}
+      &7Dauer: &e{duration}
+      &7Du kannst weder schreiben noch im Voice-Chat sprechen.
+    broadcast: "&e{player} &cwurde gemutet!"
+    chat-blocked: |
+      &c▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+      &c&l         DU BIST GEMUTET
+      
+      &7Grund: &f{reason}
+      &7Verbleibend: &e{remaining}
+      
+      &7» Du kannst weder schreiben noch sprechen
+      &c▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+
+  unmute:
+    success: "&aDer Spieler &e{player} &awurde entmutet."
+    not-muted: "&cDieser Spieler ist nicht gemutet."
+    unmute-message: "&aDu wurdest entmutet und kannst wieder schreiben und sprechen!"
+    broadcast: "&e{player} &awurde entmutet!"
+
+  # ===== LOGIN NOTIFICATIONS =====
+  login:
+    punishment-header: |
+      &c▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+      &c&l      STRAFEN WÄHREND OFFLINE
+
+    punishment-footer: "&c▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+
+    new-ban: |
+      &c⚠ &4GEBANNT
+      &7Grund: &f{reason}
+      &7Von: &e{banner}
+      &7Dauer: &e{duration}
+
+    new-mute: |
+      &c⚠ &cGEMUTET
+      &7Grund: &f{reason}
+      &7Von: &e{muter}
+      &7Dauer: &e{duration}
+
+    new-warn: |
+      &c⚠ &eVERWARNUNG
+      &7Grund: &f{reason}
+      &7Von: &e{warner}
+
+    new-kick: |
+      &c⚠ &6KICK
+      &7Grund: &f{reason}
+      &7Von: &e{kicker}
+
+  # ===== WHITELIST MESSAGES =====
+  whitelist:
+    enabled: "&aWhitelist wurde &l&aAKTIVIERT&r&a."
+    disabled: "&cWhitelist wurde &l&cDEAKTIVIERT&r&c."
+    added: "&aSpiele &e{player} &awurde zur Whitelist hinzugefügt."
+    removed: "&cSpieler &e{player} &cwurde von der Whitelist entfernt."
+    already-added: "&e{player} &7ist bereits auf der Whitelist."
+    not-on-list: "&e{player} &7ist nicht auf der Whitelist."
+    kick-message: |
+      &c&lNICHT AUF DER WHITELIST
+      
+      &7Du stehst nicht auf der Whitelist dieses Servers.
+      &7Kontaktiere einen Administrator für Zugang.
+
+  # ===== MAINTENANCE MESSAGES =====
+  maintenance:
+    enabled: "&6Wartungsmodus wurde &l&6AKTIVIERT&r&6."
+    disabled: "&aWartungsmodus wurde &l&aDEAKTIVIERT&r&a."
+    bypass-added: "&aSpiele &e{player} &ahat nun Wartungs-Bypass."
+    bypass-removed: "&cBypass entfernt von &e{player}&c."
+
+  # ===== ADMINMODE MESSAGES =====
+  adminmode:
+    enabled: |
+      
+      &a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+      &a&lADMINMODE AKTIVIERT
+      
+      &7» Deine Daten wurden gespeichert
+      &7» Du bist nun im Creative-Modus
+      &7» Inventar geleert, Health & Hunger aufgefüllt
+      &e» Nutze &6/adminmode &eerneut zum Deaktivieren
+      &a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+
+    disabled: |
+      
+      &c▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+      &c&lADMINMODE DEAKTIVIERT
+      
+      &7» Deine Daten wurden wiederhergestellt
+      &7» Du wurdest zurück teleportiert
+      &7» Inventar, Rüstung, Health, Hunger wiederhergestellt
+      &c▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+
+    error: "&cFehler beim Aktivieren des AdminModes."
+
+  # ===== VANISH MESSAGES =====
+  vanish:
+    enabled: |
+      
+      &c▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+      &c&l          VANISH AKTIVIERT
+      
+      &7  » Du bist nun &c&lUNSICHTBAR
+      &7  » Andere Spieler können dich nicht mehr sehen
+      &7  » Eine Fake-Quit-Nachricht wurde gesendet
+      
+      &8  Nutze &c/vanish &8erneut zum Deaktivieren
+      &c▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+
+    disabled: |
+      
+      &a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+      &a&l          VANISH DEAKTIVIERT
+      
+      &7  » Du bist nun &a&lSICHTBAR
+      &7  » Alle Spieler können dich wieder sehen
+      &7  » Eine Fake-Join-Nachricht wurde gesendet
+      
+      &a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+
+    other-enabled: "&7Vanish für &e{player} &7wurde &caktiviert&7."
+    other-disabled: "&7Vanish für &e{player} &7wurde &adeaktiviert&7."
+
+  # ===== INVSEE / ENDERSEE MESSAGES =====
+  inventory:
+    invsee-saved: "&aÄnderungen am Inventar von &e{player} &awurden gespeichert."
+    endersee-saved: "&aÄnderungen an der Enderchest von &e{player} &awurden gespeichert."
+    player-not-found: "&cDer Spieler &e{player} &cwurde nicht gefunden."
+    offline-readonly: "&eOffline-Inventare sind schreibgeschützt und werden nur angezeigt."
+
+  # ===== ERROR MESSAGES =====
+  errors:
+    no-permission: "&cDu hast keine Berechtigung für diesen Befehl!"
+    player-only: "&cNur Spieler können diesen Befehl nutzen."
+    player-not-found: "&cSpieler nicht gefunden!"
+    player-not-online: "&cDer Spieler &e{player} &cist nicht online."
+    invalid-duration: "&cUngültige Dauer. Beispiel: 1h30m, 45m, 2d"
+    invalid-number: "&cUngültige Zahl!"
+    database-error: "&cDatenbankfehler! Siehe Konsole für Details."
+    unknown-command: "&cUnbekannter Befehl. Nutze &e/dmb help"
+
+  # ===== GUI MESSAGES =====
+  gui:
+    punishment-title: "&8» &6Strafen: &e{player}"
+
+    # Items
+    ban-item:
+      name: "&c&lBan"
+      lore:
+        - "&7Bannt den Spieler temporär"
+        - ""
+        - "&eLinksklick &7» &fSchnell-Ban (1d)"
+        - "&eRechtsklick &7» &fBenutzerdefiniert"
+
+    mute-item:
+      name: "&6&lMute"
+      lore:
+        - "&7Muted den Spieler"
+        - ""
+        - "&eLinksklick &7» &fSchnell-Mute (30m)"
+        - "&eRechtsklick &7» &fBenutzerdefiniert"
+
+    kick-item:
+      name: "&e&lKick"
+      lore:
+        - "&7Kickt den Spieler"
+        - ""
+        - "&eKlicken &7» &fSpieler kicken"
+
+    warn-item:
+      name: "&6&lWarnung"
+      lore:
+        - "&7Verwarnt den Spieler"
+        - ""
+        - "&eKlicken &7» &fWarnung aussprechen"
+
+    history-item:
+      name: "&9&lStrafhistorie"
+      lore:
+        - "&7Zeigt alle Strafen des Spielers"
+        - ""
+        - "&eKlicken &7» &fHistorie anzeigen"
+
+    back-item:
+      name: "&7&l« Zurück"
+      lore:
+        - "&7Zurück zum vorherigen Menü"
+
+# ============================================================
+#  PUNISHMENT REASONS (Vorauswahl)
+# ============================================================
+
+punishment-reasons:
+  ban:
+    - "Hacking"
+    - "Griefing"
+    - "Beleidigung"
+    - "Spam"
+    - "Werbung"
+    - "Betrug"
+    - "Benutzerdefiniert"
+
+  mute:
+    - "Spam"
+    - "Beleidigung"
+    - "Caps"
+    - "Werbung"
+    - "Provokation"
+    - "Benutzerdefiniert"
+
+  kick:
+    - "AFK"
+    - "Verhalten"
+    - "Namensänderung erforderlich"
+    - "Benutzerdefiniert"
+
+  warn:
+    - "Regelverstoß"
+    - "Fehlverhalten"
+    - "Spamming"
+    - "Provokation"
+    - "Benutzerdefiniert"

@@ -1,6 +1,7 @@
 package de.MaxBrassLoud.disMineBridgePlugin.serverlist;
 
 import org.bukkit.Bukkit;
+import de.MaxBrassLoud.disMineBridgePlugin.utils.MessageManager;
 
 public class ServerlistManager {
 

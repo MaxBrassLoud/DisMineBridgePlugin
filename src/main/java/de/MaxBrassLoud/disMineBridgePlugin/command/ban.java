@@ -24,7 +24,11 @@ public class ban implements CommandExecutor, TabCompleter {
         }
 
         if (args.length < 3) {
-            sender.sendMessage(ChatColor.RED + "Benutzung: /ban <Spieler> <Grund> <Dauer z.B. 1h30m>");
+            sender.sendMessage(ChatColor.RED + "Benutzung: /ban <Spieler> <Grund> <Dauer>");
+            sender.sendMessage(ChatColor.GRAY + "Beispiele:");
+            sender.sendMessage(ChatColor.YELLOW + "  /ban Steve Hacking 7d");
+            sender.sendMessage(ChatColor.YELLOW + "  /ban Alex Griefing 1h30m");
+            sender.sendMessage(ChatColor.YELLOW + "  /ban Bob Spam 2d12h");
             return true;
         }
 
@@ -36,8 +40,18 @@ public class ban implements CommandExecutor, TabCompleter {
 
         try {
             expire = parseDuration(durationStr);
+            if (expire == null) {
+                sender.sendMessage(ChatColor.RED + "Ungültige Dauer!");
+                sender.sendMessage(ChatColor.GRAY + "Gültige Formate:");
+                sender.sendMessage(ChatColor.YELLOW + "  • 7d (7 Tage)");
+                sender.sendMessage(ChatColor.YELLOW + "  • 12h (12 Stunden)");
+                sender.sendMessage(ChatColor.YELLOW + "  • 30m (30 Minuten)");
+                sender.sendMessage(ChatColor.YELLOW + "  • 7d12h (7 Tage und 12 Stunden)");
+                sender.sendMessage(ChatColor.YELLOW + "  • 1h30m15s (1 Stunde, 30 Min, 15 Sek)");
+                return true;
+            }
         } catch (IllegalArgumentException e) {
-            sender.sendMessage(ChatColor.RED + "Ungültige Dauer. Beispiel: 1h30m, 45m, 2d");
+            sender.sendMessage(ChatColor.RED + "Ungültige Dauer: " + e.getMessage());
             return true;
         }
 
@@ -71,46 +85,69 @@ public class ban implements CommandExecutor, TabCompleter {
         }
 
         Bukkit.broadcastMessage(ChatColor.GOLD + targetName + ChatColor.RED + " wurde gebannt!");
-        sender.sendMessage(ChatColor.GREEN + "✓ Ban erfolgreich gesetzt. Dauer: " + timeLeft);
-        Bukkit.broadcastMessage(ChatColor.GOLD + target.getName() + ChatColor.RED + " wurde gebannt!");
+        sender.sendMessage(ChatColor.GREEN + "✓ Ban erfolgreich gesetzt. Dauer: " + ChatColor.YELLOW + timeLeft);
+
         return true;
     }
 
+    /**
+     * Verbesserte Dauer-Parsing-Methode
+     * Unterstützt: 7d, 12h, 30m, 7d12h, 1h30m15s etc.
+     */
     private Instant parseDuration(String str) {
+        if (str == null || str.isEmpty()) {
+            throw new IllegalArgumentException("Dauer darf nicht leer sein");
+        }
+
         str = str.toLowerCase().trim();
-        long seconds = 0;
+        long totalSeconds = 0;
         StringBuilder number = new StringBuilder();
 
-        for (char c : str.toCharArray()) {
+        for (int i = 0; i < str.length(); i++) {
+            char c = str.charAt(i);
+
             if (Character.isDigit(c)) {
                 number.append(c);
-            } else {
-                if (number.isEmpty()) {
-                    throw new IllegalArgumentException("Keine Zahl vor Zeiteinheit");
+            } else if (c == 'd' || c == 'h' || c == 'm' || c == 's') {
+                if (number.length() == 0) {
+                    throw new IllegalArgumentException("Keine Zahl vor Zeiteinheit '" + c + "'");
                 }
-                int value = Integer.parseInt(number.toString());
-                switch (c) {
-                    case 'd' -> seconds += value * 86400L;
-                    case 'h' -> seconds += value * 3600L;
-                    case 'm' -> seconds += value * 60L;
-                    case 's' -> seconds += value;
-                    default -> throw new IllegalArgumentException("Unbekannte Zeiteinheit: " + c);
+
+                try {
+                    int value = Integer.parseInt(number.toString());
+                    if (value < 0) {
+                        throw new IllegalArgumentException("Negative Werte sind nicht erlaubt");
+                    }
+
+                    switch (c) {
+                        case 'd' -> totalSeconds += value * 86400L;  // Tage
+                        case 'h' -> totalSeconds += value * 3600L;   // Stunden
+                        case 'm' -> totalSeconds += value * 60L;     // Minuten
+                        case 's' -> totalSeconds += value;           // Sekunden
+                    }
+                    number = new StringBuilder(); // Reset für nächste Zahl
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Ungültige Zahl: " + number);
                 }
-                number = new StringBuilder();
+            } else if (c != ' ') {
+                throw new IllegalArgumentException("Ungültiges Zeichen: '" + c + "' (erlaubt: d, h, m, s)");
             }
         }
 
-        if (!number.isEmpty()) {
-            throw new IllegalArgumentException("Zeiteinheit fehlt nach Zahl");
+        if (number.length() > 0) {
+            throw new IllegalArgumentException("Zeiteinheit fehlt nach Zahl: " + number);
         }
 
-        if (seconds == 0) {
+        if (totalSeconds == 0) {
             throw new IllegalArgumentException("Dauer muss größer als 0 sein");
         }
 
-        return Instant.now().plusSeconds(seconds);
+        return Instant.now().plusSeconds(totalSeconds);
     }
 
+    /**
+     * Formatiert Duration zu lesbarem String
+     */
     private String formatDuration(Duration duration) {
         long totalSeconds = duration.getSeconds();
         if (totalSeconds < 0) totalSeconds = 0;
@@ -133,6 +170,7 @@ public class ban implements CommandExecutor, TabCompleter {
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
                                                 @NotNull String alias, @NotNull String[] args) {
         if (args.length == 1) {
+            // Spieler-Namen vorschlagen
             List<String> online = new ArrayList<>();
             for (Player p : Bukkit.getOnlinePlayers()) {
                 if (p.getName().toLowerCase().startsWith(args[0].toLowerCase())) {
@@ -141,6 +179,12 @@ public class ban implements CommandExecutor, TabCompleter {
             }
             return online;
         }
+
+        if (args.length == args.length) {
+            // Dauer-Vorschläge beim letzten Argument
+            return Arrays.asList("1h", "12h", "1d", "3d", "7d", "14d", "30d", "1h30m", "7d12h");
+        }
+
         return Collections.emptyList();
     }
 }

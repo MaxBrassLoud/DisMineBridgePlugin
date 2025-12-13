@@ -80,6 +80,17 @@ commands:
     permission: dmb.maintenance
     permission-message: Du hast keine Berechtigung für diesen Befehl!
 
+  punish:
+    description: Öffnet das Straf-Menü mit Spieler-Auswahl
+    usage: /punish
+    permission: dmb.punish
+    permission-message: Du hast keine Berechtigung für diesen Befehl!
+
+  punishreasons:
+    description: Verwaltet Straf-Gründe
+    usage: /punishreasons
+    permission: dmb.punishreasons
+    permission-message: Du hast keine Berechtigung für diesen Befehl!
   dmb:
     description: Hauptbefehl des Plugins
     usage: /dmb
@@ -181,4 +192,12 @@ permissions:
 
   dmb.maintenance.bypass:
     description: Umgeht den Wartungsmodus
+    default: op
+
+  dmb.punish:
+    description: Erlaubt die Nutzung des Punishment-GUIs
+    default: op
+
+  dmb.punishreasons:
+    description: Erlaubt die Verwaltung von Straf-Gründen
     default: op

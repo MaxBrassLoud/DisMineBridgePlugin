@@ -35,7 +35,7 @@ public class DatabaseManager {
 
     public static DatabaseManager getInstance() {
         if (instance == null) {
-            throw new IllegalStateException("DatabaseManager wurde nicht initialisiert! Rufe zuerst DatabaseManager.init() auf.");
+            throw new IllegalStateException("DatabaseManager wurde nicht initialisiert!");
         }
         return instance;
     }
@@ -97,7 +97,6 @@ public class DatabaseManager {
             if (connection == null || connection.isClosed()) {
                 connect();
             }
-            // Teste Verbindung
             if (dbType == DatabaseType.MYSQL && !connection.isValid(3)) {
                 connect();
             }
@@ -128,32 +127,31 @@ public class DatabaseManager {
     }
 
     // ============================================================
-    //  TABLE CREATION
+    //  TABLE CREATION - ERWEITERT
     // ============================================================
 
     private void createTables() {
         try (Statement stmt = getConnection().createStatement()) {
 
-            // BANS TABLE
             stmt.execute(getBansTableSQL());
-
-            // WARNS TABLE
             stmt.execute(getWarnsTableSQL());
-
-            // KICKS TABLE
             stmt.execute(getKicksTableSQL());
-
-            // MUTES TABLE
             stmt.execute(getMutesTableSQL());
-
-            // USERS TABLE
             stmt.execute(getUsersTableSQL());
-
-            // WHITELIST TABLE
             stmt.execute(getWhitelistTableSQL());
-
-            // ADMINMODE TABLE
             stmt.execute(getAdminModeTableSQL());
+
+            // NEU: Player Data Tabelle für Inventar-Speicherung
+            stmt.execute(getPlayerDataTableSQL());
+
+            // NEU: Offline Punishments Tabelle
+            stmt.execute(getOfflinePunishmentsTableSQL());
+
+            // NEU: Punishment Reasons Tabelle
+            stmt.execute(getPunishmentReasonsTableSQL());
+
+            // Füge Standard-Gründe ein (nur einmal)
+            insertDefaultPunishmentReasons();
 
             plugin.getLogger().info("✔ Alle Tabellen erfolgreich erstellt/geladen.");
 
@@ -161,6 +159,92 @@ public class DatabaseManager {
             plugin.getLogger().log(Level.SEVERE, "❌ Fehler beim Erstellen der Tabellen:", e);
         }
     }
+
+    // ===== NEUE TABELLEN =====
+
+    private String getPlayerDataTableSQL() {
+        if (isMySQL()) {
+            return """
+                CREATE TABLE IF NOT EXISTS player_data (
+                    uuid VARCHAR(36) PRIMARY KEY,
+                    name VARCHAR(16),
+                    inventory MEDIUMTEXT,
+                    armor TEXT,
+                    enderchest MEDIUMTEXT,
+                    location_world VARCHAR(100),
+                    location_x DOUBLE,
+                    location_y DOUBLE,
+                    location_z DOUBLE,
+                    location_yaw FLOAT,
+                    location_pitch FLOAT,
+                    gamemode VARCHAR(20),
+                    health DOUBLE,
+                    food_level INT,
+                    exp FLOAT,
+                    level INT,
+                    first_join BIGINT,
+                    last_seen BIGINT,
+                    last_updated BIGINT
+                )
+            """;
+        }
+        return """
+            CREATE TABLE IF NOT EXISTS player_data (
+                uuid TEXT PRIMARY KEY,
+                name TEXT,
+                inventory TEXT,
+                armor TEXT,
+                enderchest TEXT,
+                location_world TEXT,
+                location_x REAL,
+                location_y REAL,
+                location_z REAL,
+                location_yaw REAL,
+                location_pitch REAL,
+                gamemode TEXT,
+                health REAL,
+                food_level INTEGER,
+                exp REAL,
+                level INTEGER,
+                first_join INTEGER,
+                last_seen INTEGER,
+                last_updated INTEGER
+            )
+        """;
+    }
+
+    private String getOfflinePunishmentsTableSQL() {
+        if (isMySQL()) {
+            return """
+                CREATE TABLE IF NOT EXISTS offline_punishments (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    uuid VARCHAR(36),
+                    name VARCHAR(16),
+                    type VARCHAR(20),
+                    reason TEXT,
+                    punisher VARCHAR(16),
+                    duration BIGINT,
+                    notified BOOLEAN DEFAULT FALSE,
+                    created_at BIGINT
+                )
+            """;
+        }
+        return """
+            CREATE TABLE IF NOT EXISTS offline_punishments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                uuid TEXT,
+                name TEXT,
+                type TEXT,
+                reason TEXT,
+                punisher TEXT,
+                duration INTEGER,
+                notified INTEGER DEFAULT 0,
+                created_at INTEGER
+            )
+        """;
+    }
+
+    // ===== BESTEHENDE TABELLEN =====
 
     private String getBansTableSQL() {
         if (isMySQL()) {
@@ -371,13 +455,73 @@ public class DatabaseManager {
         """;
     }
 
+    private String getPunishmentReasonsTableSQL() {
+        if (isMySQL()) {
+            return """
+            CREATE TABLE IF NOT EXISTS punishment_reasons (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                type VARCHAR(20) NOT NULL,
+                name VARCHAR(100) NOT NULL,
+                description TEXT,
+                default_duration BIGINT NOT NULL,
+                severity INT DEFAULT 1,
+                enabled BOOLEAN DEFAULT TRUE,
+                sort_order INT DEFAULT 0,
+                created_at BIGINT,
+                created_by VARCHAR(16)
+            )
+        """;
+        }
+        return """
+        CREATE TABLE IF NOT EXISTS punishment_reasons (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            type TEXT NOT NULL,
+            name TEXT NOT NULL,
+            description TEXT,
+            default_duration INTEGER NOT NULL,
+            severity INTEGER DEFAULT 1,
+            enabled INTEGER DEFAULT 1,
+            sort_order INTEGER DEFAULT 0,
+            created_at INTEGER,
+            created_by TEXT
+        )
+    """;
+    }
+
+    private void insertDefaultPunishmentReasons() {
+        try {
+            // Prüfe ob schon Gründe existieren
+            String checkSql = "SELECT COUNT(*) as count FROM punishment_reasons";
+            PreparedStatement ps = prepareStatement(checkSql);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next() && rs.getInt("count") > 0) {
+                rs.close();
+                ps.close();
+                return; // Bereits Daten vorhanden
+            }
+            rs.close();
+            ps.close();
+
+            // Füge Standard-Gründe ein (siehe SQL-Datei)
+            String sql = "INSERT INTO punishment_reasons (type, name, description, default_duration, severity, sort_order) VALUES (?, ?, ?, ?, ?, ?)";
+
+            // BAN Gründe
+            executeUpdate(sql, "BAN", "Hacking", "Verwendung von Hacking-Clients", 604800000L, 5, 1);
+            executeUpdate(sql, "BAN", "Griefing", "Absichtliche Zerstörung", 259200000L, 4, 2);
+            // ... weitere Gründe
+
+            plugin.getLogger().info("✔ Standard-Gründe wurden eingefügt.");
+
+        } catch (Exception e) {
+            plugin.getLogger().warning("Fehler beim Einfügen der Standard-Gründe: " + e.getMessage());
+        }
+    }
+
     // ============================================================
     //  UTILITY METHODS
     // ============================================================
 
-    /**
-     * Führt ein PreparedStatement aus ohne Rückgabe (INSERT, UPDATE, DELETE)
-     */
     public int executeUpdate(String sql, Object... params) {
         try (PreparedStatement stmt = getConnection().prepareStatement(sql)) {
             setParameters(stmt, params);
@@ -388,10 +532,6 @@ public class DatabaseManager {
         }
     }
 
-    /**
-     * Führt eine Query aus und gibt das ResultSet zurück
-     * WICHTIG: Caller muss ResultSet UND Statement schließen!
-     */
     public PreparedStatement prepareStatement(String sql, Object... params) throws SQLException {
         PreparedStatement stmt = getConnection().prepareStatement(sql);
         setParameters(stmt, params);
@@ -421,9 +561,6 @@ public class DatabaseManager {
         }
     }
 
-    /**
-     * Gibt den korrekten UPSERT SQL für die Datenbank zurück
-     */
     public String getUpsertSQL(String table, String[] columns, String primaryKey) {
         StringBuilder sb = new StringBuilder();
         String placeholders = String.join(", ", java.util.Collections.nCopies(columns.length, "?"));
