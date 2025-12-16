@@ -5,12 +5,16 @@ import de.MaxBrassLoud.disMineBridgePlugin.command.*;
 import de.MaxBrassLoud.disMineBridgePlugin.database.DatabaseManager;
 import de.MaxBrassLoud.disMineBridgePlugin.listener.*;
 import de.MaxBrassLoud.disMineBridgePlugin.maintenance.MaintenanceManager;
+import de.MaxBrassLoud.disMineBridgePlugin.playerdata.PlayerDataManager;
+import de.MaxBrassLoud.disMineBridgePlugin.utils.MessageManager;
 import de.MaxBrassLoud.disMineBridgePlugin.voicechat.VoiceChatMutePlugin;
 import de.MaxBrassLoud.disMineBridgePlugin.whitelist.WhitelistManager;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import de.MaxBrassLoud.disMineBridgePlugin.serverlist.ServerlistManager;
+
+import static de.MaxBrassLoud.disMineBridgePlugin.utils.MessageManager.config;
 
 public final class DisMineBridgePlugin extends JavaPlugin {
 
@@ -24,8 +28,9 @@ public final class DisMineBridgePlugin extends JavaPlugin {
 
         // Config erstellen falls nicht vorhanden
         saveDefaultConfig();
-        FileConfiguration config = getConfig();
-        ServerlistManager.setMOTD(config.getString("servermotd.motd"));
+        MessageManager.init(this);
+        //FileConfiguration config = getConfig();
+        ServerlistManager.setCurrentMOTD();
         // ============================================================
         //  DATENBANK INITIALISIEREN (ZENTRAL)
         // ============================================================
@@ -37,6 +42,9 @@ public final class DisMineBridgePlugin extends JavaPlugin {
         AdminModeManager.init();
         WhitelistManager.init(config, this);
         MaintenanceManager.init(config, this);
+
+
+        ServerlistManager.setCurrentMOTD();
 
         // ============================================================
         //  COMMANDS REGISTRIEREN
@@ -52,11 +60,20 @@ public final class DisMineBridgePlugin extends JavaPlugin {
         getCommand("unban").setExecutor(new unban());
 
         // Warn & Kick Commands
-        getCommand("warn").setExecutor(new warn());
-        getCommand("kick").setExecutor(new kick());
+        warn warnCMD = new warn();
+        getCommand("warn").setExecutor(warnCMD);
+        getCommand("warn").setTabCompleter(warnCMD);
+
+        kick kickCMD = new kick();
+        getCommand("kick").setExecutor(kickCMD);
+        getCommand("kick").setTabCompleter(kickCMD);
 
         // Mute Commands
-        getCommand("mute").setExecutor(new mute());
+        mute muteCMD = new mute();
+        getCommand("mute").setExecutor(muteCMD);
+        getCommand("mute").setTabCompleter(muteCMD);
+
+
         getCommand("unmute").setExecutor(new unmute());
 
         // Inventory Commands

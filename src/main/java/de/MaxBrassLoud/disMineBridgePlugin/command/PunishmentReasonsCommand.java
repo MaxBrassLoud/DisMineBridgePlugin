@@ -53,12 +53,15 @@ public class PunishmentReasonsCommand implements CommandExecutor, TabCompleter {
 
     /**
      * Fügt einen neuen Grund hinzu
-     * /punishreasons add BAN Hacking 7d "Verwendung von Cheats"
+     * /punishreasons add BAN "Schwere Beleidigung" 7d "Extreme Beleidigungen oder Drohungen"
      */
     private void handleAdd(CommandSender sender, String[] args) {
         if (args.length < 4) {
-            sender.sendMessage(ChatColor.RED + "Nutze: /punishreasons add <TYP> <Name> <Dauer> [Beschreibung]");
-            sender.sendMessage(ChatColor.GRAY + "Beispiel: /punishreasons add BAN Hacking 7d \"Verwendung von Cheats\"");
+            sender.sendMessage(ChatColor.RED + "Nutze: /punishreasons add <TYP> \"<Name>\" <Dauer> [\"<Beschreibung>\"]");
+            sender.sendMessage(ChatColor.GRAY + "Beispiele:");
+            sender.sendMessage(ChatColor.YELLOW + "  /punishreasons add BAN \"Schwere Beleidigung\" 7d");
+            sender.sendMessage(ChatColor.YELLOW + "  /punishreasons add BAN \"Schwere Beleidigung\" 7d \"Extreme Drohungen\"");
+            sender.sendMessage(ChatColor.YELLOW + "  /punishreasons add MUTE Spam 30m \"Wiederholtes Spammen\"");
             return;
         }
 
@@ -68,18 +71,27 @@ public class PunishmentReasonsCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
-        String name = args[2];
-        String durationStr = args[3];
-        long duration = parseDuration(durationStr);
+        // Sammle alle Args nach dem Typ
+        String allArgs = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
+
+        // Parse Name, Dauer und Beschreibung
+        ParsedArgs parsed = parseQuotedArgs(allArgs);
+
+        if (parsed == null || parsed.name == null || parsed.duration == null) {
+            sender.sendMessage(ChatColor.RED + "Ungültiges Format!");
+            sender.sendMessage(ChatColor.YELLOW + "Nutze: /punishreasons add <TYP> \"<Name>\" <Dauer> [\"<Beschreibung>\"]");
+            return;
+        }
+
+        // Ersetze /n mit echten Zeilenumbrüchen
+        String name = parsed.name.replace("/n", "\n");
+        String description = parsed.description != null ? parsed.description.replace("/n", "\n") : "";
+
+        long duration = parseDuration(parsed.duration);
 
         if (duration < 0) {
             sender.sendMessage(ChatColor.RED + "Ungültige Dauer! Format: 7d, 12h, 30m");
             return;
-        }
-
-        String description = "";
-        if (args.length > 4) {
-            description = String.join(" ", Arrays.copyOfRange(args, 4, args.length));
         }
 
         // Füge in Datenbank ein
@@ -87,7 +99,6 @@ public class PunishmentReasonsCommand implements CommandExecutor, TabCompleter {
             String sql = "INSERT INTO punishment_reasons (type, name, description, default_duration, severity, sort_order, created_at, created_by) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
-            // Hole nächste Sort-Order
             int nextSort = getNextSortOrder(type);
 
             int result = DatabaseManager.getInstance().executeUpdate(sql,
@@ -95,7 +106,7 @@ public class PunishmentReasonsCommand implements CommandExecutor, TabCompleter {
                     name,
                     description,
                     duration,
-                    2, // Standard-Severity
+                    2,
                     nextSort,
                     System.currentTimeMillis(),
                     sender.getName()
@@ -120,6 +131,50 @@ public class PunishmentReasonsCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage(ChatColor.RED + "Datenbankfehler: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Parst Args mit Anführungszeichen
+     * Format: "Name" Dauer ["Beschreibung"]
+     */
+    private ParsedArgs parseQuotedArgs(String input) {
+        ParsedArgs result = new ParsedArgs();
+
+        // Finde ersten String in Anführungszeichen (Name)
+        int firstQuote = input.indexOf('"');
+        if (firstQuote == -1) return null;
+
+        int secondQuote = input.indexOf('"', firstQuote + 1);
+        if (secondQuote == -1) return null;
+
+        result.name = input.substring(firstQuote + 1, secondQuote);
+
+        // Rest nach dem Namen
+        String remaining = input.substring(secondQuote + 1).trim();
+        String[] parts = remaining.split("\\s+", 2);
+
+        if (parts.length == 0) return null;
+        result.duration = parts[0];
+
+        // Prüfe ob es eine Beschreibung gibt
+        if (parts.length > 1) {
+            String descPart = parts[1].trim();
+            int thirdQuote = descPart.indexOf('"');
+            if (thirdQuote != -1) {
+                int fourthQuote = descPart.indexOf('"', thirdQuote + 1);
+                if (fourthQuote != -1) {
+                    result.description = descPart.substring(thirdQuote + 1, fourthQuote);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private static class ParsedArgs {
+        String name;
+        String duration;
+        String description;
     }
 
     /**

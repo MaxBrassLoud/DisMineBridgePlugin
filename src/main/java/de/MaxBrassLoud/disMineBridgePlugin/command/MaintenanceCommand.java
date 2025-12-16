@@ -16,6 +16,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static de.MaxBrassLoud.disMineBridgePlugin.utils.MessageManager.config;
+
 public class MaintenanceCommand implements CommandExecutor, TabCompleter {
 
     private static final String PREFIX = ChatColor.GOLD + "[Wartung] " + ChatColor.RESET;
@@ -73,7 +75,7 @@ public class MaintenanceCommand implements CommandExecutor, TabCompleter {
         if (enable) {
 
             // MOTD auf Wartungsmodus setzen
-            String motd = ChatColor.translateAlternateColorCodes('&', "&6Wartungsmodus");
+            String motd = ChatColor.translateAlternateColorCodes('&', config.getString("maintenance.motd"));
             ServerlistManager.setMOTD(motd);
 
             sender.sendMessage("");

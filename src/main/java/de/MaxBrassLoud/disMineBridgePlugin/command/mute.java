@@ -9,6 +9,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,11 +25,11 @@ public class mute implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (args.length < 2) {
-            sender.sendMessage(ChatColor.YELLOW + "Verwendung: /mute <Spieler> <Dauer> [Grund]");
+        if (args.length < 3) {
+            sender.sendMessage(ChatColor.YELLOW + "Verwendung: /mute <Spieler> <Dauer> <Grund>");
             sender.sendMessage(ChatColor.GRAY + "Beispiele:");
             sender.sendMessage(ChatColor.YELLOW + "  /mute Steve 30m Spam");
-            sender.sendMessage(ChatColor.YELLOW + "  /mute Alex 1h30m Beleidigung");
+            sender.sendMessage(ChatColor.YELLOW + "  /mute Alex 1h30m \"Schwere Beleidigung\"");
             sender.sendMessage(ChatColor.YELLOW + "  /mute Bob 2h Caps-Spam");
             return true;
         }
@@ -57,9 +59,12 @@ public class mute implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        String reason = args.length >= 3
-                ? String.join(" ", Arrays.copyOfRange(args, 2, args.length))
-                : "Kein Grund angegeben";
+        // Grund ab Argument 3 (Underscores → Leerzeichen, /n → neue Zeile)
+        String reason = String.join(" ", Arrays.copyOfRange(args, 2, args.length))
+                .replace("_", " ")
+                .replace("/n", "\n");
+
+        if (reason.trim().isEmpty()) reason = "Kein Grund angegeben";
 
         long expire = Instant.now().plusMillis(durationMillis).toEpochMilli();
 
@@ -179,12 +184,47 @@ public class mute implements CommandExecutor, TabCompleter {
                     "1h30m", "2h30m", "1d", "3d"
             ));
         } else if (args.length == 3) {
-            // Grund-Vorschläge
-            completions.addAll(Arrays.asList(
-                    "Spam", "Beleidigung", "Caps", "Werbung", "Provokation"
-            ));
+            // Gründe aus Datenbank laden
+            completions = loadReasonsFromDatabase("MUTE");
+
+            // Filtern basierend auf Input
+            String input = args[2].toLowerCase();
+            return completions.stream()
+                    .filter(s -> s.toLowerCase().startsWith(input))
+                    .toList();
         }
 
         return completions;
+    }
+
+    /**
+     * Lädt Gründe aus der Datenbank für Tab-Completion
+     */
+    private List<String> loadReasonsFromDatabase(String type) {
+        List<String> reasons = new ArrayList<>();
+
+        try {
+            String sql = "SELECT name FROM punishment_reasons WHERE type = ? AND enabled = 1 ORDER BY sort_order";
+            PreparedStatement ps = DatabaseManager.getInstance().prepareStatement(sql, type);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                String name = rs.getString("name");
+                // Ersetze Leerzeichen mit Underscore für bessere Tab-Completion
+                reasons.add(name.replace(" ", "_"));
+            }
+
+            rs.close();
+            ps.close();
+
+        } catch (Exception e) {
+            // Fallback zu Standard-Gründen
+            reasons.addAll(Arrays.asList("Spam", "Beleidigung", "Caps", "Werbung", "Provokation"));
+        }
+
+        // Füge "Eigener_Grund" als Option hinzu
+        reasons.add("Eigener_Grund");
+
+        return reasons;
     }
 }

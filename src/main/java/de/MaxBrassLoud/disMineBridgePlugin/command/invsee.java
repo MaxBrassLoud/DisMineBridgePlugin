@@ -1,13 +1,13 @@
 package de.MaxBrassLoud.disMineBridgePlugin.command;
 
+import de.MaxBrassLoud.disMineBridgePlugin.playerdata.PlayerDataManager;
 import org.bukkit.*;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import de.MaxBrassLoud.disMineBridgePlugin.utils.MessageManager;
-import de.MaxBrassLoud.disMineBridgePlugin.playerdata.PlayerDataManager;
+
 import java.util.*;
 
 public class invsee implements CommandExecutor, TabCompleter {
@@ -16,6 +16,7 @@ public class invsee implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+
         if (!(sender instanceof Player p)) {
             sender.sendMessage(ChatColor.RED + "Nur Spieler können diesen Befehl nutzen.");
             return true;
@@ -31,20 +32,27 @@ public class invsee implements CommandExecutor, TabCompleter {
             return true;
         }
 
+        // Versuche zuerst Online-Spieler
         Player target = Bukkit.getPlayer(args[0]);
 
         if (target != null) {
-            // Online - wie gehabt
+            // Erlaube Admins ihre eigene Enderchest zu öffnen
+            if (target.equals(p) && !p.hasPermission("dmb.admin")) {
+                p.sendMessage(ChatColor.YELLOW + "Du kannst dein eigenes Inventar mit E öffnen.");
+                p.sendMessage(ChatColor.GRAY + "» Nur Admins können ihr Inventar über InvSee öffnen.");
+                return true;
+            }
             openOnlineInventory(p, target);
             return true;
         }
 
-        // NEU: Offline-Spieler
+        // Offline-Spieler
         @SuppressWarnings("deprecation")
         OfflinePlayer offlineTarget = Bukkit.getOfflinePlayer(args[0]);
 
         if (!offlineTarget.hasPlayedBefore()) {
-            p.sendMessage(MessageManager.getPlayerNotFoundMessage());
+            p.sendMessage(ChatColor.RED + "Der Spieler " + ChatColor.YELLOW + args[0] +
+                    ChatColor.RED + " wurde nicht gefunden.");
             return true;
         }
 
@@ -57,30 +65,12 @@ public class invsee implements CommandExecutor, TabCompleter {
         if (data != null) {
             openOfflineInventory(p, data);
         } else {
-            p.sendMessage("§cKeine Daten für diesen Spieler gefunden.");
+            p.sendMessage(ChatColor.RED + "Keine Inventar-Daten für " + ChatColor.YELLOW + args[0] +
+                    ChatColor.RED + " gefunden.");
+            p.sendMessage(ChatColor.GRAY + "Der Spieler muss sich mindestens einmal eingeloggt haben.");
         }
 
         return true;
-    }
-
-    private void openOfflineInventory(Player viewer, PlayerDataManager.PlayerData data) {
-        Inventory inv = Bukkit.createInventory(null, 54, "§8» §6Inventar: §c(Offline) §e" + data.name);
-
-        // Setze Items (readonly)
-        for (int i = 0; i < data.inventory.length && i < 27; i++) {
-            inv.setItem(i, data.inventory[i]);
-        }
-
-        // Armor
-        if (data.armor.length >= 4) {
-            inv.setItem(46, data.armor[0]); // Helmet
-            inv.setItem(48, data.armor[1]); // Chestplate
-            inv.setItem(50, data.armor[2]); // Leggings
-            inv.setItem(52, data.armor[3]); // Boots
-        }
-
-        viewer.openInventory(inv);
-        viewer.sendMessage(MessageManager.getMessage("messages.inventory.offline-readonly"));
     }
 
     private void openOnlineInventory(Player viewer, Player target) {
@@ -132,6 +122,71 @@ public class invsee implements CommandExecutor, TabCompleter {
 
         Bukkit.getLogger().info("[InvSee] " + viewer.getName() + " hat das Inventar von " +
                 target.getName() + " (online) geöffnet.");
+    }
+
+    private void openOfflineInventory(Player viewer, PlayerDataManager.PlayerData data) {
+        // 54 Slots = 6 Zeilen
+        Inventory inv = Bukkit.createInventory(null, 54,
+                ChatColor.DARK_GRAY + "» " + ChatColor.GOLD + "Inventar: " +
+                        ChatColor.RED + "(Offline) " + ChatColor.YELLOW + data.name);
+
+        // Zeile 1-3: Hauptinventar (27 Items)
+        if (data.inventory != null && data.inventory.length >= 27) {
+            for (int i = 0; i < 27 && i < data.inventory.length; i++) {
+                inv.setItem(i, data.inventory[i]);
+            }
+        }
+
+        // Zeile 4: Hotbar (würde in originalem Inventar Slots 0-8 sein)
+        // Wird hier nicht separat angezeigt
+
+        // Zeile 5: Trennlinie
+        ItemStack glass = createGlass(ChatColor.DARK_GRAY + "▬▬▬▬▬▬▬▬▬");
+        for (int i = 36; i < 45; i++) {
+            inv.setItem(i, glass);
+        }
+
+        // Zeile 6: Rüstung (readonly)
+        if (data.armor != null && data.armor.length >= 4) {
+            inv.setItem(45, createArmorInfo(Material.IRON_HELMET, "§6§lHelm", "§7Rüstung (Readonly)"));
+            inv.setItem(46, data.armor[0]); // Helmet
+
+            inv.setItem(47, createArmorInfo(Material.IRON_CHESTPLATE, "§6§lBrustpanzer", "§7Rüstung (Readonly)"));
+            inv.setItem(48, data.armor[1]); // Chestplate
+
+            inv.setItem(49, createArmorInfo(Material.IRON_LEGGINGS, "§6§lHose", "§7Rüstung (Readonly)"));
+            inv.setItem(50, data.armor[2]); // Leggings
+
+            inv.setItem(51, createArmorInfo(Material.IRON_BOOTS, "§6§lSchuhe", "§7Rüstung (Readonly)"));
+            inv.setItem(52, data.armor[3]); // Boots
+        }
+
+        // Speichere Daten
+        OfflinePlayerData invData = new OfflinePlayerData();
+        invData.playerName = data.name;
+        invData.isOnline = false;
+        invData.targetUUID = data.uuid;
+        invData.originalItems = data.inventory;
+        openInventories.put(viewer.getUniqueId(), invData);
+
+        viewer.openInventory(inv);
+
+        // Benachrichtigung
+        viewer.sendMessage("");
+        viewer.sendMessage(ChatColor.GOLD + "▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
+        viewer.sendMessage(ChatColor.YELLOW + "  Inventar von " + ChatColor.GOLD + data.name +
+                ChatColor.RED + " (Offline)");
+        viewer.sendMessage("");
+        viewer.sendMessage(ChatColor.YELLOW + "  ⚠ " + ChatColor.GRAY + "Offline-Inventar (Schreibgeschützt)");
+        viewer.sendMessage(ChatColor.GRAY + "  » Änderungen werden " + ChatColor.RED + "NICHT " +
+                ChatColor.GRAY + "gespeichert");
+        viewer.sendMessage(ChatColor.GRAY + "  » Nur zur Ansicht verfügbar");
+        viewer.sendMessage("");
+        viewer.sendMessage(ChatColor.GOLD + "▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
+        viewer.sendMessage("");
+
+        Bukkit.getLogger().info("[InvSee] " + viewer.getName() + " hat das Offline-Inventar von " +
+                data.name + " geöffnet.");
     }
 
     private void setupArmorDisplay(Inventory inv, PlayerInventory targetInv) {

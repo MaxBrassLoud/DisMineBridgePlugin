@@ -1,5 +1,6 @@
 package de.MaxBrassLoud.disMineBridgePlugin.command;
 
+import de.MaxBrassLoud.disMineBridgePlugin.playerdata.PlayerDataManager;
 import org.bukkit.*;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
@@ -53,8 +54,19 @@ public class endersee implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        p.sendMessage(ChatColor.YELLOW + "⚠ Offline-Enderchests können nicht bearbeitet werden.");
-        p.sendMessage(ChatColor.GRAY + "Der Spieler ist offline - Enderchest ist schreibgeschützt.");
+        // Lade Offline-Daten
+        PlayerDataManager.PlayerData data = PlayerDataManager.loadOfflinePlayerData(
+                offlineTarget.getUniqueId(),
+                offlineTarget.getName()
+        );
+
+        if (data != null && data.enderchest != null) {
+            openOfflineEnderchest(p, data);
+        } else {
+            p.sendMessage(ChatColor.RED + "Keine Enderchest-Daten für " + ChatColor.YELLOW + args[0] +
+                    ChatColor.RED + " gefunden.");
+            p.sendMessage(ChatColor.GRAY + "Der Spieler muss sich mindestens einmal eingeloggt haben.");
+        }
 
         return true;
     }
@@ -98,6 +110,45 @@ public class endersee implements CommandExecutor, TabCompleter {
 
         Bukkit.getLogger().info("[EnderSee] " + viewer.getName() + " hat die Enderchest von " +
                 target.getName() + " (online) geöffnet.");
+    }
+
+    private void openOfflineEnderchest(Player viewer, PlayerDataManager.PlayerData data) {
+        Inventory enderChest = Bukkit.createInventory(null, 27,
+                ChatColor.DARK_GRAY + "» " + ChatColor.DARK_PURPLE + "EnderChest: " +
+                        ChatColor.RED + "(Offline) " + ChatColor.YELLOW + data.name);
+
+        // Setze Items (readonly)
+        if (data.enderchest != null) {
+            for (int i = 0; i < data.enderchest.length && i < 27; i++) {
+                enderChest.setItem(i, data.enderchest[i]);
+            }
+        }
+
+        // Speichere Daten
+        OfflineEnderData enderData = new OfflineEnderData();
+        enderData.playerName = data.name;
+        enderData.isOnline = false;
+        enderData.targetUUID = data.uuid;
+        openEnderchests.put(viewer.getUniqueId(), enderData);
+
+        viewer.openInventory(enderChest);
+
+        // Benachrichtigung
+        viewer.sendMessage("");
+        viewer.sendMessage(ChatColor.DARK_PURPLE + "▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
+        viewer.sendMessage(ChatColor.LIGHT_PURPLE + "  Enderchest von " + ChatColor.GOLD + data.name +
+                ChatColor.RED + " (Offline)");
+        viewer.sendMessage("");
+        viewer.sendMessage(ChatColor.YELLOW + "  ⚠ " + ChatColor.GRAY + "Offline-Enderchest (Schreibgeschützt)");
+        viewer.sendMessage(ChatColor.GRAY + "  » Änderungen werden " + ChatColor.RED + "NICHT " +
+                ChatColor.GRAY + "gespeichert");
+        viewer.sendMessage(ChatColor.GRAY + "  » Nur zur Ansicht verfügbar");
+        viewer.sendMessage("");
+        viewer.sendMessage(ChatColor.DARK_PURPLE + "▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
+        viewer.sendMessage("");
+
+        Bukkit.getLogger().info("[EnderSee] " + viewer.getName() + " hat die Offline-Enderchest von " +
+                data.name + " geöffnet.");
     }
 
     private String createFillBar(double percentage) {

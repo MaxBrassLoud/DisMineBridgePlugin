@@ -8,6 +8,8 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
@@ -24,18 +26,19 @@ public class ban implements CommandExecutor, TabCompleter {
         }
 
         if (args.length < 3) {
-            sender.sendMessage(ChatColor.RED + "Benutzung: /ban <Spieler> <Grund> <Dauer>");
+            sender.sendMessage(ChatColor.RED + "Benutzung: /ban <Spieler> <Dauer> <Grund>");
             sender.sendMessage(ChatColor.GRAY + "Beispiele:");
-            sender.sendMessage(ChatColor.YELLOW + "  /ban Steve Hacking 7d");
-            sender.sendMessage(ChatColor.YELLOW + "  /ban Alex Griefing 1h30m");
-            sender.sendMessage(ChatColor.YELLOW + "  /ban Bob Spam 2d12h");
+            sender.sendMessage(ChatColor.YELLOW + "  /ban Steve 7d Hacking");
+            sender.sendMessage(ChatColor.YELLOW + "  /ban Alex 1h30m \"Schwere Beleidigung\"");
+            sender.sendMessage(ChatColor.YELLOW + "  /ban Bob 2d12h Verwendung von Exploits");
             return true;
         }
 
         String targetName = args[0];
         Player target = Bukkit.getPlayer(targetName);
 
-        String durationStr = args[args.length - 1];
+        // Dauer ist jetzt das 2. Argument
+        String durationStr = args[1];
         Instant expire;
 
         try {
@@ -55,7 +58,11 @@ public class ban implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        String reason = String.join(" ", Arrays.copyOfRange(args, 1, args.length - 1));
+        // Grund ist ab dem 3. Argument (alles zusammengefügt, Underscores → Leerzeichen)
+        String reason = String.join(" ", Arrays.copyOfRange(args, 2, args.length))
+                .replace("_", " ")
+                .replace("/n", "\n");  // /n wird zu echter neuer Zeile
+
         if (reason.trim().isEmpty()) reason = "Kein Grund angegeben";
 
         String timeLeft = formatDuration(Duration.between(Instant.now(), expire));
@@ -169,22 +176,66 @@ public class ban implements CommandExecutor, TabCompleter {
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
                                                 @NotNull String alias, @NotNull String[] args) {
+        List<String> completions = new ArrayList<>();
+
         if (args.length == 1) {
             // Spieler-Namen vorschlagen
-            List<String> online = new ArrayList<>();
+            String input = args[0].toLowerCase();
             for (Player p : Bukkit.getOnlinePlayers()) {
-                if (p.getName().toLowerCase().startsWith(args[0].toLowerCase())) {
-                    online.add(p.getName());
+                if (p.getName().toLowerCase().startsWith(input)) {
+                    completions.add(p.getName());
                 }
             }
-            return online;
+            return completions;
         }
 
-        if (args.length == args.length) {
-            // Dauer-Vorschläge beim letzten Argument
+        if (args.length == 2) {
+            // Dauer-Vorschläge beim 2. Argument
             return Arrays.asList("1h", "12h", "1d", "3d", "7d", "14d", "30d", "1h30m", "7d12h");
         }
 
+        if (args.length == 3) {
+            // Gründe aus Datenbank laden
+            completions = loadReasonsFromDatabase("BAN");
+
+            // Filtern basierend auf Input
+            String input = args[2].toLowerCase();
+            return completions.stream()
+                    .filter(s -> s.toLowerCase().startsWith(input))
+                    .toList();
+        }
+
         return Collections.emptyList();
+    }
+
+    /**
+     * Lädt Gründe aus der Datenbank für Tab-Completion
+     */
+    private List<String> loadReasonsFromDatabase(String type) {
+        List<String> reasons = new ArrayList<>();
+
+        try {
+            String sql = "SELECT name FROM punishment_reasons WHERE type = ? AND enabled = 1 ORDER BY sort_order";
+            PreparedStatement ps = DatabaseManager.getInstance().prepareStatement(sql, type);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                String name = rs.getString("name");
+                // Ersetze Leerzeichen mit Underscore für bessere Tab-Completion
+                reasons.add(name.replace(" ", "_"));
+            }
+
+            rs.close();
+            ps.close();
+
+        } catch (Exception e) {
+            // Fallback zu Standard-Gründen
+            reasons.addAll(Arrays.asList("Hacking", "Griefing", "Beleidigung", "Spam", "Werbung", "Betrug"));
+        }
+
+        // Füge "Eigener_Grund" als Option hinzu
+        reasons.add("Eigener_Grund");
+
+        return reasons;
     }
 }
