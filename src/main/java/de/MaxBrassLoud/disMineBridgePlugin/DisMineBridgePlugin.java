@@ -3,6 +3,7 @@ package de.MaxBrassLoud.disMineBridgePlugin;
 import de.MaxBrassLoud.disMineBridgePlugin.adminmode.AdminModeManager;
 import de.MaxBrassLoud.disMineBridgePlugin.command.*;
 import de.MaxBrassLoud.disMineBridgePlugin.database.DatabaseManager;
+import de.MaxBrassLoud.disMineBridgePlugin.discord.DiscordManager;
 import de.MaxBrassLoud.disMineBridgePlugin.listener.*;
 import de.MaxBrassLoud.disMineBridgePlugin.maintenance.MaintenanceManager;
 import de.MaxBrassLoud.disMineBridgePlugin.playerdata.PlayerDataManager;
@@ -29,12 +30,18 @@ public final class DisMineBridgePlugin extends JavaPlugin {
         // Config erstellen falls nicht vorhanden
         saveDefaultConfig();
         MessageManager.init(this);
-        //FileConfiguration config = getConfig();
         ServerlistManager.setCurrentMOTD();
+
         // ============================================================
         //  DATENBANK INITIALISIEREN (ZENTRAL)
         // ============================================================
         DatabaseManager.init(this);
+
+        // ============================================================
+        //  DISCORD INTEGRATION
+        // ============================================================
+
+        DiscordManager.init(this);
 
         // ============================================================
         //  MANAGER INITIALISIEREN
@@ -42,7 +49,6 @@ public final class DisMineBridgePlugin extends JavaPlugin {
         AdminModeManager.init();
         WhitelistManager.init(config, this);
         MaintenanceManager.init(config, this);
-
 
         ServerlistManager.setCurrentMOTD();
 
@@ -72,7 +78,6 @@ public final class DisMineBridgePlugin extends JavaPlugin {
         mute muteCMD = new mute();
         getCommand("mute").setExecutor(muteCMD);
         getCommand("mute").setTabCompleter(muteCMD);
-
 
         getCommand("unmute").setExecutor(new unmute());
 
@@ -104,7 +109,10 @@ public final class DisMineBridgePlugin extends JavaPlugin {
 
         PunishCommand punishCmd = new PunishCommand();
         getCommand("punish").setExecutor(punishCmd);
-        //getCommand("punish").setTabCompleter(punishCmd);
+
+        PunishmentReasonsCommand reasonsCmd = new PunishmentReasonsCommand();
+        getCommand("punishreasons").setExecutor(reasonsCmd);
+        getCommand("punishreasons").setTabCompleter(reasonsCmd);
 
         // ============================================================
         //  LISTENER REGISTRIEREN
@@ -116,17 +124,12 @@ public final class DisMineBridgePlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new InventoryCloseListener(), this);
         getServer().getPluginManager().registerEvents(new BanListener(), this);
         getServer().getPluginManager().registerEvents(muteListener, this);
-        //getServer().getPluginManager().registerEvents(new AdminModeListener(), this);
         getServer().getPluginManager().registerEvents(new LoginListener(), this);
         getServer().getPluginManager().registerEvents(quitListener, this);
         getServer().getPluginManager().registerEvents(new VanishJoinQuitListener(), this);
         getServer().getPluginManager().registerEvents(new PunishmentGUIListener(), this);
         getServer().getPluginManager().registerEvents(new LoginNotificationListener(), this);
-        getServer().getPluginManager().registerEvents(new PunishmentGUIListener(), this);
-
-        PunishmentReasonsCommand reasonsCmd = new PunishmentReasonsCommand();
-        getCommand("punishreasons").setExecutor(reasonsCmd);
-        getCommand("punishreasons").setTabCompleter(reasonsCmd);
+        getServer().getPluginManager().registerEvents(new PunishmentHistoryListener(), this);
 
         // ============================================================
         //  VOICECHAT INTEGRATION
@@ -134,6 +137,10 @@ public final class DisMineBridgePlugin extends JavaPlugin {
         setupVoiceChat(muteListener, quitListener);
 
         getLogger().info("✔ Plugin erfolgreich gestartet!");
+
+        if (DiscordManager.isEnabled()) {
+            getLogger().info("✔ Discord-Integration aktiviert!");
+        }
     }
 
     private void setupVoiceChat(MuteListener muteListener, PlayerQuitListener quitListener) {
@@ -160,6 +167,7 @@ public final class DisMineBridgePlugin extends JavaPlugin {
     @Override
     public void onDisable() {
         DatabaseManager.getInstance().close();
+        DiscordManager.shutdown();
         getLogger().info("Plugin gestoppt.");
     }
 

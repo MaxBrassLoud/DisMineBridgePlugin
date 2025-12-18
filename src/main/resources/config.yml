@@ -21,9 +21,23 @@ database:
 # ============================================================
 
 discord:
+  # Aktiviere Discord-Integration
   enabled: false
+
+  # Bot Token (von https://discord.com/developers/applications)
   token: "DEIN_BOT_TOKEN_HIER"
+
+  # Discord Server ID
   guild-id: "DEINE_SERVER_ID"
+
+  # Channel-ID für Whitelist-Anfragen (wird automatisch gesetzt)
+  whitelist-request-channel-id: ""
+
+  # Rollen die Whitelist-Anfragen genehmigen können (Namen oder IDs)
+  whitelist-roles:
+    - "Admin"
+    - "Moderator"
+    - "1234567890123456789"  # Beispiel Rollen-ID
 
 # ============================================================
 #  WHITELIST SYSTEM

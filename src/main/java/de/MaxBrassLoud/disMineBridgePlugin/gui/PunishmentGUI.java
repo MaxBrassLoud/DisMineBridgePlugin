@@ -1,6 +1,8 @@
 package de.MaxBrassLoud.disMineBridgePlugin.gui;
 
 import de.MaxBrassLoud.disMineBridgePlugin.database.DatabaseManager;
+import de.MaxBrassLoud.disMineBridgePlugin.listener.PunishmentGUIListener;
+import de.MaxBrassLoud.disMineBridgePlugin.listener.PunishmentGUIListener.*;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -16,6 +18,7 @@ import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Logger;
+
 
 /**
  * Komplettes GUI-System für Strafen mit automatischer Berechnung
@@ -93,38 +96,112 @@ public class PunishmentGUI {
         // Berechne empfohlene Strafe basierend auf Historie
         PunishmentCalculation calc = calculatePunishment(target, type, reason);
 
-        String title = ChatColor.DARK_GRAY + "» " + ChatColor.GOLD + "Dauer wählen";
-        Inventory inv = Bukkit.createInventory(null, 45, title);
-
-        // Info über vorherige Vergehen
-        inv.setItem(4, createPunishmentInfoItem(target, type, calc));
-
-        // Empfohlene Strafe (in der Mitte)
-        inv.setItem(13, createRecommendedDurationItem(calc));
-
-        // Vordefinierte Dauern (abhängig vom Typ)
-        List<DurationOption> options = getDurationOptions(type, calc.minimumDuration);
-        int[] slots = {19, 20, 21, 22, 23, 24, 25}; // Untere Reihe
-
-        for (int i = 0; i < options.size() && i < slots.length; i++) {
-            inv.setItem(slots[i], createDurationOptionItem(options.get(i), calc.minimumDuration));
+        // Speichere Werte in der Session
+        PunishmentGUI.GUISession session = PunishmentGUIListener.getSession(viewer.getUniqueId());
+        if (session != null) {
+            session.minimumDuration = calc.minimumDuration;
+            session.previousOffenses = calc.previousOffenses;
+            session.selectedReason = reason;
         }
 
-        // Benutzerdefinierte Dauer
-        inv.setItem(31, createCustomDurationItem(calc.minimumDuration));
+        String title = ChatColor.DARK_GRAY + "» " + ChatColor.GOLD + "Dauer: " + ChatColor.YELLOW + type.getDisplayName();
+        Inventory inv = Bukkit.createInventory(null, 54, title);
 
-        // Navigation
-        inv.setItem(36, createBackItem());
-        inv.setItem(44, createExecuteItem());
+        // ===== KOPFZEILE: Info über Spieler =====
+        inv.setItem(4, createPunishmentInfoItem(target, type, calc));
 
-        // Fülle Rest
-        for (int i = 0; i < 45; i++) {
+        // ===== ZEILE 2: Trennlinie =====
+        for (int i = 9; i < 18; i++) {
+            inv.setItem(i, createSeparatorItem());
+        }
+
+        // ===== ZEILE 3: Empfohlene Dauer (hervorgehoben) =====
+        inv.setItem(22, createRecommendedDurationItem(calc));
+
+        // ===== ZEILE 4: Schnell-Optionen =====
+        List<DurationOption> quickOptions = getQuickDurationOptions(type);
+        int[] quickSlots = {28, 29, 30, 31, 32, 33, 34};
+
+        for (int i = 0; i < quickOptions.size() && i < quickSlots.length; i++) {
+            inv.setItem(quickSlots[i], createDurationOptionItem(quickOptions.get(i), calc.minimumDuration));
+        }
+
+        // ===== ZEILE 5: Trennlinie =====
+        for (int i = 36; i < 45; i++) {
+            inv.setItem(i, createSeparatorItem());
+        }
+
+        // ===== ZEILE 6: Navigation & Eigene Dauer =====
+        inv.setItem(45, createBackItem());
+        inv.setItem(49, createCustomDurationItem(calc.minimumDuration));
+        inv.setItem(53, createConfirmItem());
+
+        // Fülle Rest mit Glas
+        for (int i = 0; i < 54; i++) {
             if (inv.getItem(i) == null) {
                 inv.setItem(i, createFillerItem());
             }
         }
 
         viewer.openInventory(inv);
+
+        // Benachrichtigung
+        viewer.sendMessage("");
+        viewer.sendMessage(ChatColor.GOLD + "▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
+        viewer.sendMessage(ChatColor.YELLOW + "  Dauer-Auswahl für " + ChatColor.GOLD + type.getDisplayName());
+        viewer.sendMessage("");
+        viewer.sendMessage(ChatColor.GRAY + "  Spieler: " + ChatColor.WHITE + target.getName());
+        viewer.sendMessage(ChatColor.GRAY + "  Grund: " + ChatColor.WHITE + reason);
+
+        if (calc.previousOffenses > 0) {
+            viewer.sendMessage("");
+            viewer.sendMessage(ChatColor.RED + "  ⚠ Wiederholungstäter (" + calc.previousOffenses + "x)");
+            viewer.sendMessage(ChatColor.GRAY + "  Mindestdauer: " + ChatColor.YELLOW + formatDuration(calc.minimumDuration));
+        }
+
+        viewer.sendMessage("");
+        viewer.sendMessage(ChatColor.DARK_GRAY + "  Zu kurze Dauern sind ausgegraut");
+        viewer.sendMessage(ChatColor.GOLD + "▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
+        viewer.sendMessage("");
+    }
+
+    /**
+     * Erstellt Trennlinie
+     */
+    private static ItemStack createSeparatorItem() {
+        ItemStack item = new ItemStack(Material.ORANGE_STAINED_GLASS_PANE);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(ChatColor.GOLD + "▬▬▬▬▬▬▬▬▬");
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+
+    /**
+     * Erstellt verbessertes Bestätigungs-Item
+     */
+    private static ItemStack createConfirmItem() {
+        ItemStack item = new ItemStack(Material.EMERALD);
+        ItemMeta meta = item.getItemMeta();
+
+        if (meta != null) {
+            meta.setDisplayName(ChatColor.GREEN + ChatColor.BOLD.toString() + "✔ BESTÄTIGEN");
+
+            List<String> lore = new ArrayList<>();
+            lore.add("");
+            lore.add(ChatColor.GRAY + "Führt die Strafe mit der");
+            lore.add(ChatColor.GRAY + "gewählten Dauer aus");
+            lore.add("");
+            lore.add(ChatColor.YELLOW + "Wähle zuerst eine Dauer!");
+            lore.add("");
+            lore.add(ChatColor.GREEN + "➜ Klicken zum Bestätigen");
+
+            meta.setLore(lore);
+            item.setItemMeta(meta);
+        }
+
+        return item;
     }
 
     /**
@@ -397,16 +474,22 @@ public class PunishmentGUI {
         ItemMeta meta = item.getItemMeta();
 
         if (meta != null) {
-            meta.setDisplayName(ChatColor.GREEN + ChatColor.BOLD.toString() + "EMPFOHLENE DAUER");
+            meta.setDisplayName(ChatColor.GOLD + ChatColor.BOLD.toString() + "⭐ EMPFOHLEN");
 
             List<String> lore = new ArrayList<>();
             lore.add("");
-            lore.add(ChatColor.YELLOW + formatDuration(calc.recommendedDuration));
+            lore.add(ChatColor.YELLOW + "" + ChatColor.BOLD + formatDuration(calc.recommendedDuration));
             lore.add("");
-            lore.add(ChatColor.GRAY + "Basierend auf:");
-            lore.add(ChatColor.WHITE + "  • Anzahl Vorstrafen");
-            lore.add(ChatColor.WHITE + "  • Schwere des Vergehens");
-            lore.add(ChatColor.WHITE + "  • Zeitlicher Abstand");
+            lore.add(ChatColor.GRAY + "Berechnet basierend auf:");
+            lore.add(ChatColor.WHITE + "  • " + calc.previousOffenses + " vorherige Vergehen");
+            lore.add(ChatColor.WHITE + "  • Schwere: " + calc.type.getDisplayName());
+
+            if (calc.previousOffenses > 0) {
+                lore.add("");
+                lore.add(ChatColor.RED + "⚠ Wiederholungstäter!");
+                lore.add(ChatColor.GRAY + "Dauer wurde automatisch erhöht");
+            }
+
             lore.add("");
             lore.add(ChatColor.GREEN + "➜ Klicken zum Verwenden");
 
@@ -418,14 +501,28 @@ public class PunishmentGUI {
     }
 
     private static ItemStack createDurationOptionItem(DurationOption option, long minimumDuration) {
-        boolean canUse = option.durationMillis >= minimumDuration;
+        boolean canUse = option.durationMillis >= minimumDuration || option.durationMillis == Long.MAX_VALUE;
 
-        ItemStack item = new ItemStack(canUse ? Material.LIME_DYE : Material.GRAY_DYE);
+        Material material;
+        ChatColor nameColor;
+
+        if (!canUse) {
+            material = Material.GRAY_DYE;
+            nameColor = ChatColor.DARK_GRAY;
+        } else if (option.displayName.contains("Permanent")) {
+            material = Material.NETHER_STAR;
+            nameColor = ChatColor.RED;
+        } else {
+            material = Material.LIME_DYE;
+            nameColor = ChatColor.GREEN;
+        }
+
+        ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
 
         if (meta != null) {
             if (canUse) {
-                meta.setDisplayName(ChatColor.GREEN + option.displayName);
+                meta.setDisplayName(nameColor + ChatColor.BOLD.toString() + option.displayName);
             } else {
                 meta.setDisplayName(ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH.toString() + option.displayName);
             }
@@ -434,14 +531,21 @@ public class PunishmentGUI {
             lore.add("");
 
             if (canUse) {
-                lore.add(ChatColor.GRAY + "Dauer: " + ChatColor.YELLOW + formatDuration(option.durationMillis));
+                if (option.durationMillis == Long.MAX_VALUE) {
+                    lore.add(ChatColor.RED + "⚠ PERMANENT BAN");
+                    lore.add(ChatColor.GRAY + "Spieler kann sich nie wieder einloggen");
+                } else {
+                    lore.add(ChatColor.GRAY + "Dauer: " + ChatColor.YELLOW + formatDuration(option.durationMillis));
+                }
                 lore.add("");
                 lore.add(ChatColor.GREEN + "➜ Klicken zum Auswählen");
             } else {
-                lore.add(ChatColor.RED + "✖ Zu kurz!");
-                lore.add(ChatColor.GRAY + "Mindestens: " + ChatColor.YELLOW + formatDuration(minimumDuration));
+                lore.add(ChatColor.RED + "✖ Zu kurze Dauer!");
                 lore.add("");
-                lore.add(ChatColor.DARK_GRAY + "Aufgrund vorheriger Vergehen");
+                lore.add(ChatColor.GRAY + "Mindestens erforderlich:");
+                lore.add(ChatColor.YELLOW + "  " + formatDuration(minimumDuration));
+                lore.add("");
+                lore.add(ChatColor.DARK_GRAY + "Grund: Wiederholungstäter");
             }
 
             meta.setLore(lore);
@@ -659,48 +763,6 @@ public class PunishmentGUI {
         return calc;
     }
 
-    /**
-     * Lädt Spieler-Statistiken
-     */
-    private static PunishmentStats loadPlayerStats(OfflinePlayer target) {
-        PunishmentStats stats = new PunishmentStats();
-        String uuid = target.getUniqueId().toString();
-
-        try {
-            String banSql = "SELECT COUNT(*) as count FROM bans WHERE uuid = ?";
-            PreparedStatement ps = DatabaseManager.getInstance().prepareStatement(banSql, uuid);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) stats.totalBans = rs.getInt("count");
-            rs.close();
-            ps.close();
-
-            String muteSql = "SELECT COUNT(*) as count FROM mutes WHERE uuid = ?";
-            ps = DatabaseManager.getInstance().prepareStatement(muteSql, uuid);
-            rs = ps.executeQuery();
-            if (rs.next()) stats.totalMutes = rs.getInt("count");
-            rs.close();
-            ps.close();
-
-            String warnSql = "SELECT COUNT(*) as count FROM warns WHERE uuid = ?";
-            ps = DatabaseManager.getInstance().prepareStatement(warnSql, uuid);
-            rs = ps.executeQuery();
-            if (rs.next()) stats.totalWarns = rs.getInt("count");
-            rs.close();
-            ps.close();
-
-            String kickSql = "SELECT COUNT(*) as count FROM kicks WHERE uuid = ?";
-            ps = DatabaseManager.getInstance().prepareStatement(kickSql, uuid);
-            rs = ps.executeQuery();
-            if (rs.next()) stats.totalKicks = rs.getInt("count");
-            rs.close();
-            ps.close();
-
-        } catch (Exception e) {
-            logger.warning("Fehler beim Laden der Statistiken: " + e.getMessage());
-        }
-
-        return stats;
-    }
 
     /**
      * Lädt Strafhistorie
@@ -1096,4 +1158,77 @@ public class PunishmentGUI {
             this.durationMillis = durationMillis;
         }
     }
+
+    /**
+     * Lädt Spieler-Statistiken (PUBLIC für externe Nutzung)
+     */
+    public static PunishmentStats loadPlayerStats(OfflinePlayer target) {
+        PunishmentStats stats = new PunishmentStats();
+        String uuid = target.getUniqueId().toString();
+
+        try {
+            String banSql = "SELECT COUNT(*) as count FROM bans WHERE uuid = ?";
+            PreparedStatement ps = DatabaseManager.getInstance().prepareStatement(banSql, uuid);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) stats.totalBans = rs.getInt("count");
+            rs.close();
+            ps.close();
+
+            String muteSql = "SELECT COUNT(*) as count FROM mutes WHERE uuid = ?";
+            ps = DatabaseManager.getInstance().prepareStatement(muteSql, uuid);
+            rs = ps.executeQuery();
+            if (rs.next()) stats.totalMutes = rs.getInt("count");
+            rs.close();
+            ps.close();
+
+            String warnSql = "SELECT COUNT(*) as count FROM warns WHERE uuid = ?";
+            ps = DatabaseManager.getInstance().prepareStatement(warnSql, uuid);
+            rs = ps.executeQuery();
+            if (rs.next()) stats.totalWarns = rs.getInt("count");
+            rs.close();
+            ps.close();
+
+            String kickSql = "SELECT COUNT(*) as count FROM kicks WHERE uuid = ?";
+            ps = DatabaseManager.getInstance().prepareStatement(kickSql, uuid);
+            rs = ps.executeQuery();
+            if (rs.next()) stats.totalKicks = rs.getInt("count");
+            rs.close();
+            ps.close();
+
+        } catch (Exception e) {
+            logger.warning("Fehler beim Laden der Statistiken: " + e.getMessage());
+        }
+
+        return stats;
+    }
+
+    private static List<DurationOption> getQuickDurationOptions(PunishmentType type) {
+        List<DurationOption> options = new ArrayList<>();
+
+        switch (type) {
+            case BAN -> {
+                options.add(new DurationOption("1 Tag", 86400000L));
+                options.add(new DurationOption("3 Tage", 259200000L));
+                options.add(new DurationOption("7 Tage", 604800000L));
+                options.add(new DurationOption("14 Tage", 1209600000L));
+                options.add(new DurationOption("30 Tage", 2592000000L));
+                options.add(new DurationOption("60 Tage", 5184000000L));
+                options.add(new DurationOption("Permanent", Long.MAX_VALUE));
+            }
+            case MUTE -> {
+                options.add(new DurationOption("15 Minuten", 900000L));
+                options.add(new DurationOption("30 Minuten", 1800000L));
+                options.add(new DurationOption("1 Stunde", 3600000L));
+                options.add(new DurationOption("3 Stunden", 10800000L));
+                options.add(new DurationOption("6 Stunden", 21600000L));
+                options.add(new DurationOption("12 Stunden", 43200000L));
+                options.add(new DurationOption("1 Tag", 86400000L));
+            }
+        }
+
+        return options;
+    }
+
 }
+
+

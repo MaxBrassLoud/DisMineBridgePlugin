@@ -34,7 +34,7 @@ public class PunishCommand implements CommandExecutor {
         }
 
         if (!player.hasPermission("dmb.punish")) {
-            sender.sendMessage(ChatColor.RED + "Du hast keine Berechtigung für diesen Befehl!");
+            player.sendMessage(ChatColor.RED + "Du hast keine Berechtigung für diesen Befehl!");
             return true;
         }
 
@@ -87,7 +87,7 @@ public class PunishCommand implements CommandExecutor {
     }
 
     /**
-     * Erstellt einen Spieler-Kopf
+     * Erstellt einen Spieler-Kopf mit Straf-Statistiken
      */
     private ItemStack createPlayerHead(Player player) {
         ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
@@ -97,10 +97,23 @@ public class PunishCommand implements CommandExecutor {
             meta.setOwningPlayer(player);
             meta.setDisplayName(ChatColor.YELLOW + ChatColor.BOLD.toString() + player.getName());
 
+            // Lade Statistiken aus GUI
+            PunishmentGUI.PunishmentStats stats = loadPlayerStats(player);
+
             List<String> lore = new ArrayList<>();
             lore.add("");
             lore.add(ChatColor.GREEN + "✔ " + ChatColor.GRAY + "Online");
             lore.add("");
+
+            if (stats.getTotalPunishments() > 0) {
+                lore.add(ChatColor.GRAY + "Strafen-Historie:");
+                if (stats.totalBans > 0) lore.add(ChatColor.RED + "  Bans: " + ChatColor.WHITE + stats.totalBans);
+                if (stats.totalMutes > 0) lore.add(ChatColor.GOLD + "  Mutes: " + ChatColor.WHITE + stats.totalMutes);
+                if (stats.totalWarns > 0) lore.add(ChatColor.YELLOW + "  Warns: " + ChatColor.WHITE + stats.totalWarns);
+                if (stats.totalKicks > 0) lore.add(ChatColor.GRAY + "  Kicks: " + ChatColor.WHITE + stats.totalKicks);
+                lore.add("");
+            }
+
             lore.add(ChatColor.YELLOW + "Klicke um zu bestrafen");
 
             meta.setLore(lore);
@@ -108,6 +121,14 @@ public class PunishCommand implements CommandExecutor {
         }
 
         return skull;
+    }
+
+    /**
+     * Lädt Spieler-Statistiken
+     */
+    private PunishmentGUI.PunishmentStats loadPlayerStats(Player player) {
+        // Nutze die GUI-Methode
+        return de.MaxBrassLoud.disMineBridgePlugin.gui.PunishmentGUI.loadPlayerStats(player);
     }
 
     /**

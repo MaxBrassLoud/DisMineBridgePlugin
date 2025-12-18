@@ -140,6 +140,7 @@ public class DatabaseManager {
             stmt.execute(getUsersTableSQL());
             stmt.execute(getWhitelistTableSQL());
             stmt.execute(getAdminModeTableSQL());
+            stmt.execute(getDiscordDataTableSQL());
 
             // NEU: Player Data Tabelle für Inventar-Speicherung
             stmt.execute(getPlayerDataTableSQL());
@@ -161,6 +162,34 @@ public class DatabaseManager {
     }
 
     // ===== NEUE TABELLEN =====
+    private String getDiscordDataTableSQL() {
+        if (isMySQL()) {
+            return """
+                    CREATE TABLE IF NOT EXISTS discord_whitelist (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        discord_id VARCHAR(20) NOT NULL UNIQUE,
+                        discord_name VARCHAR(100),
+                        minecraft_name VARCHAR(16),
+                        minecraft_uuid VARCHAR(36),
+                        status VARCHAR(20) DEFAULT 'PENDING',
+                        requested_at BIGINT,
+                        approved_by VARCHAR(100),
+                        approved_at BIGINT
+                    )""";
+        };
+        return """
+                CREATE TABLE IF NOT EXISTS discord_whitelist (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    discord_id VARCHAR(20) NOT NULL UNIQUE,
+                    discord_name VARCHAR(100),
+                    minecraft_name VARCHAR(16),
+                    minecraft_uuid VARCHAR(36),
+                    status VARCHAR(20) DEFAULT 'PENDING',
+                    requested_at BIGINT,
+                    approved_by VARCHAR(100),
+                    approved_at BIGINT
+                )""";
+    }
 
     private String getPlayerDataTableSQL() {
         if (isMySQL()) {

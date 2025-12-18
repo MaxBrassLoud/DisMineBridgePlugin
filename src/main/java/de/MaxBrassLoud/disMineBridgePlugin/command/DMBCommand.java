@@ -25,6 +25,7 @@ public class DMBCommand implements CommandExecutor, TabCompleter {
         this.plugin = plugin;
     }
 
+
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 
@@ -42,6 +43,7 @@ public class DMBCommand implements CommandExecutor, TabCompleter {
             case "status" -> showStatus(sender);
             case "reload" -> handleReload(sender);
             case "version", "ver", "v" -> showVersion(sender);
+            case "discord" -> handleDiscordCommand(sender, Arrays.copyOfRange(args, 1, args.length));
             default -> showMainInfo(sender);
         }
 
@@ -187,6 +189,7 @@ public class DMBCommand implements CommandExecutor, TabCompleter {
 
             if (sender.hasPermission("dmb.admin")) {
                 completions.add("reload");
+                completions.add("discord");
             }
 
             return completions.stream()
@@ -199,7 +202,150 @@ public class DMBCommand implements CommandExecutor, TabCompleter {
                     .filter(s -> s.toLowerCase().startsWith(args[1].toLowerCase()))
                     .collect(Collectors.toList());
         }
-
+        if (args.length == 2 && args[0].equalsIgnoreCase("discord")) {
+            return Arrays.asList("status", "sendticket", "whitelist find").stream()
+                    .filter(s -> s.toLowerCase().startsWith(args[1].toLowerCase()))
+                    .collect(Collectors.toList());
+        }
         return new ArrayList<>();
+    }
+
+
+    private void handleDiscordCommand(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("dmb.admin")) {
+            sender.sendMessage(ChatColor.RED + "Du hast keine Berechtigung für diesen Befehl.");
+            return;
+        }
+
+        if (args.length == 0) {
+            sendDiscordHelp(sender);
+            return;
+        }
+
+        String subCommand = args[0].toLowerCase();
+
+        switch (subCommand) {
+            case "sendticket" -> handleSendTicket(sender, args);
+            case "status" -> handleDiscordStatus(sender);
+            case "whitelist" -> handleDiscordWhitelist(sender, Arrays.copyOfRange(args, 1, args.length));
+            default -> sendDiscordHelp(sender);
+        }
+    }
+
+    private void handleSendTicket(CommandSender sender, String[] args) {
+        if (!de.MaxBrassLoud.disMineBridgePlugin.discord.DiscordManager.isEnabled()) {
+            sender.sendMessage(ChatColor.RED + "Discord-Integration ist nicht aktiviert!");
+            return;
+        }
+
+        if (args.length < 2) {
+            sender.sendMessage(ChatColor.RED + "Nutze: /dmb discord sendticket <Channel-ID>");
+            sender.sendMessage(ChatColor.GRAY + "Die Channel-ID findest du mit Rechtsklick auf den Kanal (Entwicklermodus aktiviert)");
+            return;
+        }
+
+        String channelId = args[1];
+
+        sender.sendMessage(ChatColor.YELLOW + "Sende Ticket-Nachricht...");
+
+        try {
+            de.MaxBrassLoud.disMineBridgePlugin.discord.DiscordManager.sendTicketMessage(channelId);
+            de.MaxBrassLoud.disMineBridgePlugin.discord.DiscordManager.setWhitelistRequestChannelId(channelId);
+
+            sender.sendMessage(ChatColor.GREEN + "✔ Ticket-Nachricht wurde gesendet!");
+            sender.sendMessage(ChatColor.GRAY + "Channel-ID wurde als Whitelist-Request-Channel gespeichert.");
+
+        } catch (Exception e) {
+            sender.sendMessage(ChatColor.RED + "✖ Fehler beim Senden: " + e.getMessage());
+        }
+    }
+
+    private void handleDiscordStatus(CommandSender sender) {
+        boolean enabled = de.MaxBrassLoud.disMineBridgePlugin.discord.DiscordManager.isEnabled();
+
+        sender.sendMessage("");
+        sender.sendMessage(ChatColor.GOLD + "▬▬▬▬▬▬ " + ChatColor.BOLD + "DISCORD STATUS" +
+                ChatColor.RESET + ChatColor.GOLD + " ▬▬▬▬▬▬");
+        sender.sendMessage("");
+
+        sender.sendMessage(ChatColor.YELLOW + "Status: " +
+                (enabled ? ChatColor.GREEN + "✔ Online" : ChatColor.RED + "✖ Offline"));
+
+        if (enabled) {
+            var jda = de.MaxBrassLoud.disMineBridgePlugin.discord.DiscordManager.getJDA();
+            sender.sendMessage(ChatColor.YELLOW + "Bot Name: " + ChatColor.WHITE + jda.getSelfUser().getName());
+            sender.sendMessage(ChatColor.YELLOW + "Bot Tag: " + ChatColor.WHITE + jda.getSelfUser().getAsTag());
+            sender.sendMessage(ChatColor.YELLOW + "Guild ID: " + ChatColor.WHITE +
+                    de.MaxBrassLoud.disMineBridgePlugin.discord.DiscordManager.getGuildId());
+
+            String channelId = de.MaxBrassLoud.disMineBridgePlugin.discord.DiscordManager.getWhitelistRequestChannelId();
+            sender.sendMessage(ChatColor.YELLOW + "Whitelist Channel: " + ChatColor.WHITE +
+                    (channelId.isEmpty() ? "Nicht konfiguriert" : channelId));
+        }
+
+        sender.sendMessage("");
+        sender.sendMessage(ChatColor.GOLD + "▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
+        sender.sendMessage("");
+    }
+
+    private void handleDiscordWhitelist(CommandSender sender, String[] args) {
+        if (!de.MaxBrassLoud.disMineBridgePlugin.discord.DiscordManager.isEnabled()) {
+            sender.sendMessage(ChatColor.RED + "Discord-Integration ist nicht aktiviert!");
+            return;
+        }
+
+        if (args.length == 0) {
+            sender.sendMessage(ChatColor.RED + "Nutze: /dmb discord whitelist <add|remove|find>");
+            return;
+        }
+
+        String action = args[0].toLowerCase();
+
+        switch (action) {
+            case "find" -> {
+                if (args.length < 2) {
+                    sender.sendMessage(ChatColor.RED + "Nutze: /dmb discord whitelist find <Name>");
+                    return;
+                }
+
+                String identifier = args[1];
+
+                // Versuche Discord -> Minecraft
+                String minecraft = de.MaxBrassLoud.disMineBridgePlugin.discord.DiscordManager.findMinecraftByDiscord(identifier);
+                if (minecraft != null) {
+                    sender.sendMessage(ChatColor.GREEN + "Gefunden: " + ChatColor.YELLOW + minecraft);
+                    return;
+                }
+
+                // Versuche Minecraft -> Discord
+                String discord = de.MaxBrassLoud.disMineBridgePlugin.discord.DiscordManager.findDiscordByMinecraft(identifier);
+                if (discord != null) {
+                    sender.sendMessage(ChatColor.GREEN + "Gefunden: " + ChatColor.YELLOW + discord);
+                    return;
+                }
+
+                sender.sendMessage(ChatColor.RED + "Keine Einträge gefunden für: " + identifier);
+            }
+
+            default -> sender.sendMessage(ChatColor.RED + "Unbekannte Aktion: " + action);
+        }
+    }
+
+    private void sendDiscordHelp(CommandSender sender) {
+        sender.sendMessage("");
+        sender.sendMessage(ChatColor.GOLD + "▬▬▬▬▬▬ " + ChatColor.BOLD + "DISCORD BEFEHLE" +
+                ChatColor.RESET + ChatColor.GOLD + " ▬▬▬▬▬▬");
+        sender.sendMessage("");
+        sender.sendMessage(ChatColor.YELLOW + "/dmb discord status");
+        sender.sendMessage(ChatColor.GRAY + "  » Zeigt Discord-Bot Status");
+        sender.sendMessage("");
+        sender.sendMessage(ChatColor.YELLOW + "/dmb discord sendticket <Channel-ID>");
+        sender.sendMessage(ChatColor.GRAY + "  » Sendet Ticket-Nachricht in einen Discord-Kanal");
+        sender.sendMessage("");
+        sender.sendMessage(ChatColor.YELLOW + "/dmb discord whitelist find <Name>");
+        sender.sendMessage(ChatColor.GRAY + "  » Findet Discord <-> Minecraft Verknüpfung");
+        sender.sendMessage("");
+        sender.sendMessage(ChatColor.GOLD + "▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
+        sender.sendMessage("");
     }
 }
