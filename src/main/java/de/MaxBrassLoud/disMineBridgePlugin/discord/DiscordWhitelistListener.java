@@ -28,6 +28,10 @@ public class DiscordWhitelistListener extends ListenerAdapter {
             return;
         }
 
+        if (buttonId.equals("ticket_support")) {
+            return;
+        }
+
         // Whitelist Approve Button
         if (buttonId.startsWith("whitelist_approve_")) {
             handleWhitelistApprove(event, buttonId);
@@ -60,7 +64,28 @@ public class DiscordWhitelistListener extends ListenerAdapter {
 
         DiscordManager.handleMemberLeave(discordId);
     }
+    private  void  handleTicket(ButtonInteractionEvent event, String Mode) {
+        TextInput ProblemDescription = TextInput.create("problem", "Proble", TextInputStyle.PARAGRAPH)
+                .setPlaceholder("Problem Beschreibung")
+                .setRequired(true)
+                .setMinLength(20)
+                .build();
+        String Titel = Mode + " Ticket Problem Beschreibung";
+        Modal modal = Modal.create("ticket_modal", Titel ).build();
+        event.replyModal(modal).queue();
+    }
 
+    private void handleTicketSubmit(ModalInteractionEvent event) {
+        String minecraftName = event.getValue("minecraft_name").getAsString().trim();
+        User user = event.getUser();
+
+
+        event.reply("✅ Dein Ticket wird erstellt")
+                .setEphemeral(true)
+                .queue();
+
+        DiscordManager.createWhitelistRequest(user, minecraftName);
+    }
     /**
      * Behandelt Whitelist-Anfrage Button-Klick
      */

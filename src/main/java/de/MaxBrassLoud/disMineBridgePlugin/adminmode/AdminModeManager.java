@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 
 public class AdminModeManager {
 
-    private static final Set<UUID> adminModePlayers = new HashSet<>();
+    public static final Set<UUID> adminModePlayers = new HashSet<>();
     private static final Logger logger = Logger.getLogger("DisMineBridge");
 
     public static void init() {

@@ -1,7 +1,9 @@
 package de.MaxBrassLoud.disMineBridgePlugin.listener;
 
+import de.MaxBrassLoud.disMineBridgePlugin.adminmode.AdminModeManager;
 import de.MaxBrassLoud.disMineBridgePlugin.maintenance.MaintenanceManager;
 import de.MaxBrassLoud.disMineBridgePlugin.whitelist.WhitelistManager;
+import de.MaxBrassLoud.disMineBridgePlugin.database.DatabaseManager;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -10,7 +12,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerLoginEvent.Result;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.UUID;
+
+import static de.MaxBrassLoud.disMineBridgePlugin.adminmode.AdminModeManager.adminModePlayers;
 
 public class LoginListener implements Listener {
 
@@ -51,6 +58,21 @@ public class LoginListener implements Listener {
             e.disallow(Result.KICK_WHITELIST, WHITELIST_MESSAGE);
             return false; // Spieler nicht auf Whitelist
         }
+        try {
+            String sql = "SELECT adminmode FROM users WHERE uuid = ? ";
+            PreparedStatement stmt = DatabaseManager.getInstance().prepareStatement(sql, uuid);
+            ResultSet rs = stmt.executeQuery();
+
+            if(rs.getInt(0) == 0) {
+                adminModePlayers.add(player.getUniqueId());
+                player.sendMessage(ChatColor.GREEN + "" + player.getName() + " im Adminmode");
+            }
+
+        } catch (SQLException ex) {
+            throw new RuntimeException(ex);
+        }
+
+
 
         return true; // Spieler ist auf Whitelist
     }
@@ -74,4 +96,6 @@ public class LoginListener implements Listener {
         e.disallow(Result.KICK_OTHER, MaintenanceManager.getMaintenanceMessage());
         return false; // Spieler wird gekickt
     }
+
+
 }

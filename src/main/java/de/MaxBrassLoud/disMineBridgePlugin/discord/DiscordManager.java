@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.bukkit.Bukkit;
@@ -207,7 +208,43 @@ public class DiscordManager {
             logger.log(Level.SEVERE, "[Discord] Fehler beim Senden der Ticket-Nachricht!", e);
         }
     }
+    public static  void createTicket(User user, String ProblemDescription, String Mode, MessageReceivedEvent event) {
+        if (!isEnabled()) return;
 
+        String Name = user.getName();
+
+
+        String ChannelName = Name + "-" + Mode;
+
+        try {
+            event.getGuild().createTextChannel(ChannelName).queue();
+
+            EmbedBuilder embed = new EmbedBuilder()
+                    .setTitle(Mode +"Ticket")
+                    .setDescription(Name + " hat ein Ticket erstellt!")
+                    .addField("Ersteller:", user.getAsMention(), true)
+                    .addField("ProblemBeschreibung", ProblemDescription, true)
+                    .addField("Angefragt", "<t:" + (System.currentTimeMillis() / 1000) + ":R>", false)
+                    .setColor(Color.YELLOW)
+                    .setThumbnail(user.getAvatarUrl())
+                    .setFooter("User ID: " + user.getId(), null);
+            TextChannel Channelid = event.getGuild().getTextChannelsByName(ChannelName, true).getFirst();
+            Channelid.sendMessageEmbeds(embed.build())
+                    .setActionRow(
+                            Button.success("take_over" + user.getId(), "✅ Übernehmen"),
+                            Button.danger("close" + user.getId(), "❌ Schließen")
+                    )
+                    .queue();
+
+
+
+
+
+
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "[Discord] Fehler beim erstellen des Tickets");
+        }
+    }
     /**
      * Erstellt Whitelist-Anfrage
      */
@@ -470,5 +507,9 @@ public class DiscordManager {
         } catch (Exception e) {
             return false;
         }
+
+
     }
+
+
 }

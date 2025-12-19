@@ -384,6 +384,7 @@ public class DatabaseManager {
                     uuid VARCHAR(36) PRIMARY KEY,
                     name VARCHAR(16),
                     vanish BOOLEAN DEFAULT FALSE,
+                    adminmode BOOLEAN Default FALSE,
                     first_join TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
@@ -394,6 +395,7 @@ public class DatabaseManager {
                 uuid TEXT PRIMARY KEY,
                 name TEXT,
                 vanish INTEGER DEFAULT 0,
+                adminmode INTEGER Default 0,
                 first_join DATETIME DEFAULT CURRENT_TIMESTAMP,
                 last_seen DATETIME DEFAULT CURRENT_TIMESTAMP
             )
