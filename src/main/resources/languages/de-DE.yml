@@ -1,0 +1,175 @@
+# Deutsche Sprachdatei für DisMineBridge
+
+# Minecraft Nachrichten
+minecraft:
+  whitelist:
+    enabled: "&aWhitelist wurde aktiviert!"
+    disabled: "&cWhitelist wurde deaktiviert!"
+    added: "&a{player} wurde zur Whitelist hinzugefügt!"
+    removed: "&c{player} wurde von der Whitelist entfernt!"
+    not-whitelisted: "&cDu stehst nicht auf der Whitelist!"
+    already-added: "&c{player} ist bereits auf der Whitelist!"
+    not-on-list: "&c{player} ist nicht auf der Whitelist!"
+    player-not-found: "&cSpieler nicht gefunden!"
+    no-permission: "&cDu hast keine Berechtigung für diesen Befehl!"
+    usage: "&cVerwendung: /whitelist <add|remove|on|off> [Spieler]"
+    discord-leave-removed: "&cDu wurdest von der Whitelist entfernt, da du den Discord-Server verlassen hast!"
+
+  join:
+    welcome: "&aWillkommen auf dem Server, {player}!"
+    first-join: "&e{player} hat den Server zum ersten Mal betreten!"
+
+# Discord Nachrichten
+discord:
+  # Ticket Setup
+  setup:
+    title: "🎫 Ticket System Setup"
+    description: "Konfiguriere hier dein Ticket-System!"
+    select-panel-channel: "Wähle den Kanal für die Ticket-Panel Nachricht:"
+    select-support-category: "Wähle die Kategorie für Support-Tickets:"
+    select-bug-category: "Wähle die Kategorie für Bug-Report-Tickets:"
+    select-whitelist-channel: "Wähle den Kanal für Whitelist-Anfragen:"
+    select-roles: "Wähle die Rollen aus:"
+    role-admin: "👑 Admin Rollen"
+    role-moderator: "🛡️ Moderator Rollen"
+    role-supporter: "💬 Supporter Rollen"
+    role-developer: "💻 Developer Rollen"
+    success: "✅ Ticket-System erfolgreich konfiguriert!"
+    error: "❌ Fehler bei der Konfiguration des Ticket-Systems!"
+    no-permission: "❌ Du hast keine Berechtigung für diesen Befehl!"
+
+  # Ticket Panel
+  panel:
+    title: "🎫 Support Ticket System"
+    description: "Wähle eine Kategorie aus, um ein Ticket zu erstellen!"
+    button-support: "🆘 Support"
+    button-bug: "🐛 Bug Report"
+    button-whitelist: "📝 Whitelist"
+
+  # Ticket Erstellung
+  ticket:
+    create:
+      modal-title-support: "Support Ticket erstellen"
+      modal-title-bug: "Bug Report erstellen"
+      modal-title-whitelist: "Whitelist beantragen"
+      field-description: "Beschreibung"
+      field-description-placeholder: "Beschreibe dein Anliegen..."
+      field-minecraft-name: "Minecraft Name"
+      field-minecraft-name-placeholder: "Dein Minecraft Benutzername"
+
+    created:
+      title: "Ticket erstellt!"
+      description: "Dein Ticket wurde erstellt: {channel}"
+
+    channel-name: "ticket-{username}-{id}"
+
+    message:
+      title: "🎫 Ticket #{id}"
+      creator: "**Ersteller:** {user}"
+      type: "**Typ:** {type}"
+      description: "**Beschreibung:**\n{description}"
+      status: "**Status:** {status}"
+      claimed-by: "**Übernommen von:** {user}"
+      created-at: "**Erstellt am:** {time}"
+
+    button:
+      claim: "✋ Übernehmen"
+      unclaim: "🔓 Freigeben"
+      add-user: "➕ Benutzer hinzufügen"
+      close: "🔒 Schließen"
+
+    claim:
+      success: "✅ Du hast das Ticket übernommen!"
+      already-claimed: "❌ Dieses Ticket wurde bereits übernommen!"
+      unclaimed: "✅ Ticket wurde freigegeben!"
+
+    close:
+      confirm-title: "Ticket schließen?"
+      confirm-description: "Bist du sicher, dass du dieses Ticket schließen möchtest?"
+      confirm-yes: "✅ Ja, schließen"
+      confirm-no: "❌ Abbrechen"
+      request-sent: "📨 Schließungsanfrage wurde an die Moderatoren gesendet!"
+      request-title: "Schließungsanfrage"
+      request-description: "{user} möchte dieses Ticket schließen."
+      request-approve: "✅ Genehmigen"
+      request-deny: "❌ Ablehnen"
+      approved: "✅ Ticket wird geschlossen..."
+      denied: "❌ Schließungsanfrage wurde abgelehnt!"
+      closed: "🔒 Ticket wurde geschlossen!"
+
+    add-user:
+      modal-title: "Benutzer hinzufügen"
+      field-user: "Benutzer"
+      field-user-placeholder: "@Benutzer oder ID"
+      success: "✅ {user} wurde zum Ticket hinzugefügt!"
+      error: "❌ Benutzer konnte nicht hinzugefügt werden!"
+
+    error:
+      max-tickets: "❌ Du hast bereits {max} offene Tickets!"
+      cooldown: "❌ Du kannst erst wieder ein Ticket erstellen in: {time}"
+      already-whitelisted: "❌ Du bist bereits auf der Whitelist!"
+      pending-request: "❌ Du hast bereits eine ausstehende Whitelist-Anfrage!"
+      no-permission: "❌ Du hast keine Berechtigung dafür!"
+
+  # Whitelist
+  whitelist:
+    request:
+      title: "📝 Whitelist Anfrage"
+      user: "**Benutzer:** {user}"
+      minecraft-name: "**Minecraft Name:** {name}"
+      additional-info: "**Zusätzliche Informationen:**"
+      status: "**Status:** Ausstehend"
+      created-at: "**Erstellt am:** {time}"
+
+    button:
+      approve: "✅ Annehmen"
+      deny: "❌ Ablehnen"
+
+    approve:
+      success: "✅ Whitelist-Anfrage wurde angenommen!"
+      dm-title: "✅ Whitelist angenommen!"
+      dm-description: "Deine Whitelist-Anfrage für **{name}** wurde angenommen!\nDu kannst jetzt dem Server beitreten!"
+
+    deny:
+      modal-title: "Whitelist ablehnen"
+      field-reason: "Grund"
+      field-reason-placeholder: "Warum wird die Anfrage abgelehnt?"
+      success: "❌ Whitelist-Anfrage wurde abgelehnt!"
+      dm-title: "❌ Whitelist abgelehnt"
+      dm-description: "Deine Whitelist-Anfrage für **{name}** wurde leider abgelehnt.\n\n**Grund:** {reason}\n\nDu kannst in {days} Tagen eine neue Anfrage stellen."
+
+    status:
+      pending: "⏳ Ausstehend"
+      approved: "✅ Angenommen"
+      denied: "❌ Abgelehnt"
+      none: "📝 Keine Anfrage"
+      server-left: "🚪 Server verlassen"
+
+    dm:
+      request-sent-title: "📝 Whitelist Anfrage gesendet"
+      request-sent-description: "Deine Whitelist-Anfrage wurde erfolgreich gesendet!\nDu wirst benachrichtigt, sobald sie bearbeitet wurde."
+
+# Status Texte
+status:
+  pending: "Ausstehend"
+  approved: "Angenommen"
+  denied: "Abgelehnt"
+  open: "Offen"
+  claimed: "In Bearbeitung"
+  closed: "Geschlossen"
+
+# Fehler
+error:
+  database: "❌ Datenbankfehler: {error}"
+  unknown: "❌ Ein unbekannter Fehler ist aufgetreten!"
+  timeout: "❌ Die Anfrage ist abgelaufen!"
+
+# Allgemein
+general:
+  yes: "Ja"
+  no: "Nein"
+  cancel: "Abbrechen"
+  confirm: "Bestätigen"
+  back: "Zurück"
+  next: "Weiter"
+  finish: "Fertig"
