@@ -289,15 +289,15 @@ public class ButtonInteractionListener extends ListenerAdapter {
             plugin.getTicketManager().closeTicket(ticketId);
 
             event.getMessage().delete().queue();
-            event.getChannel().sendMessage(lang.getMessage("discord.ticket.close.closed")).queue();
+            //event.getChannel().sendMessage(lang.getMessage("discord.ticket.close.closed")).queue();
 
             // Channel nach 5 Sekunden löschen
             event.getChannel().asTextChannel().delete().queueAfter(5, java.util.concurrent.TimeUnit.SECONDS);
 
         } catch (SQLException e) {
             e.printStackTrace();
-            event.reply(lang.getMessage("error.database").replace("{error}", e.getMessage()))
-                    .setEphemeral(true).queue();
+            //event.reply(lang.getMessage("error.database").replace("{error}", e.getMessage()))
+                    //.setEphemeral(true).queue();
         }
     }
 

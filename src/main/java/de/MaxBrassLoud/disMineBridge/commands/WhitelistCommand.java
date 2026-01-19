@@ -24,7 +24,7 @@ public class WhitelistCommand implements CommandExecutor, TabCompleter {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         LanguageManager lang = plugin.getLanguageManager();
 
-        if (!sender.hasPermission("disminebridge.whitelist")) {
+        if (!sender.hasPermission("dmb.whitelist")) {
             sender.sendMessage(lang.getMessage("minecraft.whitelist.no-permission"));
             return true;
         }

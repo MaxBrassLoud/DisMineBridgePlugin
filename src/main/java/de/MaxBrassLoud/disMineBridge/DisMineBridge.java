@@ -1,9 +1,15 @@
 package de.MaxBrassLoud.disMineBridge;
 
+import de.MaxBrassLoud.disMineBridge.commands.BanCommand;
+import de.MaxBrassLoud.disMineBridge.commands.UnbanCommand;
+import de.MaxBrassLoud.disMineBridge.commands.VanishCommand;
 import de.MaxBrassLoud.disMineBridge.commands.WhitelistCommand;
 import de.MaxBrassLoud.disMineBridge.database.DatabaseManager;
 import de.MaxBrassLoud.disMineBridge.discord.DiscordBot;
+import de.MaxBrassLoud.disMineBridge.features.vanish.VanishManager;
+import de.MaxBrassLoud.disMineBridge.listeners.BanListener;
 import de.MaxBrassLoud.disMineBridge.listeners.PlayerJoinListener;
+import de.MaxBrassLoud.disMineBridge.listeners.VanishJoinQuitListener;
 import de.MaxBrassLoud.disMineBridge.managers.LanguageManager;
 import de.MaxBrassLoud.disMineBridge.managers.TicketManager;
 import de.MaxBrassLoud.disMineBridge.managers.WhitelistManager;
@@ -17,6 +23,7 @@ public class DisMineBridge extends JavaPlugin {
     private DiscordBot discordBot;
     private TicketManager ticketManager;
     private WhitelistManager whitelistManager;
+    private VanishManager vanishmanager;
 
     @Override
     public void onEnable() {
@@ -40,6 +47,7 @@ public class DisMineBridge extends JavaPlugin {
         // Manager initialisieren
         whitelistManager = new WhitelistManager(this);
         ticketManager = new TicketManager(this);
+        vanishmanager = new VanishManager(this);
 
         // Discord Bot starten
         String token = getConfig().getString("discord.bot-token");
@@ -58,9 +66,14 @@ public class DisMineBridge extends JavaPlugin {
 
         // Commands registrieren
         getCommand("whitelist").setExecutor(new WhitelistCommand(this));
+        getCommand("vanish").setExecutor(new VanishCommand(this));
+        getCommand("ban").setExecutor(new BanCommand(this));
+        getCommand("unban").setExecutor(new UnbanCommand(this));
 
         // Listeners registrieren
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
+        getServer().getPluginManager().registerEvents(new VanishJoinQuitListener(this), this);
+        getServer().getPluginManager().registerEvents(new BanListener(this), this);
 
         getLogger().info("DisMineBridge erfolgreich aktiviert!");
     }
@@ -102,4 +115,6 @@ public class DisMineBridge extends JavaPlugin {
     public WhitelistManager getWhitelistManager() {
         return whitelistManager;
     }
+
+    public VanishManager getVanishmanager() {return vanishmanager; };
 }

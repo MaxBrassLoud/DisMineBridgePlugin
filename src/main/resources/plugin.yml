@@ -10,23 +10,84 @@ commands:
   whitelist:
     description: Verwalte die Server Whitelist
     usage: /whitelist <add|remove|on|off> [Spieler]
-    permission: disminebridge.whitelist
+    permission: dmb.whitelist
+
+  vanish:
+    description: Bringt einen Moderator in einen Status den nur andere Moderatoren sehen und wird für restliche Spieler unsichtbar gemacht
+    usage: /vanish
+    permission: dmb.vanish
+
+  ban:
+    description: Kann einen Spieller vom Server ausschließen
+    usage: /ban [Player] [Duration] [Reason]
+    permission: dmb.ban
+
+  unban:
+    description: Kann einen Serverausschluss rückgängig machen
+    usage: /unban [Player]
+    permission: dmb.unban
+
+
 
 
 
 
 permissions:
-  disminebridge.whitelist:
+  dmb.whitelist:
     description: Erlaubt die Verwaltung der Whitelist
     default: op
 
-  whitelist.bypass:
+  dmb.whitelist.bypass:
     description: Bypasses the Whitelist
     default: op
 
-  disminebridge.admin:
+  dmb.whitelist.all:
+    description: Alle Whitelist Features
+    default: op
+    children:
+      dmb.whitelist: true
+      dmb.whitelist.bypass: true
+
+  dmb.vanish:
+    description: Zugriff auf Vanish command
+    default: op
+
+  dmb.vanish.see:
+    description: Lässt alle im Vanish sehen
+    default: op
+
+  dmb.vanish.others:
+    description: Lässt andere in den Vanish status bringen
+    default: op
+
+  dmb.vanish.all:
+    description: Alle Vanish Features
+    default: op
+    children:
+      dmb.vanish: true
+      dmb.vanish.see: true
+      dmb.vanish.others: true
+
+  dmb.ban:
+    description: Berechtigung Spieler zu bannen
+    default: op
+  dmb.unban:
+    description: Berechtigung einen Bann aufzuheben
+    default: op
+
+  dmb.ban.all:
+    description: Alle Bann Aktionen Nutzen
+    default: op
+    children:
+      dmb.ban: true
+      dmb.unban: true
+
+  dmb.admin:
     description: Voller Zugriff auf alle Plugin-Funktionen
     default: op
     children:
-      disminebridge.whitelist: true
+      dmb.whitelist.all: true
+      dmb.vanish.all: true
+      dmb.ban.all: true
+
 

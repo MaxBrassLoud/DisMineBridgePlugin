@@ -2,6 +2,137 @@
 
 # Minecraft Nachrichten
 minecraft:
+  # Ban System
+  ban:
+    # Berechtigungen & Fehler
+    no-permission: "&cDu hast keine Berechtigung für diesen Befehl!"
+    player-not-found: "&cSpieler &e{player} &cnicht gefunden!"
+    player-never-joined: "&cSpieler &e{player} &cwar noch nie auf dem Server!"
+    already-banned: "&c{player} ist bereits gebannt!"
+    database-error: "&c❌ Datenbankfehler beim Speichern des Bans!"
+
+    # Verwendung
+    usage: "&cBenutzung: /ban <Spieler> <Dauer|perm> <Grund>"
+    examples-header: "&7Beispiele:"
+    example-1: "&e  /ban Steve 7d Hacking"
+    example-2: "&e  /ban Alex perm \"Schwere Verstöße\""
+    example-3: "&e  /ban Bob 2d12h Verwendung von Exploits"
+
+    # Dauer
+    invalid-duration: "&cUngültige Dauer!"
+    invalid-duration-error: "&cUngültige Dauer: {error}"
+    valid-formats: "&7Gültige Formate:"
+    format-days: "&e  • 7d (7 Tage)"
+    format-hours: "&e  • 12h (12 Stunden)"
+    format-minutes: "&e  • 30m (30 Minuten)"
+    format-combined-1: "&e  • 7d12h (7 Tage und 12 Stunden)"
+    format-combined-2: "&e  • 1h30m15s (1 Stunde, 30 Min, 15 Sek)"
+    format-permanent: "&e  • perm (Permanent)"
+
+    # Permanent
+    permanent: "PERMANENT"
+
+    # Fehler bei Dauer-Parsing
+    error-empty-duration: "Dauer darf nicht leer sein"
+    error-no-number: "Keine Zahl vor Zeiteinheit '{unit}'"
+    error-negative: "Negative Werte sind nicht erlaubt"
+    error-invalid-number: "Ungültige Zahl: {number}"
+    error-invalid-char: "Ungültiges Zeichen: '{char}' (erlaubt: d, h, m, s)"
+    error-missing-unit: "Zeiteinheit fehlt nach Zahl: {number}"
+    error-zero-duration: "Dauer muss größer als 0 sein"
+
+    # Erfolg
+    no-reason-given: "Kein Grund angegeben"
+    success: "&a✓ Ban erfolgreich gesetzt. Dauer: &e{time}"
+    success-permanent: "&a✓ &e{player} &awurde permanent gebannt!"
+    broadcast: "&6{player} &cwurde von &6{banner} &cgebannt! &7(&e{time}&7)"
+    broadcast-permanent: "&6{player} &cwurde von &6{banner} &4PERMANENT &cgebannt!"
+
+    # Kick-Nachricht
+    kick-message: "&cDu wurdest gebannt!\n&7Grund: &f{reason}\n&7Verbleibende Zeit: &e{time}"
+
+    # Login verweigert
+    login-denied: "&cDu bist gebannt!\n&7Grund: &f{reason}\n&7Verbleibende Zeit: &e{time}\n&7Gebannt von: &f{banner}"
+
+    # Tab-Completion
+    default-reasons: "Hacking,Griefing,Beleidigung,Spam,Werbung,Betrug"
+    custom-reason: "Eigener_Grund"
+
+  # Unban System
+  unban:
+    no-permission: "&cDu hast keine Berechtigung für diesen Befehl!"
+    player-not-found: "&cSpieler &e{player} &cnicht gefunden oder war nie auf dem Server!"
+    not-banned: "&c{player} ist nicht gebannt!"
+    database-error: "&c❌ Datenbankfehler beim Entbannen!"
+
+    usage: "&cBenutzung: /unban <Spieler> [Grund]"
+    example: "&eBeispiel: /unban Steve Versehentlicher_Ban"
+
+    no-reason-given: "Kein Grund angegeben"
+    success: "&a✓ {player} wurde erfolgreich entbannt!"
+    broadcast: "&6{player} &awurde von &6{unbanner} &aentbannt!"
+
+    default-reasons: "Versehentlicher_Ban,Strafe_abgesessen,Begnadigung,Fehlerhafte_Entscheidung"
+  # Vanish System
+  vanish:
+    # Fake Join/Quit Nachrichten
+    fake-join: "&e{player} joined the game"
+    fake-quit: "&e{player} left the game"
+
+    # Berechtigungen & Fehler
+    player-only: "&cNur Spieler können /vanish ohne Argument nutzen."
+    no-permission: "&cDu hast keine Berechtigung für diesen Befehl."
+    no-permission-list: "&cDu hast keine Berechtigung, die Vanish-Liste zu sehen."
+    no-permission-others: "&cDu hast keine Berechtigung, andere Spieler zu vanishen."
+    player-not-found: "&cSpieler &e{player} &cist nicht online."
+    usage: "&cNutze: /vanish [Spieler] [on|off|list|info]"
+
+    # Status Nachrichten
+    already-enabled: "&e{player} &7ist bereits im Vanish."
+    already-disabled: "&e{player} &7ist bereits sichtbar."
+
+    # Vanish Aktiviert
+    enabled:
+      header: "&c▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+      title: "&c&l          VANISH AKTIVIERT"
+      invisible: "&7  » Du bist nun &c&lUNSICHTBAR"
+      hidden: "&7  » Andere Spieler können dich nicht mehr sehen"
+      fake-quit: "&7  » Eine Fake-Quit-Nachricht wurde gesendet"
+      team-can-see: "&7  » &e{count} &7Team-Mitglieder können dich sehen"
+      footer: "&8  Nutze &c/vanish &8erneut zum Deaktivieren"
+
+    enabled-by-other: "&7Vanish für &e{player} &7wurde &caktiviert&7."
+
+    # Vanish Deaktiviert
+    disabled:
+      header: "&a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+      title: "&a&l          VANISH DEAKTIVIERT"
+      visible: "&7  » Du bist nun &a&lSICHTBAR"
+      shown: "&7  » Alle Spieler können dich wieder sehen"
+      fake-join: "&7  » Eine Fake-Join-Nachricht wurde gesendet"
+
+    disabled-by-other: "&7Vanish für &e{player} &7wurde &adeaktiviert&7."
+
+    # Vanish Liste
+    list:
+      empty: "&eDerzeit ist kein Spieler im Vanish."
+      header: "&c▬▬▬▬▬▬ &lVANISH LISTE ({count})&r&c ▬▬▬▬▬▬"
+      entry: "&7  » &e{player} &8- &7seit {time}"
+      total: "&7Insgesamt: &e{count} &7Spieler im Vanish"
+      footer: "&c▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+
+    # Vanish Info
+    info:
+      header: "&6▬▬▬▬▬▬ &lVANISH INFO&r&6 ▬▬▬▬▬▬"
+      status-vanished: "&eStatus: &c✗ Im Vanish"
+      status-visible: "&eStatus: &a✓ Sichtbar"
+      duration: "&eIm Vanish seit: &f{time}"
+      can-see: "&eKönnen dich sehen: &f{count} Spieler"
+      permission-vanish: "&ePermission: &{status}"
+      permission-others: "&eAndere vanishen: &{status}"
+      permission-see: "&eVanish sehen: &{status}"
+      footer: "&6▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+
   whitelist:
     enabled: "&aWhitelist wurde aktiviert!"
     disabled: "&cWhitelist wurde deaktiviert!"
@@ -163,6 +294,8 @@ error:
   database: "❌ Datenbankfehler: {error}"
   unknown: "❌ Ein unbekannter Fehler ist aufgetreten!"
   timeout: "❌ Die Anfrage ist abgelaufen!"
+
+
 
 # Allgemein
 general:
