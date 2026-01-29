@@ -1,5 +1,5 @@
 name: DisMineBridge
-version: '0.1'
+version: '0.2.2'
 main: de.MaxBrassLoud.disMineBridge.DisMineBridge
 api-version: '1.21'
 authors: [ MaxBrassLoud ]
@@ -27,12 +27,90 @@ commands:
     usage: /unban [Player]
     permission: dmb.unban
 
+  kick:
+    description: Die Verbindung vom Server für einen Spieler trennen
+    usage: /kick [Player] [Reason]
+    permission: dmb.kick
 
+  warn:
+    description: Jemanden verwarnen
+    usage: /warn [Player] [Reason]
+    permission: dmb.warn
 
+  punish:
+    description: Jemanden bestrafen
+    usage: /punish
+    permission: dmb.punish
+
+  punishment:
+    description: Bestrafungen hinzufügen
+    usage: /punishment
+    permission: dmb.punishment
+
+  mute:
+    description: Mutet einen Spieler
+    usage: /mute <Spieler> <Dauer> <Grund>
+    permission: dmb.mute
+
+  unmute:
+    description: Entmutet einen Spieler
+    usage: /unmute <Spieler> [Grund]
+    permission: dmb.unmute
 
 
 
 permissions:
+  dmb.mute:
+    description: Erlaubt das Muten von Spielern
+    default: op
+
+  dmb.unmute:
+    description: Erlaubt das Entmuten von Spielern
+    default: op
+
+  dmb.punishment:
+    description: Berechtigung für den /punishments command
+    default: op
+
+  dmb.punishment.add:
+    description: Berechtigung eine Bestrafung hinzuzufügen
+    default: op
+
+  dmb.punishment.remove:
+    description: Berechtigung Strafen zu entfernen
+    default: op
+
+  dmb.punishment.list:
+    description: Berechtigung alle Strafen zu sehen
+    default: op
+
+  dmb.punishment.reload:
+    description: Berechtigung Strafen neu zu laden
+    default: op
+
+  dmb.punishment.all:
+    description: Alle Berechtigung alle Punishment Features zu nutzen
+    default: op
+    children:
+      dmb.punishment.add: true
+      dmb.punishment.remove: true
+      dmb.punishment.list: true
+      dmb.punishment.reload: true
+      dmb.punishment: true
+
+
+  dmb.punish:
+    description: Berechtigung jemanden zu bestrafen
+    default: op
+
+  dmb.kick:
+    description: Berechtigung jemanden vom server zu trennen
+    default: op
+
+  dmb.warn:
+    description: Berechtigung jemanden zu verwarnen
+    default: op
+
   dmb.whitelist:
     description: Erlaubt die Verwaltung der Whitelist
     default: op
@@ -89,5 +167,10 @@ permissions:
       dmb.whitelist.all: true
       dmb.vanish.all: true
       dmb.ban.all: true
+      dmb.kick: true
+      dmb.warn: true
+      dmb.punishment.all: true
+      dmb.mute: true
+      dmb.unmute: true
 
 

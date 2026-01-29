@@ -4,7 +4,6 @@
 discord:
   bot-token: "DEIN_BOT_TOKEN_HIER"
   guild-id: "DEINE_SERVER_ID_HIER"
-
   whitelist-channel: "DEIN_WHITELIST_CHANNEL"
 
 # Datenbank Einstellungen
@@ -28,7 +27,6 @@ whitelist-enabled: true
 
 # Whitelist Einstellungen
 whitelist:
-  # Zusätzliche Felder im Whitelist-Formular
   additional-fields:
     enabled: true
     fields:
@@ -44,19 +42,12 @@ whitelist:
         label: "Wie alt bist du?"
         required: false
         max-length: 3
-
-  # Wartezeit nach Ablehnung (in Tagen)
   cooldown-after-rejection: 7
-
-  # Automatische Whitelist-Entfernung bei Discord-Austritt
   remove-on-discord-leave: true
 
 # Ticket System Einstellungen
 tickets:
-  # Maximale Anzahl offener Tickets pro Benutzer
   max-open-tickets-per-user: 3
-
-  # Ticket-Kategorien
   categories:
     support:
       enabled: true
@@ -64,31 +55,280 @@ tickets:
       emoji: "🆘"
       description: "Benötigst du Hilfe? Erstelle ein Support-Ticket!"
       color: "#00ff00"
-
     bug-report:
       enabled: true
       name: "Bug Report"
       emoji: "🐛"
       description: "Hast du einen Bug gefunden? Melde ihn hier!"
       color: "#ff0000"
-
     whitelist:
       enabled: true
       name: "Whitelist"
-      emoji: "📝"
+      emoji: "🔓"
       description: "Beantrage hier deinen Whitelist-Zugang!"
       color: "#0099ff"
-
-  # Automatisches Schließen inaktiver Tickets (in Stunden, 0 = deaktiviert)
   auto-close-inactive: 72
-
-  # Logs
   log-messages: true
 
 # Benachrichtigungen
 notifications:
-  # Benachrichtige Benutzer über Whitelist-Status via DM
   dm-whitelist-updates: true
-
-  # Benachrichtige bei Ticket-Updates
   dm-ticket-updates: true
+
+# ============================================
+# MUTE SYSTEM
+# ============================================
+mute:
+  # Blockierte Chat-Befehle während eines Mutes
+  blocked-commands:
+    # Private Nachrichten
+    - tell
+    - msg
+    - w
+    - whisper
+    - m
+    - pm
+    - dm
+
+    # Action Messages
+    - me
+    - action
+
+    # Broadcast
+    - say
+    - broadcast
+    - bc
+    - shout
+    - announce
+
+    # Reply
+    - r
+    - reply
+
+    # Mail/Email Plugins
+    - mail
+    - email
+
+    # Help
+    - helpop
+
+    # Chat Channels
+    - ac
+    - adminchat
+    - sc
+    - staffchat
+    - gc
+    - globalchat
+    - lc
+    - localchat
+    - ch
+    - channel
+
+    # Party/Guild/Team/Faction Chat
+    - party
+    - p
+    - guild
+    - g
+    - gchat
+    - clan
+    - c
+    - cchat
+    - team
+    - t
+    - tchat
+    - faction
+    - f
+    - fchat
+
+    # Trade Chat
+    - trade
+    - tradechat
+    - tc
+
+    # Emotes
+    - emote
+
+  # Voice-Chat Integration (Simple Voice Chat)
+  voice-chat:
+    enabled: true
+    block-microphone: true
+
+# ============================================
+# PUNISHMENT SYSTEM - Erweiterte Konfiguration
+# ============================================
+punishment:
+  # Aktiviere das Punktesystem
+  use-point-system: true
+
+  # Punkteverfall (in Tagen)
+  # Nach dieser Zeit verfallen Punkte automatisch
+  point-decay:
+    enabled: true
+    days: 90  # Punkte verfallen nach 90 Tagen
+
+  # Schweregrad-Gewichtung (1-10)
+  # Diese Werte bestimmen, wie viele Punkte ein Verstoß mit bestimmtem Schweregrad gibt
+  severity-weights:
+    1: 5      # Sehr leicht (z.B. Spam)
+    2: 10     # Leicht (z.B. Caps)
+    3: 20     # Leicht-Mittel (z.B. Provokation)
+    4: 30     # Mittel (z.B. Beleidigung)
+    5: 50     # Mittel-Schwer (z.B. mehrfache Beleidigung)
+    6: 75     # Schwer (z.B. Rassismus)
+    7: 100    # Sehr Schwer (z.B. Griefing)
+    8: 150    # Kritisch (z.B. schweres Griefing)
+    9: 250    # Extrem (z.B. Hacking)
+    10: 500   # Maximal (z.B. DDoS-Drohung)
+
+  # Bestrafungs-Schwellenwerte
+  # Wenn der Spieler X Punkte erreicht, wird die entsprechende Strafe verhängt
+  thresholds:
+    # Erste Warnung (0-19 Punkte)
+    warn-1:
+      min-points: 0
+      max-points: 19
+      action: "WARN"
+      duration: "-"
+      message: "Erste Verwarnung - Bitte halte dich an die Regeln!"
+
+    # Zweite Warnung (20-39 Punkte)
+    warn-2:
+      min-points: 20
+      max-points: 39
+      action: "WARN"
+      duration: "-"
+      message: "Zweite Verwarnung - Weitere Verstöße führen zu einem Kick!"
+
+    # Dritte Warnung + Kick (40-69 Punkte)
+    warn-3-kick:
+      min-points: 40
+      max-points: 69
+      action: "KICK"
+      duration: "-"
+      message: "Letzte Warnung + Kick - Nächster Verstoß = Temporärer Ban!"
+
+    # 1-Tages Ban (70-99 Punkte)
+    tempban-1d:
+      min-points: 70
+      max-points: 99
+      action: "TEMPBAN"
+      duration: "1d"
+      message: "1-Tages Ban wegen wiederholter Verstöße"
+
+    # 3-Tages Ban (100-149 Punkte)
+    tempban-3d:
+      min-points: 100
+      max-points: 149
+      action: "TEMPBAN"
+      duration: "3d"
+      message: "3-Tages Ban - Letzte Chance!"
+
+    # 7-Tages Ban (150-199 Punkte)
+    tempban-7d:
+      min-points: 150
+      max-points: 199
+      action: "TEMPBAN"
+      duration: "7d"
+      message: "7-Tages Ban wegen mehrfacher schwerer Verstöße"
+
+    # 14-Tages Ban (200-299 Punkte)
+    tempban-14d:
+      min-points: 200
+      max-points: 299
+      action: "TEMPBAN"
+      duration: "14d"
+      message: "14-Tages Ban - Du bist kurz vor einem permanenten Ban!"
+
+    # 30-Tages Ban (300-499 Punkte)
+    tempban-30d:
+      min-points: 300
+      max-points: 499
+      action: "TEMPBAN"
+      duration: "30d"
+      message: "30-Tages Ban wegen anhaltender Regelverstöße"
+
+    # Permanenter Ban (500+ Punkte)
+    permban:
+      min-points: 500
+      max-points: 999999
+      action: "PERMBAN"
+      duration: "perm"
+      message: "Permanenter Ban - Du hast zu viele schwere Verstöße begangen"
+
+  # Spezielle Regeln für bestimmte Verstöße
+  # Diese überschreiben das normale Punktesystem
+  special-rules:
+    # Hacking führt immer zu einem längeren Ban, unabhängig von Punkten
+    hacking:
+      enabled: true
+      min-ban-duration: "14d"
+      escalation: true  # Erhöht sich bei Wiederholung
+
+    # Griefing hat eine eigene Eskalation
+    griefing:
+      enabled: true
+      first-offense: "3d"
+      second-offense: "14d"
+      third-offense: "30d"
+      fourth-offense: "perm"
+
+    # DDoS-Drohungen = sofortiger Perm-Ban
+    ddos-threat:
+      enabled: true
+      instant-permban: true
+
+    # Rassismus/Extremismus = sofortiger Perm-Ban
+    racism-extremism:
+      enabled: true
+      instant-permban: true
+
+  # Multiplikatoren für wiederholte Verstöße
+  repeat-offense-multipliers:
+    enabled: true
+    # Jeder weitere Verstoß des GLEICHEN Typs erhöht die Punkte
+    same-reason:
+      2nd-offense: 1.5   # 50% mehr Punkte
+      3rd-offense: 2.0   # 100% mehr Punkte (doppelt)
+      4th-offense: 3.0   # 200% mehr Punkte (dreifach)
+      5th-offense: 5.0   # 400% mehr Punkte (fünffach)
+
+    # Zeitbasierter Multiplikator
+    # Wenn mehrere Verstöße in kurzer Zeit passieren
+    time-based:
+      enabled: true
+      within-24h: 1.5    # 50% mehr wenn innerhalb 24h
+      within-7d: 1.2     # 20% mehr wenn innerhalb 7 Tagen
+
+  # Automatische Verringerung
+  reduction:
+    enabled: true
+    # Spieler können Punkte durch gutes Verhalten abbauen
+    good-behavior:
+      enabled: true
+      points-per-day: 1          # 1 Punkt pro Tag ohne Verstoß
+      max-reduction-per-week: 10  # Max 10 Punkte pro Woche
+
+    # Admin kann Punkte manuell reduzieren
+    manual-reduction:
+      enabled: true
+      max-per-reduction: 50       # Max 50 Punkte pro Aktion
+
+  # Benachrichtigungen
+  notifications:
+    # Warne Spieler wenn sie bestimmte Punktzahlen erreichen
+    warn-at-points:
+      - 50   # Warnung bei 50 Punkten
+      - 100  # Warnung bei 100 Punkten
+      - 200  # Warnung bei 200 Punkten
+      - 400  # Warnung bei 400 Punkten
+
+    # Zeige Spielern ihre Punkte
+    show-points-in-warn: true
+    show-points-in-kick: true
+    show-points-in-ban: true
+
+  # Logging
+  logging:
+    log-all-punishments: true
+    log-point-changes: true
+    detailed-logs: true

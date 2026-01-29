@@ -11,10 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 
 public class UnbanCommand implements CommandExecutor, TabCompleter {
@@ -45,48 +42,15 @@ public class UnbanCommand implements CommandExecutor, TabCompleter {
         }
 
         String targetName = args[0];
-        Player target = Bukkit.getPlayer(targetName);
-        String uuid = null;
 
-        // Versuche UUID zu bekommen (online oder aus Datenbank)
-        if (target != null && target.isOnline()) {
-            uuid = target.getUniqueId().toString();
-        } else {
-            // Offline-Spieler - suche in Datenbank
-            try {
-                uuid = database.getMinecraftUuidByName(targetName);
-            } catch (SQLException e) {
-                plugin.getLogger().log(Level.SEVERE, "Fehler beim Suchen der UUID", e);
-            }
-        }
-
-        if (uuid == null) {
-            // Versuche Ban direkt über Namen zu finden
-            try {
-                BanInfo banInfo = database.getActiveBanByName(targetName);
-                if (banInfo == null) {
-                    sender.sendMessage(language.getMessage("minecraft.unban.player-not-found")
-                            .replace("{player}", targetName));
-                    return true;
-                }
-                // UUID aus BanInfo verwenden falls vorhanden
-                // Fahre mit dem Unban fort
-            } catch (SQLException e) {
-                sender.sendMessage(language.getMessage("minecraft.unban.player-not-found")
-                        .replace("{player}", targetName));
-                return true;
-            }
-        }
-        // Grund für Unban (optional)
-        String pardonReason = args.length > 1 ?
-                String.join(" ", Arrays.copyOfRange(args, 1, args.length))
-                        .replace("_", " ")
-                        .replace("/n", "\n") :
+        // Grund zusammenfügen (optional)
+        String reason = args.length > 1 ?
+                String.join(" ", Arrays.copyOfRange(args, 1, args.length)).replace("_", " ") :
                 language.getMessage("minecraft.unban.no-reason-given");
 
         try {
-            // Prüfe ob ein aktiver Ban existiert
-            BanInfo banInfo = database.getActiveBan(uuid);
+            // Suche aktiven Ban NACH NAMEN (nicht UUID!)
+            BanInfo banInfo = database.getActiveBanByName(targetName);
 
             if (banInfo == null) {
                 sender.sendMessage(language.getMessage("minecraft.unban.not-banned")
@@ -94,14 +58,17 @@ public class UnbanCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
 
-            // Erstelle Pardoner User-ID
-            int pardonerId = sender instanceof Player ?
-                    database.createOrGetUser(((Player) sender).getUniqueId().toString()) : 0;
+            // Hole Pardoner ID
+            int pardonerId = 0;
+            if (sender instanceof Player) {
+                Player pardoner = (Player) sender;
+                pardonerId = database.createOrGetUser(pardoner.getUniqueId().toString());
+            }
 
-            // Pardon den Ban
-            database.pardonBan(banInfo.banId, pardonerId, pardonReason);
+            // Entbanne den Spieler
+            database.pardonBan(banInfo.banId, pardonerId, reason);
 
-            // Bestätigung
+            // Erfolgsmeldung
             sender.sendMessage(language.getMessage("minecraft.unban.success")
                     .replace("{player}", targetName));
 
@@ -110,8 +77,8 @@ public class UnbanCommand implements CommandExecutor, TabCompleter {
                     .replace("{player}", targetName)
                     .replace("{unbanner}", sender.getName()));
 
-            plugin.getLogger().info("[Unban] " + targetName + " wurde von " +
-                    sender.getName() + " entbannt. Grund: " + pardonReason);
+            plugin.getLogger().info("[Unban] " + targetName + " wurde von " + sender.getName() +
+                    " entbannt. Grund: " + reason);
 
         } catch (SQLException e) {
             plugin.getLogger().log(Level.SEVERE, "Fehler beim Entbannen von " + targetName, e);
@@ -127,20 +94,30 @@ public class UnbanCommand implements CommandExecutor, TabCompleter {
         List<String> completions = new ArrayList<>();
 
         if (args.length == 1) {
-            // Spieler-Namen vorschlagen (online Spieler)
-            String input = args[0].toLowerCase();
-            for (Player p : Bukkit.getOnlinePlayers()) {
-                if (p.getName().toLowerCase().startsWith(input)) {
-                    completions.add(p.getName());
+            // Zeige aktuell gebannte Spieler
+            try {
+                List<String> bannedPlayers = database.getBannedPlayerNames();
+                String input = args[0].toLowerCase();
+
+                for (String playerName : bannedPlayers) {
+                    if (playerName.toLowerCase().startsWith(input)) {
+                        completions.add(playerName);
+                    }
                 }
+            } catch (SQLException e) {
+                plugin.getLogger().warning("Fehler beim Laden der gebannten Spieler für Tab-Completion");
             }
+
             return completions;
         }
 
         if (args.length == 2) {
-            // Gründe für Unban vorschlagen
+            // Gründe vorschlagen
             String defaultReasons = language.getMessage("minecraft.unban.default-reasons");
-            return Arrays.asList(defaultReasons.split(","));
+            return Arrays.stream(defaultReasons.split(","))
+                    .map(s -> s.replace(" ", "_"))
+                    .filter(s -> s.toLowerCase().startsWith(args[1].toLowerCase()))
+                    .toList();
         }
 
         return Collections.emptyList();

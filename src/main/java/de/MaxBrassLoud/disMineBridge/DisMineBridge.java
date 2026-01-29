@@ -1,18 +1,12 @@
 package de.MaxBrassLoud.disMineBridge;
 
-import de.MaxBrassLoud.disMineBridge.commands.BanCommand;
-import de.MaxBrassLoud.disMineBridge.commands.UnbanCommand;
-import de.MaxBrassLoud.disMineBridge.commands.VanishCommand;
-import de.MaxBrassLoud.disMineBridge.commands.WhitelistCommand;
+import de.MaxBrassLoud.disMineBridge.commands.*;
 import de.MaxBrassLoud.disMineBridge.database.DatabaseManager;
 import de.MaxBrassLoud.disMineBridge.discord.DiscordBot;
 import de.MaxBrassLoud.disMineBridge.features.vanish.VanishManager;
-import de.MaxBrassLoud.disMineBridge.listeners.BanListener;
-import de.MaxBrassLoud.disMineBridge.listeners.PlayerJoinListener;
-import de.MaxBrassLoud.disMineBridge.listeners.VanishJoinQuitListener;
-import de.MaxBrassLoud.disMineBridge.managers.LanguageManager;
-import de.MaxBrassLoud.disMineBridge.managers.TicketManager;
-import de.MaxBrassLoud.disMineBridge.managers.WhitelistManager;
+import de.MaxBrassLoud.disMineBridge.listeners.*;
+import de.MaxBrassLoud.disMineBridge.managers.*;
+import net.dv8tion.jda.api.entities.Message;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class DisMineBridge extends JavaPlugin {
@@ -20,10 +14,14 @@ public class DisMineBridge extends JavaPlugin {
     private static DisMineBridge instance;
     private DatabaseManager databaseManager;
     private LanguageManager languageManager;
-    private DiscordBot discordBot;
-    private TicketManager ticketManager;
+    private PunishmentManager punishmentManager;
+    private MuteManager muteManager;
+    private VanishManager vanishManager;
     private WhitelistManager whitelistManager;
-    private VanishManager vanishmanager;
+    private TicketManager ticketManager;
+    private DiscordBot discordBot;
+
+    // ... andere Manager ...
 
     @Override
     public void onEnable() {
@@ -32,31 +30,31 @@ public class DisMineBridge extends JavaPlugin {
         // Config erstellen
         saveDefaultConfig();
 
-        // Language Manager initialisieren
-        languageManager = new LanguageManager(this);
+        // Database Manager
+        this.databaseManager = new DatabaseManager(this);
+        if (!databaseManager.connect()) {
+            getLogger().severe("Fehler beim Verbinden zur Datenbank!");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+
+        // Language Manager
+        this.languageManager = new LanguageManager(this);
         languageManager.loadLanguages();
 
-        // Datenbank initialisieren
-        databaseManager = new DatabaseManager(this);
-        if (!databaseManager.connect()) {
-            getLogger().severe("Konnte keine Verbindung zur Datenbank herstellen!");
-            getServer().getPluginManager().disablePlugin(this);
-            return;
-        }
+        // Punishment Manager
+        this.punishmentManager = new PunishmentManager(this);
 
-        // Manager initialisieren
-        whitelistManager = new WhitelistManager(this);
-        ticketManager = new TicketManager(this);
-        vanishmanager = new VanishManager(this);
+        // Mute Manager
+        this.muteManager = new MuteManager(this);
+        muteManager.loadActiveMutes();
 
-        // Discord Bot starten
+        this.vanishManager = new VanishManager(this);
+
+        this.whitelistManager = new WhitelistManager(this);
+
+        this.ticketManager = new TicketManager(this);
         String token = getConfig().getString("discord.bot-token");
-        if (token == null || token.isEmpty()) {
-            getLogger().severe("Kein Discord Bot Token in der Config gefunden!");
-            getServer().getPluginManager().disablePlugin(this);
-            return;
-        }
-
         discordBot = new DiscordBot(this, token);
         if (!discordBot.start()) {
             getLogger().severe("Discord Bot konnte nicht gestartet werden!");
@@ -64,34 +62,64 @@ public class DisMineBridge extends JavaPlugin {
             return;
         }
 
+        // Default Punishments laden (beim ersten Start)
+        DefaultPunishmentsLoader defaultLoader = new DefaultPunishmentsLoader(this);
+        defaultLoader.loadDefaults();
+
         // Commands registrieren
-        getCommand("whitelist").setExecutor(new WhitelistCommand(this));
-        getCommand("vanish").setExecutor(new VanishCommand(this));
-        getCommand("ban").setExecutor(new BanCommand(this));
-        getCommand("unban").setExecutor(new UnbanCommand(this));
+        registerCommands();
 
         // Listeners registrieren
-        getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
-        getServer().getPluginManager().registerEvents(new VanishJoinQuitListener(this), this);
-        getServer().getPluginManager().registerEvents(new BanListener(this), this);
+        registerListeners();
 
-        getLogger().info("DisMineBridge erfolgreich aktiviert!");
+        getLogger().info("DisMineBridge wurde aktiviert!");
     }
 
     @Override
     public void onDisable() {
-        if (discordBot != null) {
-            discordBot.shutdown();
+        // Cleanup
+        if (muteManager != null) {
+            muteManager.shutdown();
         }
 
         if (databaseManager != null) {
             databaseManager.disconnect();
         }
 
-
-        getLogger().info("DisMineBridge deaktiviert!");
+        getLogger().info("DisMineBridge wurde deaktiviert!");
     }
 
+    private void registerCommands() {
+        // Ban/Unban
+        getCommand("ban").setExecutor(new BanCommand(this));
+        getCommand("unban").setExecutor(new UnbanCommand(this));
+
+        // Mute/Unmute
+        getCommand("mute").setExecutor(new MuteCommand(this));
+        getCommand("unmute").setExecutor(new UnmuteCommand(this));
+
+        // Warn/Kick
+        getCommand("warn").setExecutor(new WarnCommand(this));
+        getCommand("kick").setExecutor(new KickCommand(this));
+
+        // Punishment System
+        getCommand("punishment").setExecutor(new PunishmentCommand(this));
+        getCommand("punish").setExecutor(new PunishCommand(this));
+
+        // ... andere Commands ...
+    }
+
+    private void registerListeners() {
+        // Ban Listener
+        getServer().getPluginManager().registerEvents(new BanListener(this), this);
+
+        // Chat Listener (für Mutes)
+        getServer().getPluginManager().registerEvents(new ChatListener(this), this);
+
+        // ... andere Listeners ...
+    }
+
+    // Getter
     public static DisMineBridge getInstance() {
         return instance;
     }
@@ -104,17 +132,27 @@ public class DisMineBridge extends JavaPlugin {
         return languageManager;
     }
 
-    public DiscordBot getDiscordBot() {
-        return discordBot;
+    public PunishmentManager getPunishmentManager() {
+        return punishmentManager;
     }
 
-    public TicketManager getTicketManager() {
-        return ticketManager;
+    public MuteManager getMuteManager() {
+        return muteManager;
+    }
+
+    public VanishManager getVanishmanager() {
+        return vanishManager;
     }
 
     public WhitelistManager getWhitelistManager() {
         return whitelistManager;
     }
 
-    public VanishManager getVanishmanager() {return vanishmanager; };
+    public TicketManager getTicketManager() {
+        return ticketManager;
+    }
+
+    public DiscordBot getDiscordBot() {
+        return discordBot;
+    }
 }

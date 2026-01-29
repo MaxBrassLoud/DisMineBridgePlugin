@@ -2,6 +2,60 @@
 
 # Minecraft Nachrichten
 minecraft:
+
+  kick:
+    # Berechtigungen & Fehler
+    no-permission: "&cDu hast keine Berechtigung für diesen Befehl!"
+    player-not-found: "&cSpieler &e{player} &cnicht gefunden oder nicht online!"
+    database-error: "&c✘ Fehler beim Speichern des Kicks!"
+
+    # Verwendung
+    usage: "&cBenutzung: /kick <Spieler> <Grund>"
+    examples-header: "&7Beispiele:"
+    example-1: "&e  /kick Steve AFK"
+    example-2: "&e  /kick Alex Unangemessenes_Verhalten"
+
+    # Erfolg
+    no-reason-given: "Kein Grund angegeben"
+    success: "&a✓ Kick wurde in die Datenbank eingetragen."
+    broadcast: "&6{player} &cwurde von &6{kicker} &cgekickt!"
+
+    # Kick-Nachricht
+    kick-message: "&cDu wurdest vom Server gekickt!\n&7Grund: &f{reason}"
+
+    # Tab-Completion
+    default-reasons: "AFK,Unangemessenes_Verhalten,Namensänderung_erforderlich"
+    custom-reason: "Eigener_Grund"
+
+  # Warn System
+  warn:
+    # Berechtigungen & Fehler
+    no-permission: "&cDu hast keine Berechtigung für diesen Befehl!"
+    player-not-found: "&cSpieler &e{player} &cnicht gefunden oder nicht online!"
+    database-error: "&cFehler beim Speichern der Verwarnung!"
+
+    # Verwendung
+    usage: "&cBenutzung: /warn <Spieler> <Grund>"
+    examples-header: "&7Beispiele:"
+    example-1: "&e  /warn Steve Regelverstoß"
+    example-2: "&e  /warn Alex Fehlverhalten"
+
+    # Erfolg
+    no-reason-given: "Kein Grund angegeben"
+    success: "&a✓ Warnung wurde eingetragen."
+    total-warns: "&7Spieler hat nun &e{total} &7Verwarnungen."
+    broadcast: "&6{player} &cwurde von &6{warner} &cverwarnt!"
+
+    # Nachricht an Spieler
+    message:
+      header: "&c▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+      title: "&c&l      DU WURDEST VERWARNT!"
+      reason: "&eGrund: &f{reason}"
+      by: "&eVon: &f{warner}"
+      total: "&eVerwarnungen insgesamt: &c{total}"
+      warning-threshold-1: "&c⚠ &4&lACHTUNG: &cWeitere Verwarnungen"
+      warning-threshold-2: "&c   führen zu einem automatischen Ban!"
+      footer: "&c▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
   # Ban System
   ban:
     # Berechtigungen & Fehler
@@ -149,6 +203,152 @@ minecraft:
   join:
     welcome: "&aWillkommen auf dem Server, {player}!"
     first-join: "&e{player} hat den Server zum ersten Mal betreten!"
+  # Tab-Completion
+  default-reasons: "Regelverstoß,Fehlverhalten,Spamming,Provokation"
+  custom-reason: "Eigener_Grund"
+
+
+# Füge diese Abschnitte zur de-DE.yml hinzu:
+
+
+  punishment:
+    no-permission: "&cDu hast keine Berechtigung für diesen Befehl!"
+
+    # Usage
+    usage:
+      header: "&6&l━━━━━━━ &ePUNISHMENT SYSTEM &6&l━━━━━━━"
+      add: "&e/punishment add <Type> <Duration> <Grund>"
+      remove: "&e/punishment remove <ID>"
+      list: "&e/punishment list [Type]"
+      reload: "&e/punishment reload"
+
+    # Add Command
+    add:
+      usage: "&cBenutzung: /punishment add <Type> <Duration> <Grund>"
+      examples-header: "&7Beispiele:"
+      example-1: "&e  /punishment add WARN - Beleidigung"
+      example-2: "&e  /punishment add KICK - Spam"
+      example-3: "&e  /punishment add BAN 7d Hacking"
+      invalid-type: "&cUngültiger Typ: &e{type}"
+      valid-types: "&7Gültige Typen: &eWARN, KICK, BAN"
+      success: "&a✓ Grund hinzugefügt! &7(&e{type}&7) &f{reason} &7- &e{duration}"
+      error: "&c✘ Fehler beim Hinzufügen des Grundes!"
+
+    # Remove Command
+    remove:
+      usage: "&cBenutzung: /punishment remove <ID>"
+      invalid-id: "&cUngültige ID! Muss eine Zahl sein."
+      success: "&a✓ Grund mit ID &e{id} &awurde entfernt!"
+      error: "&c✘ Fehler beim Entfernen des Grundes!"
+
+    # List Command
+    list:
+      header: "&6&l━━━━━━━ &ePUNISHMENT GRÜNDE &6&l━━━━━━━"
+      footer: "&6&l━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+      invalid-type: "&cUngültiger Typ! Nutze: ALL, WARN, KICK, BAN"
+      no-reasons: "&7Keine Gründe für Typ &e{type} &7gefunden."
+      type-header: "&e&l{type} &7({count} Gründe):"
+      entry: "&7  &e#{id} &f{reason} &8- &7{duration}"
+
+    # Reload Command
+    reload:
+      success: "&a✓ Punishment Cache neu geladen!"
+
+  # Mute System
+  mute:
+    # Permissions & Errors
+    no-permission: "&cDu hast keine Berechtigung für diesen Befehl!"
+    player-not-found: "&cSpieler &e{player} &cnicht gefunden!"
+    already-muted: "&c{player} ist bereits gemutet!"
+    database-error: "&c✘ Datenbankfehler beim Muten!"
+
+    # Usage
+    usage: "&cBenutzung: /mute <Spieler> <Dauer> <Grund>"
+    examples-header: "&7Beispiele:"
+    example-1: "&e  /mute Steve 10m Spam"
+    example-2: "&e  /mute Alex 1h Beleidigung"
+    example-3: "&e  /mute Bob 24h Schwere_Beleidigung"
+
+    # Duration
+    invalid-duration: "&cUngültige Dauer!"
+    invalid-duration-error: "&cUngültige Dauer: {error}"
+    valid-formats: "&7Gültige Formate:"
+    format-minutes: "&e  • 10m (10 Minuten)"
+    format-hours: "&e  • 1h (1 Stunde)"
+    format-days: "&e  • 1d (1 Tag)"
+    format-combined: "&e  • 1h30m (1 Stunde 30 Minuten)"
+
+    # Errors
+    error-empty-duration: "Dauer darf nicht leer sein"
+    error-no-number: "Keine Zahl vor Zeiteinheit '{unit}'"
+    error-negative: "Negative Werte sind nicht erlaubt"
+    error-invalid-number: "Ungültige Zahl: {number}"
+    error-invalid-char: "Ungültiges Zeichen: '{char}'"
+    error-missing-unit: "Zeiteinheit fehlt nach Zahl: {number}"
+    error-zero-duration: "Dauer muss größer als 0 sein"
+
+    # Success
+    no-reason-given: "Kein Grund angegeben"
+    success: "&a✓ {player} wurde für &e{duration} &agemutet!"
+    broadcast: "&6{player} &7wurde von &6{muter} &7für &e{duration} &7gemutet!"
+
+    # Messages to Player
+    muted: "&c▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n&c&l      DU WURDEST GEMUTET!\n\n&7Grund: &f{reason}\n&7Dauer: &e{duration}\n\n&c⚠ &eDu kannst während dieser Zeit nicht im Chat schreiben!\n&c⚠ &eDein Voice-Chat wurde ebenfalls deaktiviert!\n&c⚠ &eAlle Chat-Befehle sind blockiert!\n&c▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+    chat-blocked: "&cDu bist noch für &e{time} &cgemutet!"
+    command-blocked: "&cDer Befehl &e/{command} &cist während deines Mutes nicht verfügbar! &7(noch &e{time}&7)"
+    voice-blocked: "&cDein Voice-Chat ist gemutet!"
+    expired: "&aDein Mute ist abgelaufen! Du kannst nun wieder im Chat und Voice-Chat sprechen!"
+
+    # Tab-Completion
+    default-reasons: "Spam,Beleidigung,Provokation,Werbung"
+    custom-reason: "Eigener_Grund"
+
+  # Unmute System
+  unmute:
+    no-permission: "&cDu hast keine Berechtigung für diesen Befehl!"
+    player-not-found: "&cSpieler &e{player} &cnicht gefunden oder war nie auf dem Server!"
+    not-muted: "&c{player} ist nicht gemutet!"
+    database-error: "&c✘ Datenbankfehler beim Entmuten!"
+
+    usage: "&cBenutzung: /unmute <Spieler> [Grund]"
+    example: "&eBeispiel: /unmute Steve Versehentlicher_Mute"
+
+    no-reason-given: "Kein Grund angegeben"
+    success: "&a✓ {player} wurde erfolgreich entmutet!"
+    broadcast: "&6{player} &awurde von &6{unmuter} &aentmutet!"
+    unmuted: "&aVoice-Chat aktiv!"
+
+    default-reasons: "Versehentlicher_Mute,Strafe_abgesessen,Begnadigung"
+
+  # Punish Command (Automatische Eskalation - Vereinfacht)
+  punish:
+    no-permission: "&cDu hast keine Berechtigung für diesen Befehl!"
+
+    # Usage
+    usage: "&cBenutzung: /punish <Spieler> <Grund>"
+    examples-header: "&7Beispiele:"
+    example-1: "&e  /punish Steve Spam"
+    example-2: "&e  /punish Alex Griefing"
+    example-3: "&e  /punish Bob Hacking"
+
+    # Messages
+    player-not-found: "&cSpieler &e{player} &cnicht gefunden oder nicht online!"
+    reason-not-found: "&cGrund &e{reason} &cnicht in der Datenbank gefunden!"
+    use-punishment-list: "&7Nutze &e/punishment list &7um alle Gründe zu sehen."
+    database-error: "&c✘ Datenbankfehler beim Ausführen der Strafe!"
+
+    executing: "&7Führe Strafe aus für &e{player} &7wegen: &f{reason}"
+
+    success: "&a✓ Strafe erfolgreich ausgeführt!"
+    error: "&c✘ Fehler beim Ausführen der Strafe!"
+
+    # Warnung an Spieler
+    escalation-warning: "&c⚠ &eWeitere Verstöße führen zu härteren Strafen!"
+
+    # Spezialstrafen
+    special:
+      instant-permban: "&c&lPERMANENTER BAN!\n\n&7Grund: &f{reason}\n\n&cDieser Verstoß führt zu einem permanenten Ausschluss!"
+      instant-permban-broadcast: "&c&l⚠ {player} wurde PERMANENT gebannt! &7(Grund: {reason})"
 
 # Discord Nachrichten
 discord:

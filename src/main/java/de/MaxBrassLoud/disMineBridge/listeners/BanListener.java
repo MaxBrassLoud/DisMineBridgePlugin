@@ -44,14 +44,23 @@ public class BanListener implements Listener {
             }
 
             // Berechne verbleibende Zeit
-            Instant now = Instant.now();
             String timeLeft;
 
-            // Prüfe ob permanenter Ban
+            // Prüfe ob permanenter Ban (-1)
             if (banInfo.expireTime == -1) {
                 timeLeft = language.getMessage("minecraft.ban.permanent");
             } else {
+                // Temporärer Ban
+                Instant now = Instant.now();
                 Instant expire = Instant.ofEpochMilli(banInfo.expireTime);
+
+                // Doppelt-Check: Ist der Ban wirklich noch aktiv?
+                if (now.isAfter(expire)) {
+                    plugin.getLogger().info("[Ban] Ban für " + event.getName() +
+                            " ist bereits abgelaufen und wurde nicht blockiert");
+                    return;
+                }
+
                 Duration remaining = Duration.between(now, expire);
                 timeLeft = formatDuration(remaining);
             }
@@ -64,9 +73,15 @@ public class BanListener implements Listener {
 
             event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED, kickMessage);
 
-            plugin.getLogger().info("[Ban] Spieler " + event.getName() +
-                    " wurde am Login gehindert. Ban-ID: " + banInfo.banId +
-                    (banInfo.expireTime == -1 ? " (PERMANENT)" : ""));
+            // Logging
+            if (banInfo.expireTime == -1) {
+                plugin.getLogger().info("[Ban] Spieler " + event.getName() +
+                        " wurde am Login gehindert. Ban-ID: " + banInfo.banId + " (PERMANENT)");
+            } else {
+                plugin.getLogger().info("[Ban] Spieler " + event.getName() +
+                        " wurde am Login gehindert. Ban-ID: " + banInfo.banId +
+                        " | Verbleibende Zeit: " + timeLeft);
+            }
 
         } catch (SQLException e) {
             plugin.getLogger().log(Level.SEVERE,
