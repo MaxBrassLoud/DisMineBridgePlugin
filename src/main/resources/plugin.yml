@@ -1,163 +1,65 @@
 name: DisMineBridge
-version: '1.0'
-main: de.MaxBrassLoud.disMineBridgePlugin.DisMineBridgePlugin
+version: '0.2.2'
+main: de.MaxBrassLoud.disMineBridge.DisMineBridge
 api-version: '1.21'
 authors: [ MaxBrassLoud ]
-description: This is a simple yet powerful Plugin which makes the work as an Server Admin or Moderator more easy
-softdepend:
-  - voicechat
+description: A simpe yet powerful moderaion Plugin for Minecraft 1.21.8
+
 
 commands:
+  whitelist:
+    description: Verwalte die Server Whitelist
+    usage: /whitelist <add|remove|on|off> [Spieler]
+    permission: dmb.whitelist
+
   vanish:
-    description: Macht dich oder andere Spieler unsichtbar
-    usage: /vanish [Spieler] [on|off]
+    description: Bringt einen Moderator in einen Status den nur andere Moderatoren sehen und wird für restliche Spieler unsichtbar gemacht
+    usage: /vanish
     permission: dmb.vanish
-    permission-message: Du hast keine Berechtigung für diesen Befehl!
-
-  unmute:
-    description: Entmuted einen Spieler
-    usage: /unmute <Spieler>
-    permission: dmb.unmute
-    permission-message: Du hast keine Berechtigung für diesen Befehl!
-
-  warn:
-    description: Warnt einen Spieler
-    usage: /warn <Spieler> <Grund>
-    permission: dmb.warn
-    permission-message: Du hast keine Berechtigung für diesen Befehl!
 
   ban:
-    description: Bannt einen Spieler temporär
-    usage: /ban <Spieler> <Grund> <Dauer z.B. 1h30m>
+    description: Kann einen Spieller vom Server ausschließen
+    usage: /ban [Player] [Duration] [Reason]
     permission: dmb.ban
-    permission-message: Du hast keine Berechtigung für diesen Befehl!
-
-  kick:
-    description: Kickt einen Spieler vom Server und speichert es in der Datenbank
-    usage: /kick <Spieler> <Grund>
-    permission: dmb.kick
-    permission-message: Du hast keine Berechtigung für diesen Befehl!
 
   unban:
-    description: Entbannt einen Spieler
-    usage: /unban <Spieler>
+    description: Kann einen Serverausschluss rückgängig machen
+    usage: /unban [Player]
     permission: dmb.unban
-    permission-message: Du hast keine Berechtigung für diesen Befehl!
 
-  mute:
-    description: Muted einen Spieler
-    usage: /mute <Spieler> <Dauer in Minuten> [Grund]
-    permission: dmb.mute
-    permission-message: Du hast keine Berechtigung für diesen Befehl!
+  kick:
+    description: Die Verbindung vom Server für einen Spieler trennen
+    usage: /kick [Player] [Reason]
+    permission: dmb.kick
 
-  invsee:
-    description: Sehe und bearbeite das Inventar eines Spielers
-    usage: /invsee <Spieler>
-    permission: dmb.invsee
-    permission-message: Du hast keine Berechtigung für diesen Befehl!
-
-  endersee:
-    description: Sehe und bearbeite die Enderchest eines Spielers
-    usage: /endersee <Spieler>
-    permission: dmb.endersee
-    permission-message: Du hast keine Berechtigung für diesen Befehl!
-
-  adminmode:
-    description: Aktiviert den AdminMode (speichert Inventar, Position, etc.)
-    usage: /adminmode
-    permission: dmb.adminmode
-    permission-message: Du hast keine Berechtigung für diesen Befehl!
-
-  whitelist:
-    description: Verwaltet die Server-Whitelist
-    usage: /whitelist <on|off|add|remove> [Spieler]
-    permission: dmb.whitelist
-    permission-message: Du hast keine Berechtigung für diesen Befehl!
-
-  maintenance:
-    description: Verwaltet den Wartungsmodus
-    usage: /maintenance <on|off|add|remove> [Spieler]
-    permission: dmb.maintenance
-    permission-message: Du hast keine Berechtigung für diesen Befehl!
+  warn:
+    description: Jemanden verwarnen
+    usage: /warn [Player] [Reason]
+    permission: dmb.warn
 
   punish:
-    description: Öffnet das Straf-Menü mit Spieler-Auswahl
+    description: Jemanden bestrafen
     usage: /punish
     permission: dmb.punish
-    permission-message: Du hast keine Berechtigung für diesen Befehl!
 
-  punishreasons:
-    description: Verwaltet Straf-Gründe
-    usage: /punishreasons
-    permission: dmb.punishreasons
-    permission-message: Du hast keine Berechtigung für diesen Befehl!
-  dmb:
-    description: Hauptbefehl des Plugins
-    usage: /dmb
-    permission: dmb.admin
-    permission-message: Du hast keine Berechtigung für diesen Befehl!
+  punishment:
+    description: Bestrafungen hinzufügen
+    usage: /punishment
+    permission: dmb.punishment
+
+  mute:
+    description: Mutet einen Spieler
+    usage: /mute <Spieler> <Dauer> <Grund>
+    permission: dmb.mute
+
+  unmute:
+    description: Entmutet einen Spieler
+    usage: /unmute <Spieler> [Grund]
+    permission: dmb.unmute
+
+
 
 permissions:
-  dmb.admin:
-    description: Admin Rechte - Zugriff auf alle Befehle
-    default: op
-    children:
-      dmb.vanish: true
-      dmb.vanish.others: true
-      dmb.vanish.see: true
-      dmb.ban: true
-      dmb.unban: true
-      dmb.kick: true
-      dmb.warn: true
-      dmb.mute: true
-      dmb.unmute: true
-      dmb.invsee: true
-      dmb.endersee: true
-      dmb.adminmode: true
-      dmb.whitelist: true
-      dmb.whitelist.bypass: true
-      dmb.maintenance: true
-      dmb.maintenance.bypass: true
-      dmb.help: true
-
-  dmb.moderator:
-    description: Moderator Rechte - Zugriff auf grundlegende Moderation
-    default: false
-    children:
-      dmb.kick: true
-      dmb.warn: true
-      dmb.mute: true
-      dmb.unmute: true
-      dmb.help: true
-
-  dmb.vanish:
-    description: Erlaubt die Nutzung von /vanish für sich selbst
-    default: op
-
-  dmb.vanish.others:
-    description: Erlaubt das Vanishen anderer Spieler
-    default: op
-
-  dmb.vanish.see:
-    description: Erlaubt es, Spieler im Vanish zu sehen
-    default: op
-
-  dmb.ban:
-    description: Erlaubt das Bannen von Spielern
-    default: op
-
-  dmb.unban:
-    description: Erlaubt das Entbannen von Spielern
-    default: op
-
-  dmb.kick:
-    description: Erlaubt das Kicken von Spielern
-    default: op
-
-  dmb.warn:
-    description: Erlaubt das Warnen von Spielern
-    default: op
-
   dmb.mute:
     description: Erlaubt das Muten von Spielern
     default: op
@@ -166,16 +68,47 @@ permissions:
     description: Erlaubt das Entmuten von Spielern
     default: op
 
-  dmb.invsee:
-    description: Erlaubt das Einsehen und Bearbeiten von Spieler-Inventaren
+  dmb.punishment:
+    description: Berechtigung für den /punishments command
     default: op
 
-  dmb.endersee:
-    description: Erlaubt das Einsehen und Bearbeiten von Spieler-Enderchests
+  dmb.punishment.add:
+    description: Berechtigung eine Bestrafung hinzuzufügen
     default: op
 
-  dmb.adminmode:
-    description: Erlaubt die Nutzung des AdminMode
+  dmb.punishment.remove:
+    description: Berechtigung Strafen zu entfernen
+    default: op
+
+  dmb.punishment.list:
+    description: Berechtigung alle Strafen zu sehen
+    default: op
+
+  dmb.punishment.reload:
+    description: Berechtigung Strafen neu zu laden
+    default: op
+
+  dmb.punishment.all:
+    description: Alle Berechtigung alle Punishment Features zu nutzen
+    default: op
+    children:
+      dmb.punishment.add: true
+      dmb.punishment.remove: true
+      dmb.punishment.list: true
+      dmb.punishment.reload: true
+      dmb.punishment: true
+
+
+  dmb.punish:
+    description: Berechtigung jemanden zu bestrafen
+    default: op
+
+  dmb.kick:
+    description: Berechtigung jemanden vom server zu trennen
+    default: op
+
+  dmb.warn:
+    description: Berechtigung jemanden zu verwarnen
     default: op
 
   dmb.whitelist:
@@ -183,21 +116,61 @@ permissions:
     default: op
 
   dmb.whitelist.bypass:
-    description: Umgeht die Whitelist-Prüfung
+    description: Bypasses the Whitelist
     default: op
 
-  dmb.maintenance:
-    description: Erlaubt die Verwaltung des Wartungsmodus
+  dmb.whitelist.all:
+    description: Alle Whitelist Features
+    default: op
+    children:
+      dmb.whitelist: true
+      dmb.whitelist.bypass: true
+
+  dmb.vanish:
+    description: Zugriff auf Vanish command
     default: op
 
-  dmb.maintenance.bypass:
-    description: Umgeht den Wartungsmodus
+  dmb.vanish.see:
+    description: Lässt alle im Vanish sehen
     default: op
 
-  dmb.punish:
-    description: Erlaubt die Nutzung des Punishment-GUIs
+  dmb.vanish.others:
+    description: Lässt andere in den Vanish status bringen
     default: op
 
-  dmb.punishreasons:
-    description: Erlaubt die Verwaltung von Straf-Gründen
+  dmb.vanish.all:
+    description: Alle Vanish Features
     default: op
+    children:
+      dmb.vanish: true
+      dmb.vanish.see: true
+      dmb.vanish.others: true
+
+  dmb.ban:
+    description: Berechtigung Spieler zu bannen
+    default: op
+  dmb.unban:
+    description: Berechtigung einen Bann aufzuheben
+    default: op
+
+  dmb.ban.all:
+    description: Alle Bann Aktionen Nutzen
+    default: op
+    children:
+      dmb.ban: true
+      dmb.unban: true
+
+  dmb.admin:
+    description: Voller Zugriff auf alle Plugin-Funktionen
+    default: op
+    children:
+      dmb.whitelist.all: true
+      dmb.vanish.all: true
+      dmb.ban.all: true
+      dmb.kick: true
+      dmb.warn: true
+      dmb.punishment.all: true
+      dmb.mute: true
+      dmb.unmute: true
+
+

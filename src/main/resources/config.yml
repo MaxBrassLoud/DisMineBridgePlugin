@@ -1,341 +1,334 @@
 # DisMineBridge Configuration
-# Diese Datei wird automatisch erstellt beim ersten Start
 
-# ============================================================
-#  DATABASE SETTINGS
-# ============================================================
-
-database:
-  # Datenbank-Typ: "sqlite" oder "mysql"
-  type: sqlite
-
-  mysql:
-    host: localhost
-    port: 3306
-    database: disminebridge
-    username: root
-    password: ""
-
-# ============================================================
-#  DISCORD INTEGRATION
-# ============================================================
-
+# Discord Bot Einstellungen
 discord:
-  # Aktiviere Discord-Integration
-  enabled: false
+  bot-token: "DEIN_BOT_TOKEN_HIER"
+  guild-id: "DEINE_SERVER_ID_HIER"
+  whitelist-channel: "DEIN_WHITELIST_CHANNEL"
 
-  # Bot Token (von https://discord.com/developers/applications)
-  token: "DEIN_BOT_TOKEN_HIER"
+# Datenbank Einstellungen
+database:
+  use-local: true
+  local:
+    file: "disminebridge.db"
+  extern:
+    host: "localhost"
+    port: 3306
+    database: "disminebridge"
+    username: "root"
+    password: ""
+    use-ssl: false
 
-  # Discord Server ID
-  guild-id: "DEINE_SERVER_ID"
+# Sprach Einstellungen
+language:
+  default: "de-DE"
 
-  # Channel-ID für Whitelist-Anfragen (wird automatisch gesetzt)
-  whitelist-request-channel-id: ""
+whitelist-enabled: true
 
-  # Rollen die Whitelist-Anfragen genehmigen können (Namen oder IDs)
-  whitelist-roles:
-    - "Admin"
-    - "Moderator"
-    - "1234567890123456789"  # Beispiel Rollen-ID
-
-# ============================================================
-#  WHITELIST SYSTEM
-# ============================================================
-
+# Whitelist Einstellungen
 whitelist:
-  enabled: false
+  additional-fields:
+    enabled: true
+    fields:
+      - name: "reason"
+        label: "Warum möchtest du beitreten?"
+        required: true
+        max-length: 500
+      - name: "plans"
+        label: "Was möchtest du auf dem Server machen?"
+        required: false
+        max-length: 300
+      - name: "age"
+        label: "Wie alt bist du?"
+        required: false
+        max-length: 3
+  cooldown-after-rejection: 7
+  remove-on-discord-leave: true
 
-servermotd:
-  motd: Willkommen auf dem Server
+# Ticket System Einstellungen
+tickets:
+  max-open-tickets-per-user: 3
+  categories:
+    support:
+      enabled: true
+      name: "Support"
+      emoji: "🆘"
+      description: "Benötigst du Hilfe? Erstelle ein Support-Ticket!"
+      color: "#00ff00"
+    bug-report:
+      enabled: true
+      name: "Bug Report"
+      emoji: "🐛"
+      description: "Hast du einen Bug gefunden? Melde ihn hier!"
+      color: "#ff0000"
+    whitelist:
+      enabled: true
+      name: "Whitelist"
+      emoji: "🔓"
+      description: "Beantrage hier deinen Whitelist-Zugang!"
+      color: "#0099ff"
+  auto-close-inactive: 72
+  log-messages: true
 
-# ============================================================
-#  WARTUNGSMODUS
-# ============================================================
+# Benachrichtigungen
+notifications:
+  dm-whitelist-updates: true
+  dm-ticket-updates: true
 
-maintenance:
-  enabled: false
-  motd: §c§lWARTUNGSMODUS
-  kick-message: |
-    §c§lWARTUNGSMODUS
-    
-    §7Der Server befindet sich aktuell im Wartungsmodus.
-    §7Bitte versuche es später erneut.
+# ============================================
+# MUTE SYSTEM
+# ============================================
+mute:
+  # Blockierte Chat-Befehle während eines Mutes
+  blocked-commands:
+    # Private Nachrichten
+    - tell
+    - msg
+    - w
+    - whisper
+    - m
+    - pm
+    - dm
 
-# ============================================================
-#  NACHRICHTEN - ALLE TEXTE ANPASSBAR
-# ============================================================
+    # Action Messages
+    - me
+    - action
 
-messages:
-  prefix: "&6[DMB] &r"
+    # Broadcast
+    - say
+    - broadcast
+    - bc
+    - shout
+    - announce
 
-  # ===== BAN MESSAGES =====
-  ban:
-    success: "&aErfolgreich gebannt: &e{player}"
-    already-banned: "&cDieser Spieler ist bereits gebannt!"
-    kick-message: |
-      &c&lDU WURDEST GEBANNT!
-      
-      &7Grund: &f{reason}
-      &7Von: &e{banner}
-      &7Verbleibend: &e{duration}
-      &7Gebannt am: &e{date}
-    broadcast: "&e{player} &cwurde gebannt!"
+    # Reply
+    - r
+    - reply
 
-  unban:
-    success: "&aDer Spieler &e{player} &awurde entbannt."
-    not-banned: "&cDieser Spieler ist nicht gebannt."
-    broadcast: "&e{player} &awurde entbannt!"
+    # Mail/Email Plugins
+    - mail
+    - email
 
-  # ===== KICK MESSAGES =====
-  kick:
-    success: "&aErfolgreich gekickt: &e{player}"
-    kick-message: |
-      &c&lDU WURDEST GEKICKT!
-      
-      &7Grund: &f{reason}
-      &7Von: &e{kicker}
-    broadcast: "&e{player} &cwurde gekickt!"
+    # Help
+    - helpop
 
-  # ===== WARN MESSAGES =====
-  warn:
-    success: "&aVerwarnung ausgesprochen für &e{player}"
-    warn-message: |
-      &c&lDU WURDEST VERWARNT!
-      
-      &7Grund: &f{reason}
-      &7Von: &e{warner}
-      &7Verwarnungen insgesamt: &e{count}
-    broadcast: "&e{player} &cwurde verwarnt!"
+    # Chat Channels
+    - ac
+    - adminchat
+    - sc
+    - staffchat
+    - gc
+    - globalchat
+    - lc
+    - localchat
+    - ch
+    - channel
 
-  # ===== MUTE MESSAGES =====
-  mute:
-    success: "&aErfolgreich gemutet: &e{player} &7für &e{duration}"
-    already-muted: "&cDieser Spieler ist bereits gemutet!"
-    mute-message: |
-      &c&lDU WURDEST GEMUTET!
-      
-      &7Grund: &f{reason}
-      &7Von: &e{muter}
-      &7Dauer: &e{duration}
-      &7Du kannst weder schreiben noch im Voice-Chat sprechen.
-    broadcast: "&e{player} &cwurde gemutet!"
-    chat-blocked: |
-      &c▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-      &c&l         DU BIST GEMUTET
-      
-      &7Grund: &f{reason}
-      &7Verbleibend: &e{remaining}
-      
-      &7» Du kannst weder schreiben noch sprechen
-      &c▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+    # Party/Guild/Team/Faction Chat
+    - party
+    - p
+    - guild
+    - g
+    - gchat
+    - clan
+    - c
+    - cchat
+    - team
+    - t
+    - tchat
+    - faction
+    - f
+    - fchat
 
-  unmute:
-    success: "&aDer Spieler &e{player} &awurde entmutet."
-    not-muted: "&cDieser Spieler ist nicht gemutet."
-    unmute-message: "&aDu wurdest entmutet und kannst wieder schreiben und sprechen!"
-    broadcast: "&e{player} &awurde entmutet!"
+    # Trade Chat
+    - trade
+    - tradechat
+    - tc
 
-  # ===== LOGIN NOTIFICATIONS =====
-  login:
-    punishment-header: |
-      &c▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-      &c&l      STRAFEN WÄHREND OFFLINE
+    # Emotes
+    - emote
 
-    punishment-footer: "&c▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+  # Voice-Chat Integration (Simple Voice Chat)
+  voice-chat:
+    enabled: true
+    block-microphone: true
 
-    new-ban: |
-      &c⚠ &4GEBANNT
-      &7Grund: &f{reason}
-      &7Von: &e{banner}
-      &7Dauer: &e{duration}
+# ============================================
+# PUNISHMENT SYSTEM - Erweiterte Konfiguration
+# ============================================
+punishment:
+  # Aktiviere das Punktesystem
+  use-point-system: true
 
-    new-mute: |
-      &c⚠ &cGEMUTET
-      &7Grund: &f{reason}
-      &7Von: &e{muter}
-      &7Dauer: &e{duration}
+  # Punkteverfall (in Tagen)
+  # Nach dieser Zeit verfallen Punkte automatisch
+  point-decay:
+    enabled: true
+    days: 90  # Punkte verfallen nach 90 Tagen
 
-    new-warn: |
-      &c⚠ &eVERWARNUNG
-      &7Grund: &f{reason}
-      &7Von: &e{warner}
+  # Schweregrad-Gewichtung (1-10)
+  # Diese Werte bestimmen, wie viele Punkte ein Verstoß mit bestimmtem Schweregrad gibt
+  severity-weights:
+    1: 5      # Sehr leicht (z.B. Spam)
+    2: 10     # Leicht (z.B. Caps)
+    3: 20     # Leicht-Mittel (z.B. Provokation)
+    4: 30     # Mittel (z.B. Beleidigung)
+    5: 50     # Mittel-Schwer (z.B. mehrfache Beleidigung)
+    6: 75     # Schwer (z.B. Rassismus)
+    7: 100    # Sehr Schwer (z.B. Griefing)
+    8: 150    # Kritisch (z.B. schweres Griefing)
+    9: 250    # Extrem (z.B. Hacking)
+    10: 500   # Maximal (z.B. DDoS-Drohung)
 
-    new-kick: |
-      &c⚠ &6KICK
-      &7Grund: &f{reason}
-      &7Von: &e{kicker}
+  # Bestrafungs-Schwellenwerte
+  # Wenn der Spieler X Punkte erreicht, wird die entsprechende Strafe verhängt
+  thresholds:
+    # Erste Warnung (0-19 Punkte)
+    warn-1:
+      min-points: 0
+      max-points: 19
+      action: "WARN"
+      duration: "-"
+      message: "Erste Verwarnung - Bitte halte dich an die Regeln!"
 
-  # ===== WHITELIST MESSAGES =====
-  whitelist:
-    enabled: "&aWhitelist wurde &l&aAKTIVIERT&r&a."
-    disabled: "&cWhitelist wurde &l&cDEAKTIVIERT&r&c."
-    added: "&aSpiele &e{player} &awurde zur Whitelist hinzugefügt."
-    removed: "&cSpieler &e{player} &cwurde von der Whitelist entfernt."
-    already-added: "&e{player} &7ist bereits auf der Whitelist."
-    not-on-list: "&e{player} &7ist nicht auf der Whitelist."
-    kick-message: |
-      &c&lNICHT AUF DER WHITELIST
-      
-      &7Du stehst nicht auf der Whitelist dieses Servers.
-      &7Kontaktiere einen Administrator für Zugang.
+    # Zweite Warnung (20-39 Punkte)
+    warn-2:
+      min-points: 20
+      max-points: 39
+      action: "WARN"
+      duration: "-"
+      message: "Zweite Verwarnung - Weitere Verstöße führen zu einem Kick!"
 
-  # ===== MAINTENANCE MESSAGES =====
-  maintenance:
-    enabled: "&6Wartungsmodus wurde &l&6AKTIVIERT&r&6."
-    disabled: "&aWartungsmodus wurde &l&aDEAKTIVIERT&r&a."
-    bypass-added: "&aSpiele &e{player} &ahat nun Wartungs-Bypass."
-    bypass-removed: "&cBypass entfernt von &e{player}&c."
+    # Dritte Warnung + Kick (40-69 Punkte)
+    warn-3-kick:
+      min-points: 40
+      max-points: 69
+      action: "KICK"
+      duration: "-"
+      message: "Letzte Warnung + Kick - Nächster Verstoß = Temporärer Ban!"
 
-  # ===== ADMINMODE MESSAGES =====
-  adminmode:
-    enabled: |
-      
-      &a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-      &a&lADMINMODE AKTIVIERT
-      
-      &7» Deine Daten wurden gespeichert
-      &7» Du bist nun im Creative-Modus
-      &7» Inventar geleert, Health & Hunger aufgefüllt
-      &e» Nutze &6/adminmode &eerneut zum Deaktivieren
-      &a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+    # 1-Tages Ban (70-99 Punkte)
+    tempban-1d:
+      min-points: 70
+      max-points: 99
+      action: "TEMPBAN"
+      duration: "1d"
+      message: "1-Tages Ban wegen wiederholter Verstöße"
 
-    disabled: |
-      
-      &c▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-      &c&lADMINMODE DEAKTIVIERT
-      
-      &7» Deine Daten wurden wiederhergestellt
-      &7» Du wurdest zurück teleportiert
-      &7» Inventar, Rüstung, Health, Hunger wiederhergestellt
-      &c▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+    # 3-Tages Ban (100-149 Punkte)
+    tempban-3d:
+      min-points: 100
+      max-points: 149
+      action: "TEMPBAN"
+      duration: "3d"
+      message: "3-Tages Ban - Letzte Chance!"
 
-    error: "&cFehler beim Aktivieren des AdminModes."
+    # 7-Tages Ban (150-199 Punkte)
+    tempban-7d:
+      min-points: 150
+      max-points: 199
+      action: "TEMPBAN"
+      duration: "7d"
+      message: "7-Tages Ban wegen mehrfacher schwerer Verstöße"
 
-  # ===== VANISH MESSAGES =====
-  vanish:
-    enabled: |
-      
-      &c▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-      &c&l          VANISH AKTIVIERT
-      
-      &7  » Du bist nun &c&lUNSICHTBAR
-      &7  » Andere Spieler können dich nicht mehr sehen
-      &7  » Eine Fake-Quit-Nachricht wurde gesendet
-      
-      &8  Nutze &c/vanish &8erneut zum Deaktivieren
-      &c▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+    # 14-Tages Ban (200-299 Punkte)
+    tempban-14d:
+      min-points: 200
+      max-points: 299
+      action: "TEMPBAN"
+      duration: "14d"
+      message: "14-Tages Ban - Du bist kurz vor einem permanenten Ban!"
 
-    disabled: |
-      
-      &a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-      &a&l          VANISH DEAKTIVIERT
-      
-      &7  » Du bist nun &a&lSICHTBAR
-      &7  » Alle Spieler können dich wieder sehen
-      &7  » Eine Fake-Join-Nachricht wurde gesendet
-      
-      &a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+    # 30-Tages Ban (300-499 Punkte)
+    tempban-30d:
+      min-points: 300
+      max-points: 499
+      action: "TEMPBAN"
+      duration: "30d"
+      message: "30-Tages Ban wegen anhaltender Regelverstöße"
 
-    other-enabled: "&7Vanish für &e{player} &7wurde &caktiviert&7."
-    other-disabled: "&7Vanish für &e{player} &7wurde &adeaktiviert&7."
+    # Permanenter Ban (500+ Punkte)
+    permban:
+      min-points: 500
+      max-points: 999999
+      action: "PERMBAN"
+      duration: "perm"
+      message: "Permanenter Ban - Du hast zu viele schwere Verstöße begangen"
 
-  # ===== INVSEE / ENDERSEE MESSAGES =====
-  inventory:
-    invsee-saved: "&aÄnderungen am Inventar von &e{player} &awurden gespeichert."
-    endersee-saved: "&aÄnderungen an der Enderchest von &e{player} &awurden gespeichert."
-    player-not-found: "&cDer Spieler &e{player} &cwurde nicht gefunden."
-    offline-readonly: "&eOffline-Inventare sind schreibgeschützt und werden nur angezeigt."
+  # Spezielle Regeln für bestimmte Verstöße
+  # Diese überschreiben das normale Punktesystem
+  special-rules:
+    # Hacking führt immer zu einem längeren Ban, unabhängig von Punkten
+    hacking:
+      enabled: true
+      min-ban-duration: "14d"
+      escalation: true  # Erhöht sich bei Wiederholung
 
-  # ===== ERROR MESSAGES =====
-  errors:
-    no-permission: "&cDu hast keine Berechtigung für diesen Befehl!"
-    player-only: "&cNur Spieler können diesen Befehl nutzen."
-    player-not-found: "&cSpieler nicht gefunden!"
-    player-not-online: "&cDer Spieler &e{player} &cist nicht online."
-    invalid-duration: "&cUngültige Dauer. Beispiel: 1h30m, 45m, 2d"
-    invalid-number: "&cUngültige Zahl!"
-    database-error: "&cDatenbankfehler! Siehe Konsole für Details."
-    unknown-command: "&cUnbekannter Befehl. Nutze &e/dmb help"
+    # Griefing hat eine eigene Eskalation
+    griefing:
+      enabled: true
+      first-offense: "3d"
+      second-offense: "14d"
+      third-offense: "30d"
+      fourth-offense: "perm"
 
-  # ===== GUI MESSAGES =====
-  gui:
-    punishment-title: "&8» &6Strafen: &e{player}"
+    # DDoS-Drohungen = sofortiger Perm-Ban
+    ddos-threat:
+      enabled: true
+      instant-permban: true
 
-    # Items
-    ban-item:
-      name: "&c&lBan"
-      lore:
-        - "&7Bannt den Spieler temporär"
-        - ""
-        - "&eLinksklick &7» &fSchnell-Ban (1d)"
-        - "&eRechtsklick &7» &fBenutzerdefiniert"
+    # Rassismus/Extremismus = sofortiger Perm-Ban
+    racism-extremism:
+      enabled: true
+      instant-permban: true
 
-    mute-item:
-      name: "&6&lMute"
-      lore:
-        - "&7Muted den Spieler"
-        - ""
-        - "&eLinksklick &7» &fSchnell-Mute (30m)"
-        - "&eRechtsklick &7» &fBenutzerdefiniert"
+  # Multiplikatoren für wiederholte Verstöße
+  repeat-offense-multipliers:
+    enabled: true
+    # Jeder weitere Verstoß des GLEICHEN Typs erhöht die Punkte
+    same-reason:
+      2nd-offense: 1.5   # 50% mehr Punkte
+      3rd-offense: 2.0   # 100% mehr Punkte (doppelt)
+      4th-offense: 3.0   # 200% mehr Punkte (dreifach)
+      5th-offense: 5.0   # 400% mehr Punkte (fünffach)
 
-    kick-item:
-      name: "&e&lKick"
-      lore:
-        - "&7Kickt den Spieler"
-        - ""
-        - "&eKlicken &7» &fSpieler kicken"
+    # Zeitbasierter Multiplikator
+    # Wenn mehrere Verstöße in kurzer Zeit passieren
+    time-based:
+      enabled: true
+      within-24h: 1.5    # 50% mehr wenn innerhalb 24h
+      within-7d: 1.2     # 20% mehr wenn innerhalb 7 Tagen
 
-    warn-item:
-      name: "&6&lWarnung"
-      lore:
-        - "&7Verwarnt den Spieler"
-        - ""
-        - "&eKlicken &7» &fWarnung aussprechen"
+  # Automatische Verringerung
+  reduction:
+    enabled: true
+    # Spieler können Punkte durch gutes Verhalten abbauen
+    good-behavior:
+      enabled: true
+      points-per-day: 1          # 1 Punkt pro Tag ohne Verstoß
+      max-reduction-per-week: 10  # Max 10 Punkte pro Woche
 
-    history-item:
-      name: "&9&lStrafhistorie"
-      lore:
-        - "&7Zeigt alle Strafen des Spielers"
-        - ""
-        - "&eKlicken &7» &fHistorie anzeigen"
+    # Admin kann Punkte manuell reduzieren
+    manual-reduction:
+      enabled: true
+      max-per-reduction: 50       # Max 50 Punkte pro Aktion
 
-    back-item:
-      name: "&7&l« Zurück"
-      lore:
-        - "&7Zurück zum vorherigen Menü"
+  # Benachrichtigungen
+  notifications:
+    # Warne Spieler wenn sie bestimmte Punktzahlen erreichen
+    warn-at-points:
+      - 50   # Warnung bei 50 Punkten
+      - 100  # Warnung bei 100 Punkten
+      - 200  # Warnung bei 200 Punkten
+      - 400  # Warnung bei 400 Punkten
 
-# ============================================================
-#  PUNISHMENT REASONS (Vorauswahl)
-# ============================================================
+    # Zeige Spielern ihre Punkte
+    show-points-in-warn: true
+    show-points-in-kick: true
+    show-points-in-ban: true
 
-punishment-reasons:
-  ban:
-    - "Hacking"
-    - "Griefing"
-    - "Beleidigung"
-    - "Spam"
-    - "Werbung"
-    - "Betrug"
-    - "Benutzerdefiniert"
-
-  mute:
-    - "Spam"
-    - "Beleidigung"
-    - "Caps"
-    - "Werbung"
-    - "Provokation"
-    - "Benutzerdefiniert"
-
-  kick:
-    - "AFK"
-    - "Verhalten"
-    - "Namensänderung erforderlich"
-    - "Benutzerdefiniert"
-
-  warn:
-    - "Regelverstoß"
-    - "Fehlverhalten"
-    - "Spamming"
-    - "Provokation"
-    - "Benutzerdefiniert"
+  # Logging
+  logging:
+    log-all-punishments: true
+    log-point-changes: true
+    detailed-logs: true

@@ -1,0 +1,508 @@
+# Deutsche Sprachdatei für DisMineBridge
+
+# Minecraft Nachrichten
+minecraft:
+
+  kick:
+    # Berechtigungen & Fehler
+    no-permission: "&cDu hast keine Berechtigung für diesen Befehl!"
+    player-not-found: "&cSpieler &e{player} &cnicht gefunden oder nicht online!"
+    database-error: "&c✘ Fehler beim Speichern des Kicks!"
+
+    # Verwendung
+    usage: "&cBenutzung: /kick <Spieler> <Grund>"
+    examples-header: "&7Beispiele:"
+    example-1: "&e  /kick Steve AFK"
+    example-2: "&e  /kick Alex Unangemessenes_Verhalten"
+
+    # Erfolg
+    no-reason-given: "Kein Grund angegeben"
+    success: "&a✓ Kick wurde in die Datenbank eingetragen."
+    broadcast: "&6{player} &cwurde von &6{kicker} &cgekickt!"
+
+    # Kick-Nachricht
+    kick-message: "&cDu wurdest vom Server gekickt!\n&7Grund: &f{reason}"
+
+    # Tab-Completion
+    default-reasons: "AFK,Unangemessenes_Verhalten,Namensänderung_erforderlich"
+    custom-reason: "Eigener_Grund"
+
+  # Warn System
+  warn:
+    # Berechtigungen & Fehler
+    no-permission: "&cDu hast keine Berechtigung für diesen Befehl!"
+    player-not-found: "&cSpieler &e{player} &cnicht gefunden oder nicht online!"
+    database-error: "&cFehler beim Speichern der Verwarnung!"
+
+    # Verwendung
+    usage: "&cBenutzung: /warn <Spieler> <Grund>"
+    examples-header: "&7Beispiele:"
+    example-1: "&e  /warn Steve Regelverstoß"
+    example-2: "&e  /warn Alex Fehlverhalten"
+
+    # Erfolg
+    no-reason-given: "Kein Grund angegeben"
+    success: "&a✓ Warnung wurde eingetragen."
+    total-warns: "&7Spieler hat nun &e{total} &7Verwarnungen."
+    broadcast: "&6{player} &cwurde von &6{warner} &cverwarnt!"
+
+    # Nachricht an Spieler
+    message:
+      header: "&c▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+      title: "&c&l      DU WURDEST VERWARNT!"
+      reason: "&eGrund: &f{reason}"
+      by: "&eVon: &f{warner}"
+      total: "&eVerwarnungen insgesamt: &c{total}"
+      warning-threshold-1: "&c⚠ &4&lACHTUNG: &cWeitere Verwarnungen"
+      warning-threshold-2: "&c   führen zu einem automatischen Ban!"
+      footer: "&c▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+  # Ban System
+  ban:
+    # Berechtigungen & Fehler
+    no-permission: "&cDu hast keine Berechtigung für diesen Befehl!"
+    player-not-found: "&cSpieler &e{player} &cnicht gefunden!"
+    player-never-joined: "&cSpieler &e{player} &cwar noch nie auf dem Server!"
+    already-banned: "&c{player} ist bereits gebannt!"
+    database-error: "&c❌ Datenbankfehler beim Speichern des Bans!"
+
+    # Verwendung
+    usage: "&cBenutzung: /ban <Spieler> <Dauer|perm> <Grund>"
+    examples-header: "&7Beispiele:"
+    example-1: "&e  /ban Steve 7d Hacking"
+    example-2: "&e  /ban Alex perm \"Schwere Verstöße\""
+    example-3: "&e  /ban Bob 2d12h Verwendung von Exploits"
+
+    # Dauer
+    invalid-duration: "&cUngültige Dauer!"
+    invalid-duration-error: "&cUngültige Dauer: {error}"
+    valid-formats: "&7Gültige Formate:"
+    format-days: "&e  • 7d (7 Tage)"
+    format-hours: "&e  • 12h (12 Stunden)"
+    format-minutes: "&e  • 30m (30 Minuten)"
+    format-combined-1: "&e  • 7d12h (7 Tage und 12 Stunden)"
+    format-combined-2: "&e  • 1h30m15s (1 Stunde, 30 Min, 15 Sek)"
+    format-permanent: "&e  • perm (Permanent)"
+
+    # Permanent
+    permanent: "PERMANENT"
+
+    # Fehler bei Dauer-Parsing
+    error-empty-duration: "Dauer darf nicht leer sein"
+    error-no-number: "Keine Zahl vor Zeiteinheit '{unit}'"
+    error-negative: "Negative Werte sind nicht erlaubt"
+    error-invalid-number: "Ungültige Zahl: {number}"
+    error-invalid-char: "Ungültiges Zeichen: '{char}' (erlaubt: d, h, m, s)"
+    error-missing-unit: "Zeiteinheit fehlt nach Zahl: {number}"
+    error-zero-duration: "Dauer muss größer als 0 sein"
+
+    # Erfolg
+    no-reason-given: "Kein Grund angegeben"
+    success: "&a✓ Ban erfolgreich gesetzt. Dauer: &e{time}"
+    success-permanent: "&a✓ &e{player} &awurde permanent gebannt!"
+    broadcast: "&6{player} &cwurde von &6{banner} &cgebannt! &7(&e{time}&7)"
+    broadcast-permanent: "&6{player} &cwurde von &6{banner} &4PERMANENT &cgebannt!"
+
+    # Kick-Nachricht
+    kick-message: "&cDu wurdest gebannt!\n&7Grund: &f{reason}\n&7Verbleibende Zeit: &e{time}"
+
+    # Login verweigert
+    login-denied: "&cDu bist gebannt!\n&7Grund: &f{reason}\n&7Verbleibende Zeit: &e{time}\n&7Gebannt von: &f{banner}"
+
+    # Tab-Completion
+    default-reasons: "Hacking,Griefing,Beleidigung,Spam,Werbung,Betrug"
+    custom-reason: "Eigener_Grund"
+
+  # Unban System
+  unban:
+    no-permission: "&cDu hast keine Berechtigung für diesen Befehl!"
+    player-not-found: "&cSpieler &e{player} &cnicht gefunden oder war nie auf dem Server!"
+    not-banned: "&c{player} ist nicht gebannt!"
+    database-error: "&c❌ Datenbankfehler beim Entbannen!"
+
+    usage: "&cBenutzung: /unban <Spieler> [Grund]"
+    example: "&eBeispiel: /unban Steve Versehentlicher_Ban"
+
+    no-reason-given: "Kein Grund angegeben"
+    success: "&a✓ {player} wurde erfolgreich entbannt!"
+    broadcast: "&6{player} &awurde von &6{unbanner} &aentbannt!"
+
+    default-reasons: "Versehentlicher_Ban,Strafe_abgesessen,Begnadigung,Fehlerhafte_Entscheidung"
+  # Vanish System
+  vanish:
+    # Fake Join/Quit Nachrichten
+    fake-join: "&e{player} joined the game"
+    fake-quit: "&e{player} left the game"
+
+    # Berechtigungen & Fehler
+    player-only: "&cNur Spieler können /vanish ohne Argument nutzen."
+    no-permission: "&cDu hast keine Berechtigung für diesen Befehl."
+    no-permission-list: "&cDu hast keine Berechtigung, die Vanish-Liste zu sehen."
+    no-permission-others: "&cDu hast keine Berechtigung, andere Spieler zu vanishen."
+    player-not-found: "&cSpieler &e{player} &cist nicht online."
+    usage: "&cNutze: /vanish [Spieler] [on|off|list|info]"
+
+    # Status Nachrichten
+    already-enabled: "&e{player} &7ist bereits im Vanish."
+    already-disabled: "&e{player} &7ist bereits sichtbar."
+
+    # Vanish Aktiviert
+    enabled:
+      header: "&c▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+      title: "&c&l          VANISH AKTIVIERT"
+      invisible: "&7  » Du bist nun &c&lUNSICHTBAR"
+      hidden: "&7  » Andere Spieler können dich nicht mehr sehen"
+      fake-quit: "&7  » Eine Fake-Quit-Nachricht wurde gesendet"
+      team-can-see: "&7  » &e{count} &7Team-Mitglieder können dich sehen"
+      footer: "&8  Nutze &c/vanish &8erneut zum Deaktivieren"
+
+    enabled-by-other: "&7Vanish für &e{player} &7wurde &caktiviert&7."
+
+    # Vanish Deaktiviert
+    disabled:
+      header: "&a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+      title: "&a&l          VANISH DEAKTIVIERT"
+      visible: "&7  » Du bist nun &a&lSICHTBAR"
+      shown: "&7  » Alle Spieler können dich wieder sehen"
+      fake-join: "&7  » Eine Fake-Join-Nachricht wurde gesendet"
+
+    disabled-by-other: "&7Vanish für &e{player} &7wurde &adeaktiviert&7."
+
+    # Vanish Liste
+    list:
+      empty: "&eDerzeit ist kein Spieler im Vanish."
+      header: "&c▬▬▬▬▬▬ &lVANISH LISTE ({count})&r&c ▬▬▬▬▬▬"
+      entry: "&7  » &e{player} &8- &7seit {time}"
+      total: "&7Insgesamt: &e{count} &7Spieler im Vanish"
+      footer: "&c▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+
+    # Vanish Info
+    info:
+      header: "&6▬▬▬▬▬▬ &lVANISH INFO&r&6 ▬▬▬▬▬▬"
+      status-vanished: "&eStatus: &c✗ Im Vanish"
+      status-visible: "&eStatus: &a✓ Sichtbar"
+      duration: "&eIm Vanish seit: &f{time}"
+      can-see: "&eKönnen dich sehen: &f{count} Spieler"
+      permission-vanish: "&ePermission: &{status}"
+      permission-others: "&eAndere vanishen: &{status}"
+      permission-see: "&eVanish sehen: &{status}"
+      footer: "&6▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+
+  whitelist:
+    enabled: "&aWhitelist wurde aktiviert!"
+    disabled: "&cWhitelist wurde deaktiviert!"
+    added: "&a{player} wurde zur Whitelist hinzugefügt!"
+    removed: "&c{player} wurde von der Whitelist entfernt!"
+    not-whitelisted: "&cDu stehst nicht auf der Whitelist!"
+    already-added: "&c{player} ist bereits auf der Whitelist!"
+    not-on-list: "&c{player} ist nicht auf der Whitelist!"
+    player-not-found: "&cSpieler nicht gefunden!"
+    no-permission: "&cDu hast keine Berechtigung für diesen Befehl!"
+    usage: "&cVerwendung: /whitelist <add|remove|on|off> [Spieler]"
+    discord-leave-removed: "&cDu wurdest von der Whitelist entfernt, da du den Discord-Server verlassen hast!"
+
+  join:
+    welcome: "&aWillkommen auf dem Server, {player}!"
+    first-join: "&e{player} hat den Server zum ersten Mal betreten!"
+  # Tab-Completion
+  default-reasons: "Regelverstoß,Fehlverhalten,Spamming,Provokation"
+  custom-reason: "Eigener_Grund"
+
+
+# Füge diese Abschnitte zur de-DE.yml hinzu:
+
+
+  punishment:
+    no-permission: "&cDu hast keine Berechtigung für diesen Befehl!"
+
+    # Usage
+    usage:
+      header: "&6&l━━━━━━━ &ePUNISHMENT SYSTEM &6&l━━━━━━━"
+      add: "&e/punishment add <Type> <Duration> <Grund>"
+      remove: "&e/punishment remove <ID>"
+      list: "&e/punishment list [Type]"
+      reload: "&e/punishment reload"
+
+    # Add Command
+    add:
+      usage: "&cBenutzung: /punishment add <Type> <Duration> <Grund>"
+      examples-header: "&7Beispiele:"
+      example-1: "&e  /punishment add WARN - Beleidigung"
+      example-2: "&e  /punishment add KICK - Spam"
+      example-3: "&e  /punishment add BAN 7d Hacking"
+      invalid-type: "&cUngültiger Typ: &e{type}"
+      valid-types: "&7Gültige Typen: &eWARN, KICK, BAN"
+      success: "&a✓ Grund hinzugefügt! &7(&e{type}&7) &f{reason} &7- &e{duration}"
+      error: "&c✘ Fehler beim Hinzufügen des Grundes!"
+
+    # Remove Command
+    remove:
+      usage: "&cBenutzung: /punishment remove <ID>"
+      invalid-id: "&cUngültige ID! Muss eine Zahl sein."
+      success: "&a✓ Grund mit ID &e{id} &awurde entfernt!"
+      error: "&c✘ Fehler beim Entfernen des Grundes!"
+
+    # List Command
+    list:
+      header: "&6&l━━━━━━━ &ePUNISHMENT GRÜNDE &6&l━━━━━━━"
+      footer: "&6&l━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+      invalid-type: "&cUngültiger Typ! Nutze: ALL, WARN, KICK, BAN"
+      no-reasons: "&7Keine Gründe für Typ &e{type} &7gefunden."
+      type-header: "&e&l{type} &7({count} Gründe):"
+      entry: "&7  &e#{id} &f{reason} &8- &7{duration}"
+
+    # Reload Command
+    reload:
+      success: "&a✓ Punishment Cache neu geladen!"
+
+  # Mute System
+  mute:
+    # Permissions & Errors
+    no-permission: "&cDu hast keine Berechtigung für diesen Befehl!"
+    player-not-found: "&cSpieler &e{player} &cnicht gefunden!"
+    already-muted: "&c{player} ist bereits gemutet!"
+    database-error: "&c✘ Datenbankfehler beim Muten!"
+
+    # Usage
+    usage: "&cBenutzung: /mute <Spieler> <Dauer> <Grund>"
+    examples-header: "&7Beispiele:"
+    example-1: "&e  /mute Steve 10m Spam"
+    example-2: "&e  /mute Alex 1h Beleidigung"
+    example-3: "&e  /mute Bob 24h Schwere_Beleidigung"
+
+    # Duration
+    invalid-duration: "&cUngültige Dauer!"
+    invalid-duration-error: "&cUngültige Dauer: {error}"
+    valid-formats: "&7Gültige Formate:"
+    format-minutes: "&e  • 10m (10 Minuten)"
+    format-hours: "&e  • 1h (1 Stunde)"
+    format-days: "&e  • 1d (1 Tag)"
+    format-combined: "&e  • 1h30m (1 Stunde 30 Minuten)"
+
+    # Errors
+    error-empty-duration: "Dauer darf nicht leer sein"
+    error-no-number: "Keine Zahl vor Zeiteinheit '{unit}'"
+    error-negative: "Negative Werte sind nicht erlaubt"
+    error-invalid-number: "Ungültige Zahl: {number}"
+    error-invalid-char: "Ungültiges Zeichen: '{char}'"
+    error-missing-unit: "Zeiteinheit fehlt nach Zahl: {number}"
+    error-zero-duration: "Dauer muss größer als 0 sein"
+
+    # Success
+    no-reason-given: "Kein Grund angegeben"
+    success: "&a✓ {player} wurde für &e{duration} &agemutet!"
+    broadcast: "&6{player} &7wurde von &6{muter} &7für &e{duration} &7gemutet!"
+
+    # Messages to Player
+    muted: "&c▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n&c&l      DU WURDEST GEMUTET!\n\n&7Grund: &f{reason}\n&7Dauer: &e{duration}\n\n&c⚠ &eDu kannst während dieser Zeit nicht im Chat schreiben!\n&c⚠ &eDein Voice-Chat wurde ebenfalls deaktiviert!\n&c⚠ &eAlle Chat-Befehle sind blockiert!\n&c▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+    chat-blocked: "&cDu bist noch für &e{time} &cgemutet!"
+    command-blocked: "&cDer Befehl &e/{command} &cist während deines Mutes nicht verfügbar! &7(noch &e{time}&7)"
+    voice-blocked: "&cDein Voice-Chat ist gemutet!"
+    expired: "&aDein Mute ist abgelaufen! Du kannst nun wieder im Chat und Voice-Chat sprechen!"
+
+    # Tab-Completion
+    default-reasons: "Spam,Beleidigung,Provokation,Werbung"
+    custom-reason: "Eigener_Grund"
+
+  # Unmute System
+  unmute:
+    no-permission: "&cDu hast keine Berechtigung für diesen Befehl!"
+    player-not-found: "&cSpieler &e{player} &cnicht gefunden oder war nie auf dem Server!"
+    not-muted: "&c{player} ist nicht gemutet!"
+    database-error: "&c✘ Datenbankfehler beim Entmuten!"
+
+    usage: "&cBenutzung: /unmute <Spieler> [Grund]"
+    example: "&eBeispiel: /unmute Steve Versehentlicher_Mute"
+
+    no-reason-given: "Kein Grund angegeben"
+    success: "&a✓ {player} wurde erfolgreich entmutet!"
+    broadcast: "&6{player} &awurde von &6{unmuter} &aentmutet!"
+    unmuted: "&aVoice-Chat aktiv!"
+
+    default-reasons: "Versehentlicher_Mute,Strafe_abgesessen,Begnadigung"
+
+  # Punish Command (Automatische Eskalation - Vereinfacht)
+  punish:
+    no-permission: "&cDu hast keine Berechtigung für diesen Befehl!"
+
+    # Usage
+    usage: "&cBenutzung: /punish <Spieler> <Grund>"
+    examples-header: "&7Beispiele:"
+    example-1: "&e  /punish Steve Spam"
+    example-2: "&e  /punish Alex Griefing"
+    example-3: "&e  /punish Bob Hacking"
+
+    # Messages
+    player-not-found: "&cSpieler &e{player} &cnicht gefunden oder nicht online!"
+    reason-not-found: "&cGrund &e{reason} &cnicht in der Datenbank gefunden!"
+    use-punishment-list: "&7Nutze &e/punishment list &7um alle Gründe zu sehen."
+    database-error: "&c✘ Datenbankfehler beim Ausführen der Strafe!"
+
+    executing: "&7Führe Strafe aus für &e{player} &7wegen: &f{reason}"
+
+    success: "&a✓ Strafe erfolgreich ausgeführt!"
+    error: "&c✘ Fehler beim Ausführen der Strafe!"
+
+    # Warnung an Spieler
+    escalation-warning: "&c⚠ &eWeitere Verstöße führen zu härteren Strafen!"
+
+    # Spezialstrafen
+    special:
+      instant-permban: "&c&lPERMANENTER BAN!\n\n&7Grund: &f{reason}\n\n&cDieser Verstoß führt zu einem permanenten Ausschluss!"
+      instant-permban-broadcast: "&c&l⚠ {player} wurde PERMANENT gebannt! &7(Grund: {reason})"
+
+# Discord Nachrichten
+discord:
+  # Ticket Setup
+  setup:
+    title: "🎫 Ticket System Setup"
+    description: "Konfiguriere hier dein Ticket-System!"
+    select-panel-channel: "Wähle den Kanal für die Ticket-Panel Nachricht:"
+    select-support-category: "Wähle die Kategorie für Support-Tickets:"
+    select-bug-category: "Wähle die Kategorie für Bug-Report-Tickets:"
+    select-whitelist-channel: "Wähle den Kanal für Whitelist-Anfragen:"
+    select-roles: "Wähle die Rollen aus:"
+    role-admin: "👑 Admin Rollen"
+    role-moderator: "🛡️ Moderator Rollen"
+    role-supporter: "💬 Supporter Rollen"
+    role-developer: "💻 Developer Rollen"
+    success: "✅ Ticket-System erfolgreich konfiguriert!"
+    error: "❌ Fehler bei der Konfiguration des Ticket-Systems!"
+    no-permission: "❌ Du hast keine Berechtigung für diesen Befehl!"
+
+  # Ticket Panel
+  panel:
+    title: "🎫 Support Ticket System"
+    description: "Wähle eine Kategorie aus, um ein Ticket zu erstellen!"
+    button-support: "🆘 Support"
+    button-bug: "🐛 Bug Report"
+    button-whitelist: "📝 Whitelist"
+
+  # Ticket Erstellung
+  ticket:
+    create:
+      modal-title-support: "Support Ticket erstellen"
+      modal-title-bug: "Bug Report erstellen"
+      modal-title-whitelist: "Whitelist beantragen"
+      field-description: "Beschreibung"
+      field-description-placeholder: "Beschreibe dein Anliegen..."
+      field-minecraft-name: "Minecraft Name"
+      field-minecraft-name-placeholder: "Dein Minecraft Benutzername"
+
+    created:
+      title: "Ticket erstellt!"
+      description: "Dein Ticket wurde erstellt: {channel}"
+
+    channel-name: "ticket-{username}-{id}"
+
+    message:
+      title: "🎫 Ticket #{id}"
+      creator: "**Ersteller:** {user}"
+      type: "**Typ:** {type}"
+      description: "**Beschreibung:**\n{description}"
+      status: "**Status:** {status}"
+      claimed-by: "**Übernommen von:** {user}"
+      created-at: "**Erstellt am:** {time}"
+
+    button:
+      claim: "✋ Übernehmen"
+      unclaim: "🔓 Freigeben"
+      add-user: "➕ Benutzer hinzufügen"
+      close: "🔒 Schließen"
+
+    claim:
+      success: "✅ Du hast das Ticket übernommen!"
+      already-claimed: "❌ Dieses Ticket wurde bereits übernommen!"
+      unclaimed: "✅ Ticket wurde freigegeben!"
+
+    close:
+      confirm-title: "Ticket schließen?"
+      confirm-description: "Bist du sicher, dass du dieses Ticket schließen möchtest?"
+      confirm-yes: "✅ Ja, schließen"
+      confirm-no: "❌ Abbrechen"
+      request-sent: "📨 Schließungsanfrage wurde an die Moderatoren gesendet!"
+      request-title: "Schließungsanfrage"
+      request-description: "{user} möchte dieses Ticket schließen."
+      request-approve: "✅ Genehmigen"
+      request-deny: "❌ Ablehnen"
+      approved: "✅ Ticket wird geschlossen..."
+      denied: "❌ Schließungsanfrage wurde abgelehnt!"
+      closed: "🔒 Ticket wurde geschlossen!"
+
+    add-user:
+      modal-title: "Benutzer hinzufügen"
+      field-user: "Benutzer"
+      field-user-placeholder: "@Benutzer oder ID"
+      success: "✅ {user} wurde zum Ticket hinzugefügt!"
+      error: "❌ Benutzer konnte nicht hinzugefügt werden!"
+
+    error:
+      max-tickets: "❌ Du hast bereits {max} offene Tickets!"
+      cooldown: "❌ Du kannst erst wieder ein Ticket erstellen in: {time}"
+      already-whitelisted: "❌ Du bist bereits auf der Whitelist!"
+      pending-request: "❌ Du hast bereits eine ausstehende Whitelist-Anfrage!"
+      no-permission: "❌ Du hast keine Berechtigung dafür!"
+
+  # Whitelist
+  whitelist:
+    request:
+      title: "📝 Whitelist Anfrage"
+      user: "**Benutzer:** {user}"
+      minecraft-name: "**Minecraft Name:** {name}"
+      additional-info: "**Zusätzliche Informationen:**"
+      status: "**Status:** Ausstehend"
+      created-at: "**Erstellt am:** {time}"
+
+    button:
+      approve: "✅ Annehmen"
+      deny: "❌ Ablehnen"
+
+    approve:
+      success: "✅ Whitelist-Anfrage wurde angenommen!"
+      dm-title: "✅ Whitelist angenommen!"
+      dm-description: "Deine Whitelist-Anfrage für **{name}** wurde angenommen!\nDu kannst jetzt dem Server beitreten!"
+
+    deny:
+      modal-title: "Whitelist ablehnen"
+      field-reason: "Grund"
+      field-reason-placeholder: "Warum wird die Anfrage abgelehnt?"
+      success: "❌ Whitelist-Anfrage wurde abgelehnt!"
+      dm-title: "❌ Whitelist abgelehnt"
+      dm-description: "Deine Whitelist-Anfrage für **{name}** wurde leider abgelehnt.\n\n**Grund:** {reason}\n\nDu kannst in {days} Tagen eine neue Anfrage stellen."
+
+    status:
+      pending: "⏳ Ausstehend"
+      approved: "✅ Angenommen"
+      denied: "❌ Abgelehnt"
+      none: "📝 Keine Anfrage"
+      server-left: "🚪 Server verlassen"
+
+    dm:
+      request-sent-title: "📝 Whitelist Anfrage gesendet"
+      request-sent-description: "Deine Whitelist-Anfrage wurde erfolgreich gesendet!\nDu wirst benachrichtigt, sobald sie bearbeitet wurde."
+
+# Status Texte
+status:
+  pending: "Ausstehend"
+  approved: "Angenommen"
+  denied: "Abgelehnt"
+  open: "Offen"
+  claimed: "In Bearbeitung"
+  closed: "Geschlossen"
+
+# Fehler
+error:
+  database: "❌ Datenbankfehler: {error}"
+  unknown: "❌ Ein unbekannter Fehler ist aufgetreten!"
+  timeout: "❌ Die Anfrage ist abgelaufen!"
+
+
+
+# Allgemein
+general:
+  yes: "Ja"
+  no: "Nein"
+  cancel: "Abbrechen"
+  confirm: "Bestätigen"
+  back: "Zurück"
+  next: "Weiter"
+  finish: "Fertig"
