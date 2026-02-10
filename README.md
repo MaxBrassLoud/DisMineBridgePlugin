@@ -173,3 +173,7 @@ Explore more projects: [GitHub Profile](https://github.com/MaxBrassLoud)
 ## Support
 
 For issues, questions, or feature requests, please use the GitHub issue tracker or contact the developer through the repository.
+
+
+
+Parts coded with AI
