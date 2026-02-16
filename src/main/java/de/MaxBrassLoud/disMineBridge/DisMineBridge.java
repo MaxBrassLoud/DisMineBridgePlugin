@@ -106,7 +106,8 @@ public class DisMineBridge extends JavaPlugin {
         getCommand("punishment").setExecutor(new PunishmentCommand(this));
         getCommand("punish").setExecutor(new PunishCommand(this));
 
-        // ... andere Commands ...
+        getCommand("vanish").setExecutor(new VanishCommand(this));
+        getCommand("whitelist").setExecutor(new WhitelistCommand(this));
     }
 
     private void registerListeners() {
@@ -116,7 +117,11 @@ public class DisMineBridge extends JavaPlugin {
         // Chat Listener (für Mutes)
         getServer().getPluginManager().registerEvents(new ChatListener(this), this);
 
-        // ... andere Listeners ...
+        getServer().getPluginManager().registerEvents(new VanishJoinQuitListener(this), this);
+
+        getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
+
+
     }
 
     // Getter

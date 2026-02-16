@@ -1,5 +1,5 @@
 name: DisMineBridge
-version: '0.2.2'
+version: '0.2.2.1'
 main: de.MaxBrassLoud.disMineBridge.DisMineBridge
 api-version: '1.21'
 authors: [ MaxBrassLoud ]

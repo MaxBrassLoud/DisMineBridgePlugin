@@ -2,6 +2,7 @@ package de.MaxBrassLoud.disMineBridge.listeners;
 
 import de.MaxBrassLoud.disMineBridge.DisMineBridge;
 import de.MaxBrassLoud.disMineBridge.features.vanish.VanishManager;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -20,14 +21,22 @@ public class VanishJoinQuitListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onJoin(PlayerJoinEvent event) {
+        Player joiningPlayer = event.getPlayer();
+
         // IMMER die Standard-Join-Nachricht blockieren
         event.setJoinMessage(null);
 
         // VanishManager lädt Spieler und entscheidet über Join-Nachricht
-        vanishManager.loadPlayer(event.getPlayer());
+        vanishManager.loadPlayer(joiningPlayer);
 
         // Zeige vanished Spieler für Staff-Mitglieder
-        vanishManager.showVanishedToStaff(event.getPlayer());
+        vanishManager.showVanishedToStaff(joiningPlayer);
+
+        // WICHTIG: Verstecke alle vanished Spieler vor dem neu joinenden Spieler
+        // (außer wenn der joinende Spieler selbst Staff ist und vanished Spieler sehen darf)
+        if (!joiningPlayer.hasPermission("dmb.vanish.see")) {
+            vanishManager.hideAllVanishedFrom(joiningPlayer);
+        }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
