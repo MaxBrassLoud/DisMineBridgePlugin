@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.IPermissionHolder;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
@@ -15,7 +16,10 @@ import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 
 import java.awt.*;
 import java.sql.SQLException;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ModalInteractionListener extends ListenerAdapter {
@@ -146,9 +150,11 @@ public class ModalInteractionListener extends ListenerAdapter {
                     channel.sendMessageEmbeds(embed.build())
                             .addActionRow(
                                     Button.success("whitelist_approve_" + event.getUser().getId(),
-                                            lang.getMessage("discord.whitelist.button.approve")),
+                                                    lang.getMessage("discord.whitelist.button.approve"))
+                                            .withEmoji(Emoji.fromUnicode("✅")),
                                     Button.danger("whitelist_deny_" + event.getUser().getId(),
-                                            lang.getMessage("discord.whitelist.button.deny"))
+                                                    lang.getMessage("discord.whitelist.button.deny"))
+                                            .withEmoji(Emoji.fromUnicode("❌"))
                             )
                             .queue();
                 }
@@ -220,29 +226,32 @@ public class ModalInteractionListener extends ListenerAdapter {
         String reason = event.getValue("reason").getAsString();
 
         try {
+            // Minecraft Name holen
+            String minecraftName = "Unknown";
+            try {
+                var conn = plugin.getDatabaseManager().getConnection();
+                var stmt = conn.prepareStatement("SELECT minecraft_name FROM users WHERE discord_id = ?");
+                stmt.setString(1, discordId);
+                var rs = stmt.executeQuery();
+                if (rs.next()) {
+                    minecraftName = rs.getString("minecraft_name");
+                }
+                rs.close();
+                stmt.close();
+            } catch (Exception ignored) {}
+
             plugin.getWhitelistManager().denyWhitelistRequest(discordId, reason);
 
             int cooldownDays = plugin.getConfig().getInt("whitelist.cooldown-after-rejection", 7);
 
             event.reply(lang.getMessage("discord.whitelist.deny.success")).setEphemeral(true).queue();
 
+            // ✅ NEU: Finde und update die ursprüngliche Whitelist-Anfrage Message
+            updateWhitelistEmbedOnDeny(event, discordId, minecraftName, reason, lang);
+
             // DM an User
             User user = plugin.getDiscordBot().getJDA().retrieveUserById(discordId).complete();
             if (user != null) {
-                // Minecraft Name holen
-                String minecraftName = "Unknown";
-                try {
-                    var conn = plugin.getDatabaseManager().getConnection();
-                    var stmt = conn.prepareStatement("SELECT minecraft_name FROM users WHERE discord_id = ?");
-                    stmt.setString(1, discordId);
-                    var rs = stmt.executeQuery();
-                    if (rs.next()) {
-                        minecraftName = rs.getString("minecraft_name");
-                    }
-                    rs.close();
-                    stmt.close();
-                } catch (Exception ignored) {}
-
                 EmbedBuilder dm = new EmbedBuilder();
                 dm.setTitle(lang.getMessage("discord.whitelist.deny.dm-title"));
                 dm.setDescription(lang.getMessage("discord.whitelist.deny.dm-description")
@@ -259,5 +268,68 @@ public class ModalInteractionListener extends ListenerAdapter {
             event.reply(lang.getMessage("error.database").replace("{error}", e.getMessage()))
                     .setEphemeral(true).queue();
         }
+    }
+
+    /**
+     * ✅ NEU: Update das Whitelist-Embed nach Deny
+     */
+    private void updateWhitelistEmbedOnDeny(ModalInteractionEvent event, String discordId,
+                                            String minecraftName, String reason, LanguageManager lang) {
+        String whitelistChannelId = plugin.getConfig().getString("discord.whitelist-channel");
+        if (whitelistChannelId == null) return;
+
+        TextChannel whitelistChannel = event.getGuild().getTextChannelById(whitelistChannelId);
+        if (whitelistChannel == null) return;
+
+        // Suche nach der Message mit den Buttons für diesen User
+        whitelistChannel.getIterableHistory().takeAsync(100).thenAccept(messages -> {
+            for (var message : messages) {
+                // Prüfe ob Message Buttons für diesen Discord-User hat
+                if (!message.getButtons().isEmpty()) {
+                    for (var button : message.getButtons()) {
+                        if (button.getId() != null && button.getId().contains(discordId)) {
+                            // Gefunden! Update diese Message
+                            if (!message.getEmbeds().isEmpty()) {
+                                EmbedBuilder updatedEmbed = new EmbedBuilder(message.getEmbeds().get(0));
+
+                                // Setze Farbe auf ROT
+                                updatedEmbed.setColor(Color.RED);
+
+                                // Update Felder
+                                updatedEmbed.clearFields();
+                                updatedEmbed.addField(lang.getMessage("discord.whitelist.request.user"),
+                                        "<@" + discordId + ">", false);
+                                updatedEmbed.addField(lang.getMessage("discord.whitelist.request.minecraft-name"),
+                                        minecraftName, false);
+                                updatedEmbed.addField(lang.getMessage("discord.whitelist.request.status"),
+                                        "❌ " + lang.getMessage("discord.whitelist.status.denied"), false);
+                                updatedEmbed.addField("Abgelehnt von",
+                                        event.getUser().getName(), false);
+                                updatedEmbed.addField("Grund",
+                                        reason, false);
+                                updatedEmbed.setTimestamp(Instant.now());
+
+                                // Disable alle Buttons
+                                List<Button> disabledButtons = new ArrayList<>();
+                                disabledButtons.add(Button.success("whitelist_approve_disabled",
+                                                lang.getMessage("discord.whitelist.button.approve"))
+                                        .withEmoji(Emoji.fromUnicode("✅"))
+                                        .asDisabled());
+                                disabledButtons.add(Button.danger("whitelist_deny_disabled",
+                                                lang.getMessage("discord.whitelist.button.deny"))
+                                        .withEmoji(Emoji.fromUnicode("❌"))
+                                        .asDisabled());
+
+                                // Update die Message
+                                message.editMessageEmbeds(updatedEmbed.build())
+                                        .setComponents(ActionRow.of(disabledButtons))
+                                        .queue();
+                            }
+                            return; // Gefunden und updated, fertig
+                        }
+                    }
+                }
+            }
+        });
     }
 }

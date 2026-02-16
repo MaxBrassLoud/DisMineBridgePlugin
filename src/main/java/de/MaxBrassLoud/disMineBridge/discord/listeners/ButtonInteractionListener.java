@@ -5,6 +5,7 @@ import de.MaxBrassLoud.disMineBridge.managers.LanguageManager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
@@ -15,6 +16,7 @@ import net.dv8tion.jda.api.interactions.modals.Modal;
 
 import java.awt.*;
 import java.sql.*;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -297,7 +299,7 @@ public class ButtonInteractionListener extends ListenerAdapter {
         } catch (SQLException e) {
             e.printStackTrace();
             //event.reply(lang.getMessage("error.database").replace("{error}", e.getMessage()))
-                    //.setEphemeral(true).queue();
+            //.setEphemeral(true).queue();
         }
     }
 
@@ -329,6 +331,10 @@ public class ButtonInteractionListener extends ListenerAdapter {
             plugin.getWhitelistManager().approveWhitelistRequest(discordId, minecraftName);
 
             event.reply(lang.getMessage("discord.whitelist.approve.success")).setEphemeral(true).queue();
+
+            // ✅ NEU: Update das Embed in der Nachricht
+            updateWhitelistEmbed(event.getMessage(), discordId, minecraftName, true,
+                    event.getUser().getName(), lang);
 
             // DM an User senden
             User user = plugin.getDiscordBot().getJDA().retrieveUserById(discordId).complete();
@@ -366,5 +372,51 @@ public class ButtonInteractionListener extends ListenerAdapter {
                 .build();
 
         event.replyModal(modal).queue();
+    }
+
+    /**
+     * ✅ NEU: Update das Whitelist-Embed nach Approve/Deny
+     */
+    private void updateWhitelistEmbed(Message message, String discordId, String minecraftName,
+                                      boolean approved, String moderator, LanguageManager lang) {
+        if (message.getEmbeds().isEmpty()) return;
+
+        EmbedBuilder updatedEmbed = new EmbedBuilder(message.getEmbeds().get(0));
+
+        // Setze Farbe basierend auf Status
+        updatedEmbed.setColor(approved ? Color.GREEN : Color.RED);
+
+        // Update Status-Feld
+        String statusText = approved ?
+                "✅ " + lang.getMessage("discord.whitelist.status.approved") :
+                "❌ " + lang.getMessage("discord.whitelist.status.denied");
+
+        // Entferne altes Status-Feld und füge neues hinzu
+        updatedEmbed.clearFields();
+        updatedEmbed.addField(lang.getMessage("discord.whitelist.request.user"),
+                "<@" + discordId + ">", false);
+        updatedEmbed.addField(lang.getMessage("discord.whitelist.request.minecraft-name"),
+                minecraftName, false);
+        updatedEmbed.addField(lang.getMessage("discord.whitelist.request.status"),
+                statusText, false);
+        updatedEmbed.addField(approved ? "Genehmigt von" : "Abgelehnt von",
+                moderator, false);
+        updatedEmbed.setTimestamp(Instant.now());
+
+        // Disable alle Buttons
+        List<Button> disabledButtons = new ArrayList<>();
+        disabledButtons.add(Button.success("whitelist_approve_disabled",
+                        lang.getMessage("discord.whitelist.button.approve"))
+                .withEmoji(Emoji.fromUnicode("✅"))
+                .asDisabled());
+        disabledButtons.add(Button.danger("whitelist_deny_disabled",
+                        lang.getMessage("discord.whitelist.button.deny"))
+                .withEmoji(Emoji.fromUnicode("❌"))
+                .asDisabled());
+
+        // Update die Message
+        message.editMessageEmbeds(updatedEmbed.build())
+                .setComponents(ActionRow.of(disabledButtons))
+                .queue();
     }
 }

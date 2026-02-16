@@ -107,14 +107,14 @@ public class VanishManager {
     private void hide(Player p) {
         for (Player other : Bukkit.getOnlinePlayers()) {
             if (!other.equals(p) && !other.hasPermission("dmb.vanish.see")) {
-                other.hidePlayer(p);
+                other.hidePlayer(plugin, p);
             }
         }
     }
 
     private void show(Player p) {
         for (Player other : Bukkit.getOnlinePlayers()) {
-            other.showPlayer(p);
+            other.showPlayer(plugin, p);
         }
     }
 
@@ -142,7 +142,17 @@ public class VanishManager {
         if (!staff.hasPermission("dmb.vanish.see")) return;
 
         for (Player vanishedPlayer : getVanishedPlayers()) {
-            staff.showPlayer(vanishedPlayer);
+            staff.showPlayer(plugin, vanishedPlayer);
+        }
+    }
+
+    /**
+     * NEU: Versteckt alle vanished Spieler vor einem bestimmten Spieler
+     * Wird beim Join aufgerufen für normale Spieler
+     */
+    public void hideAllVanishedFrom(Player player) {
+        for (Player vanishedPlayer : getVanishedPlayers()) {
+            player.hidePlayer(plugin, vanishedPlayer);
         }
     }
 
