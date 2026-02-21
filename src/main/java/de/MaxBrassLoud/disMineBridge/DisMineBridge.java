@@ -8,6 +8,7 @@ import de.MaxBrassLoud.disMineBridge.listeners.*;
 import de.MaxBrassLoud.disMineBridge.managers.*;
 import net.dv8tion.jda.api.entities.Message;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.checkerframework.checker.units.qual.A;
 
 public class DisMineBridge extends JavaPlugin {
 
@@ -20,6 +21,8 @@ public class DisMineBridge extends JavaPlugin {
     private WhitelistManager whitelistManager;
     private TicketManager ticketManager;
     private DiscordBot discordBot;
+    private AdminModeManager adminModeManager;
+    private InventoryStoreManager inventoryStoreManager;
 
     // ... andere Manager ...
 
@@ -61,6 +64,10 @@ public class DisMineBridge extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
+
+        this.adminModeManager = new AdminModeManager(this);
+
+        this.inventoryStoreManager = new InventoryStoreManager(this);
 
         // Default Punishments laden (beim ersten Start)
         DefaultPunishmentsLoader defaultLoader = new DefaultPunishmentsLoader(this);
@@ -108,6 +115,9 @@ public class DisMineBridge extends JavaPlugin {
 
         getCommand("vanish").setExecutor(new VanishCommand(this));
         getCommand("whitelist").setExecutor(new WhitelistCommand(this));
+
+        getCommand("invsee").setExecutor(new InvSeeCommand(this));
+        getCommand("adminmode").setExecutor(new AdminModeCommand(this));
     }
 
     private void registerListeners() {
@@ -160,4 +170,8 @@ public class DisMineBridge extends JavaPlugin {
     public DiscordBot getDiscordBot() {
         return discordBot;
     }
+
+    public AdminModeManager getAdminModeManager() {return adminModeManager;}
+
+    public InventoryStoreManager getInventoryStoreManager() { return  inventoryStoreManager;}
 }
