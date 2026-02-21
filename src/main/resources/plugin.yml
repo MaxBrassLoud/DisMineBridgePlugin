@@ -1,5 +1,5 @@
 name: DisMineBridge
-version: '0.2.2.1'
+version: '0.2.3'
 main: de.MaxBrassLoud.disMineBridge.DisMineBridge
 api-version: '1.21'
 authors: [ MaxBrassLoud ]
@@ -7,6 +7,12 @@ description: A simpe yet powerful moderaion Plugin for Minecraft 1.21.8
 
 
 commands:
+  adminmode:
+    description: Aktiviert/deaktiviert den Admin-Modus (Inventar-Snapshot + Creative)
+    usage: /adminmode
+    permission: dmb.adminmode
+    aliases: [am]
+
   whitelist:
     description: Verwalte die Server Whitelist
     usage: /whitelist <add|remove|on|off> [Spieler]
@@ -57,9 +63,19 @@ commands:
     usage: /unmute <Spieler> [Grund]
     permission: dmb.unmute
 
+  invsee:
+    description: lässt dich in Inventare von anderen Spielern schauen
+    usage: /invsee [inv| end] {Player}
+    permission: dmb.invsee
+
 
 
 permissions:
+  dmb.adminmode:
+    description: Admin-Modus toggle (/adminmode)
+    default: op
+  dmb.invsee:
+    default: op
   dmb.mute:
     description: Erlaubt das Muten von Spielern
     default: op

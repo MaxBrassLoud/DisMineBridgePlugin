@@ -3,6 +3,27 @@
 # Minecraft Nachrichten
 minecraft:
 
+  adminmode:
+    # Fehler
+    player-only: "&cNur Spieler können diesen Befehl nutzen!"
+    no-permission: "&cDu hast keine Berechtigung für den Admin-Modus!"
+
+    # Aktivierung
+    activated-header: "&8&m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    activated-line1: "  &c&l⚠ Admin-Modus &aaktiviert"
+    activated-line2: "  &7Dein Inventar, Position & Zustand wurden gesichert."
+    activated-line3: "  &7Tippe &e/adminmode &7um alles wiederherzustellen."
+
+    # Deaktivierung
+    deactivated-header: "&8&m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    deactivated-line1: "  &a&l✔ Admin-Modus &cdeaktiviert"
+    deactivated-line2: "  &7Du wurdest zu deiner vorherigen Position teleportiert."
+
+    # Server-Restart-Hinweis
+    restart-notice-header: "&8&m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    restart-notice-line1: "  &6&l⚡ Admin-Modus wiederhergestellt"
+    restart-notice-line2: "  &7Du warst beim letzten Server-Neustart im Admin-Modus."
+
   kick:
     # Berechtigungen & Fehler
     no-permission: "&cDu hast keine Berechtigung für diesen Befehl!"
