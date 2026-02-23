@@ -462,7 +462,7 @@ public class DatabaseManager {
                 "WHERE minecraft_uuid = ? AND is_pardoned = 0 " +
                 "ORDER BY created_at DESC LIMIT 1";
 
-        PreparedStatement stmt = connection.prepareStatement(query);
+        PreparedStatement stmt = getConnection().prepareStatement(query);
         stmt.setString(1, minecraftUuid);
 
         ResultSet rs = stmt.executeQuery();
@@ -1228,7 +1228,29 @@ public class DatabaseManager {
     // USERS
     // ============================================
 
-    public Connection getConnection() {
+    public synchronized Connection getConnection() throws SQLException {
+        if (connection == null || connection.isClosed()) {
+            boolean useLocal = plugin.getConfig().getBoolean("database.use-local", true);
+
+            if (useLocal) {
+                String file = plugin.getConfig().getString("database.local.file", "disminebridge.db");
+                String url = "jdbc:sqlite:" + plugin.getDataFolder() + "/" + file;
+                connection = DriverManager.getConnection(url);
+            } else {
+                String host = plugin.getConfig().getString("database.extern.host");
+                int port = plugin.getConfig().getInt("database.extern.port", 3306);
+                String database = plugin.getConfig().getString("database.extern.database");
+                String username = plugin.getConfig().getString("database.extern.username");
+                String password = plugin.getConfig().getString("database.extern.password");
+                boolean useSSL = plugin.getConfig().getBoolean("database.extern.use-ssl", false);
+
+                String url = "jdbc:mysql://" + host + ":" + port + "/" + database + "?useSSL=" + useSSL;
+                connection = DriverManager.getConnection(url, username, password);
+            }
+
+            createTables(); // falls neu aufgebaut wurde
+        }
+
         return connection;
     }
 

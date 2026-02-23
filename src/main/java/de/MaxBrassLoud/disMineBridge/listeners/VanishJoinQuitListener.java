@@ -19,7 +19,7 @@ public class VanishJoinQuitListener implements Listener {
         this.vanishManager = plugin.getVanishmanager();
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGH)
     public void onJoin(PlayerJoinEvent event) {
         Player joiningPlayer = event.getPlayer();
 

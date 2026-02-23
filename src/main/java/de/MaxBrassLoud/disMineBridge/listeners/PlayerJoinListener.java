@@ -24,6 +24,7 @@ public class PlayerJoinListener implements Listener {
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerLogin(PlayerLoginEvent event) {
         Player player = event.getPlayer();
+        LanguageManager lang = plugin.getLanguageManager();
 
         boolean whitelist = plugin.getConfig().getBoolean("whitelist-enabled");
 
@@ -38,15 +39,11 @@ public class PlayerJoinListener implements Listener {
         if (player.hasPermission("dmb.whitelist.bypass")) {
             return;
         }
-        // Whitelist Check
-        if (!plugin.getWhitelistManager().isWhitelisted(player.getUniqueId())) {
 
-            LanguageManager lang = plugin.getLanguageManager();
+        if (!plugin.getWhitelistManager().isWhitelisted(player.getUniqueId())) {
             event.disallow(PlayerLoginEvent.Result.KICK_WHITELIST,
                     lang.getMessage("minecraft.whitelist.not-whitelisted"));
-
         }
-
     }
 
     @EventHandler
@@ -54,10 +51,8 @@ public class PlayerJoinListener implements Listener {
         Player player = event.getPlayer();
         LanguageManager lang = plugin.getLanguageManager();
 
-        // In Datenbank aktualisieren/erstellen
         updatePlayerData(player);
 
-        // Welcome Nachricht
         if (!player.hasPlayedBefore()) {
             event.setJoinMessage(lang.getMessage("minecraft.join.first-join")
                     .replace("{player}", player.getName()));
@@ -71,7 +66,6 @@ public class PlayerJoinListener implements Listener {
             try {
                 Connection conn = plugin.getDatabaseManager().getConnection();
 
-                // Suche nach User mit diesem Minecraft Namen
                 String query = "SELECT internal_id, minecraft_uuid FROM users WHERE minecraft_name = ?";
                 PreparedStatement stmt = conn.prepareStatement(query);
                 stmt.setString(1, player.getName());
@@ -81,7 +75,6 @@ public class PlayerJoinListener implements Listener {
                     int userId = rs.getInt("internal_id");
                     String storedUUID = rs.getString("minecraft_uuid");
 
-                    // UUID aktualisieren falls geändert oder nicht vorhanden
                     if (storedUUID == null || !storedUUID.equals(player.getUniqueId().toString())) {
                         plugin.getDatabaseManager().updateMinecraftData(
                                 userId,

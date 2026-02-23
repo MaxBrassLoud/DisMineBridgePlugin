@@ -1,5 +1,30 @@
 # DisMineBridge Configuration
 
+
+# ═══════════════════════════════════════════════════
+#  DisMineBridge – Web-Dashboard Konfiguration
+#  Füge diesen Block in deine config.yml ein
+# ═══════════════════════════════════════════════════
+
+web:
+  # Port auf dem das Web-Dashboard läuft
+  # Stelle sicher, dass dieser Port in deiner Firewall freigegeben ist
+  port: 8080
+
+  # Discord OAuth2 Konfiguration
+  # Erstelle eine App unter: https://discord.com/developers/applications
+  discord:
+    # Client ID deiner Discord-Anwendung
+    client-id: "DEINE_CLIENT_ID"
+
+    # Client Secret deiner Discord-Anwendung (NIEMALS teilen!)
+    client-secret: "DEIN_CLIENT_SECRET"
+
+    # Redirect URI – muss exakt in deiner Discord-App eingetragen sein
+    # Format: http://DEINE_IP_ODER_DOMAIN:<port>/api/auth/callback
+    # Beispiel lokal:   http://localhost:8080/api/auth/callback
+    # Beispiel Server:  https://admin.meinserver.de/api/auth/callback
+    redirect-uri: "http://localhost:8080/api/auth/callback"
 # Discord Bot Einstellungen
 discord:
   bot-token: "DEIN_BOT_TOKEN_HIER"

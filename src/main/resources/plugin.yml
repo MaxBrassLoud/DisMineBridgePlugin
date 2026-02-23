@@ -3,10 +3,15 @@ version: '0.2.3'
 main: de.MaxBrassLoud.disMineBridge.DisMineBridge
 api-version: '1.21'
 authors: [ MaxBrassLoud ]
-description: A simpe yet powerful moderaion Plugin for Minecraft 1.21.8
+description: A simpe yet powerful moderaion Plugin for Minecraft 1.21.x
 
 
 commands:
+  dmb:
+    description: DisMineBridge Hauptbefehl
+    usage: /dmb <webpermission> [grant|remove] <Spieler>
+    permission: disminebridge.dmb
+
   adminmode:
     description: Aktiviert/deaktiviert den Admin-Modus (Inventar-Snapshot + Creative)
     usage: /adminmode
@@ -71,6 +76,14 @@ commands:
 
 
 permissions:
+
+  dmb.webpermission:
+    description: Zugang zum Web-Dashboard gewähren/entziehen
+    default: op
+  dmb.dmb:
+    description: /dmb Befehl nutzen
+    default: op
+
   dmb.adminmode:
     description: Admin-Modus toggle (/adminmode)
     default: op

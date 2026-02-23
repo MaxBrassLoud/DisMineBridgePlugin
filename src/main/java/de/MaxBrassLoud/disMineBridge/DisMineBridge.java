@@ -6,6 +6,9 @@ import de.MaxBrassLoud.disMineBridge.discord.DiscordBot;
 import de.MaxBrassLoud.disMineBridge.features.vanish.VanishManager;
 import de.MaxBrassLoud.disMineBridge.listeners.*;
 import de.MaxBrassLoud.disMineBridge.managers.*;
+import de.MaxBrassLoud.disMineBridge.web.WebPermissionManager;
+import de.MaxBrassLoud.disMineBridge.web.WebServer;
+import de.MaxBrassLoud.disMineBridge.web.WebSessionManager;
 import net.dv8tion.jda.api.entities.Message;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.checkerframework.checker.units.qual.A;
@@ -23,8 +26,12 @@ public class DisMineBridge extends JavaPlugin {
     private DiscordBot discordBot;
     private AdminModeManager adminModeManager;
     private InventoryStoreManager inventoryStoreManager;
+    private WebServer webServer;
+    private WebSessionManager webSessionManager;
+    private WebPermissionManager webPermissionManager;
 
-    // ... andere Manager ...
+
+
 
     @Override
     public void onEnable() {
@@ -69,6 +76,11 @@ public class DisMineBridge extends JavaPlugin {
 
         this.inventoryStoreManager = new InventoryStoreManager(this);
 
+        this.webSessionManager = new WebSessionManager();
+        this.webPermissionManager = new WebPermissionManager(this);
+        this.webServer = new WebServer(this);
+        this.webServer.start();
+
         // Default Punishments laden (beim ersten Start)
         DefaultPunishmentsLoader defaultLoader = new DefaultPunishmentsLoader(this);
         defaultLoader.loadDefaults();
@@ -92,6 +104,9 @@ public class DisMineBridge extends JavaPlugin {
         if (databaseManager != null) {
             databaseManager.disconnect();
         }
+
+        if (webServer != null) webServer.stop();
+        if (webSessionManager != null) webSessionManager.shutdown();
 
         getLogger().info("DisMineBridge wurde deaktiviert!");
     }
@@ -118,6 +133,10 @@ public class DisMineBridge extends JavaPlugin {
 
         getCommand("invsee").setExecutor(new InvSeeCommand(this));
         getCommand("adminmode").setExecutor(new AdminModeCommand(this));
+
+        getCommand("dmb").setExecutor(new DmbCommand(this));
+
+
     }
 
     private void registerListeners() {
@@ -174,4 +193,11 @@ public class DisMineBridge extends JavaPlugin {
     public AdminModeManager getAdminModeManager() {return adminModeManager;}
 
     public InventoryStoreManager getInventoryStoreManager() { return  inventoryStoreManager;}
+
+    public WebServer getWebServer() { return webServer; }
+
+    public WebSessionManager getWebSessionManager() { return webSessionManager; }
+
+    public WebPermissionManager getWebPermissionManager() { return webPermissionManager; }
+
 }
