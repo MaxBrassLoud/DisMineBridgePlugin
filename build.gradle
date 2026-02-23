@@ -1,0 +1,158 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+group = 'de.MaxBrassLoud'
+version = '0.2.3'
+description = 'A simple yet powerful moderation Plugin for Minecraft 1.21.x'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+
+    // Spigot / Paper
+    maven {
+        name = 'papermc'
+        url = 'https://repo.papermc.io/repository/maven-public/'
+    }
+
+    // JDA (Discord)
+    maven {
+        name = 'dv8tion'
+        url = 'https://m2.dv8tion.net/releases'
+    }
+
+    // Simple Voice Chat
+    maven {
+        name = 'henkelmax.public'
+        url = 'https://maven.maxhenkel.de/repository/public'
+    }
+}
+
+dependencies {
+    // Paper API (Minecraft 1.21)
+    compileOnly 'io.papermc.paper:paper-api:1.21.3-R0.1-SNAPSHOT'
+
+    // JDA (Discord Bot Library)
+    implementation('net.dv8tion:JDA:5.2.1') {
+        exclude module: 'opus-java'
+    }
+
+    // Simple Voice Chat API
+    compileOnly 'de.maxhenkel.voicechat:voicechat-api:2.6.0'
+
+    // SQLite JDBC Driver
+    implementation 'org.xerial:sqlite-jdbc:3.47.0.0'
+
+    // MySQL JDBC Driver (optional, falls extern genutzt)
+    implementation 'com.mysql:mysql-connector-j:9.1.0'
+
+    // SLF4J (Logging für JDA)
+    implementation 'org.slf4j:slf4j-api:2.0.16'
+    implementation 'org.slf4j:slf4j-simple:2.0.16'
+
+    // Annotations
+    compileOnly 'org.jetbrains:annotations:26.0.1'
+}
+
+processResources {
+    def props = [
+            version: version,
+            description: description,
+            name: project.name
+    ]
+
+    inputs.properties props
+
+    filteringCharset 'UTF-8'
+
+    filesMatching('plugin.yml') {
+        expand props
+    }
+}
+
+shadowJar {
+    // ❌ KEINE RELOCATION - Das verursacht den Fehler mit Java 21!
+    // Die Relocation verwendet ASM das Java 21 nicht unterstützt
+
+    // Shadow Plugin funktioniert nur OHNE Relocation bei Java 21
+    // Das ist okay - Konflikte sind sehr selten mit diesen Libraries
+
+    // Exclude unnötige Dateien um JAR zu verkleinern
+    exclude 'META-INF/*.SF'
+    exclude 'META-INF/*.DSA'
+    exclude 'META-INF/*.RSA'
+    exclude 'META-INF/maven/**'
+    exclude 'META-INF/proguard/**'
+    exclude 'META-INF/versions/**'
+    exclude 'module-info.class'
+
+    // Output Name
+    archiveBaseName.set('DisMineBridge')
+    archiveClassifier.set('')
+    archiveVersion.set(version)
+
+    // Manifest
+    manifest {
+        attributes(
+                'Main-Class': 'de.MaxBrassLoud.disMineBridge.DisMineBridge',
+                'Built-By': 'MaxBrassLoud',
+                'Build-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'"),
+                'Implementation-Version': version,
+                'Multi-Release': 'true'
+        )
+    }
+
+    // Merge Service Files (wichtig für SLF4J und JDA)
+    mergeServiceFiles()
+
+    // Append statt Merge für LICENSE Dateien
+    append('LICENSE')
+    append('NOTICE')
+}
+
+tasks.named('build') {
+    dependsOn shadowJar
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 21
+
+    // Warnings unterdrücken (optional)
+    options.compilerArgs += ['-Xlint:-deprecation', '-Xlint:-unchecked']
+}
+
+// Kopiere finale JAR in einen Output-Ordner
+task copyToOutput(type: Copy) {
+    dependsOn shadowJar
+    from shadowJar.archiveFile
+    into layout.buildDirectory.dir('output')
+}
+
+build.finalizedBy(copyToOutput)
+
+// Clean Task erweitern
+clean {
+    delete 'build/output'
+}
+
+// Info nach erfolgreichem Build
+gradle.buildFinished { buildResult ->
+    if (buildResult.failure == null) {
+        println ""
+        println "=========================================="
+        println "✅ BUILD ERFOLGREICH!"
+        println "=========================================="
+        println "JAR Location: build/libs/DisMineBridge-${version}.jar"
+        println "JAR Size: " + new File("build/libs/DisMineBridge-${version}.jar").length() / 1024 / 1024 + " MB"
+        println "=========================================="
+        println ""
+    }
+}
