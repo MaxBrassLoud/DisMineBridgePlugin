@@ -2,8 +2,9 @@ package de.MaxBrassLoud.disMineBridge.web;
 
 import com.sun.net.httpserver.HttpExchange;
 import de.MaxBrassLoud.disMineBridge.DisMineBridge;
+import de.MaxBrassLoud.disMineBridge.util.OfflineInventoryStore;
 import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -77,7 +78,6 @@ public class WebApiHandler {
         }
 
         try {
-            // Exchange code for token
             String tokenBody = "client_id=" + URLEncoder.encode(clientId, StandardCharsets.UTF_8)
                     + "&client_secret=" + URLEncoder.encode(clientSecret, StandardCharsets.UTF_8)
                     + "&grant_type=authorization_code"
@@ -99,7 +99,6 @@ public class WebApiHandler {
                 return;
             }
 
-            // Fetch Discord user info
             HttpRequest userReq = HttpRequest.newBuilder()
                     .uri(URI.create("https://discord.com/api/users/@me"))
                     .header("Authorization", "Bearer " + accessToken)
@@ -115,19 +114,15 @@ public class WebApiHandler {
                     ? "https://cdn.discordapp.com/avatars/" + discordId + "/" + avatar + ".png"
                     : "https://cdn.discordapp.com/embed/avatars/0.png";
 
-            // Check permission
             if (!permissions.hasPermission(discordId)) {
-                // Redirect to frontend with error
                 ex.getResponseHeaders().set("Location", "/?error=no_permission");
                 ex.sendResponseHeaders(302, -1);
                 ex.close();
                 return;
             }
 
-            // Create session
             String sessionToken = sessions.createSession(discordId, username, avatarUrl);
 
-            // Set cookie + redirect to dashboard
             ex.getResponseHeaders().set("Set-Cookie",
                     "dmb_session=" + sessionToken + "; Path=/; HttpOnly; SameSite=Lax; Max-Age=86400");
             ex.getResponseHeaders().set("Location", "/?auth=success");
@@ -163,24 +158,91 @@ public class WebApiHandler {
     //  PLAYER ENDPOINTS
     // ═══════════════════════════════════════════════════
 
-    /** GET /api/players → list of online + recently offline players */
+    /**
+     * GET /api/players → Liste aller Online-Spieler + bekannter Offline-Spieler.
+     *
+     * Antwortformat:
+     * {
+     *   "online": [ {...}, ... ],
+     *   "offline": [ {...}, ... ]
+     * }
+     *
+     * Offline-Spieler werden aus den JSON-Snapshots des InventoryStoreManagers geladen.
+     * Es werden nur Spieler zurückgegeben die mindestens einmal eingeloggt waren
+     * (d.h. für die ein JSON-Snapshot existiert).
+     */
     public void handlePlayers(HttpExchange ex) throws IOException {
         if (!ex.getRequestMethod().equals("GET")) { send405(ex); return; }
         if (getSession(ex) == null) { sendJson(ex, 401, "{\"error\":\"Nicht authentifiziert\"}"); return; }
         addCors(ex);
 
+        // ── Online-Spieler ────────────────────────────────────────────────
         StringBuilder sb = new StringBuilder("{\"online\":[");
         List<Player> online = new ArrayList<>(Bukkit.getOnlinePlayers());
+        Set<UUID> onlineUuids = new HashSet<>();
         for (int i = 0; i < online.size(); i++) {
             Player p = online.get(i);
+            onlineUuids.add(p.getUniqueId());
             if (i > 0) sb.append(",");
             sb.append(buildPlayerJson(p));
         }
+        sb.append("],");
+
+        // ── Offline-Spieler aus JSON-Snapshots ────────────────────────────
+        sb.append("\"offline\":[");
+        List<String> offlineJsons = buildOfflinePlayersJson(onlineUuids);
+        for (int i = 0; i < offlineJsons.size(); i++) {
+            if (i > 0) sb.append(",");
+            sb.append(offlineJsons.get(i));
+        }
         sb.append("]}");
+
         sendJson(ex, 200, sb.toString());
     }
 
-    /** GET /api/player/{uuid} → detailed player info */
+    /**
+     * Liest alle verfügbaren Offline-Snapshots und gibt die Spieler-JSONs zurück.
+     * Spieler die aktuell online sind werden herausgefiltert (onlineUuids).
+     */
+    private List<String> buildOfflinePlayersJson(Set<UUID> onlineUuids) {
+        List<String> result = new ArrayList<>();
+        java.nio.file.Path playersDir = plugin.getInventoryStoreManager().getPlayersDir();
+
+        try {
+            if (!java.nio.file.Files.exists(playersDir)) return result;
+
+            java.nio.file.Files.list(playersDir)
+                    .filter(p -> p.getFileName().toString().endsWith(".json"))
+                    .forEach(path -> {
+                        String filename = path.getFileName().toString();
+                        String uuidStr  = filename.replace(".json", "");
+                        try {
+                            UUID uuid = UUID.fromString(uuidStr);
+                            // Überspringe aktuell eingeloggte Spieler
+                            if (onlineUuids.contains(uuid)) return;
+
+                            OfflineInventoryStore store = plugin.getInventoryStoreManager().storeFor(uuid);
+                            OfflineInventoryStore.PlayerSnapshot snap = store.getSnapshot();
+                            if (snap == null) return;
+
+                            // Name aus Bukkit holen (gecacht, kein I/O)
+                            @SuppressWarnings("deprecation")
+                            OfflinePlayer op = Bukkit.getOfflinePlayer(uuid);
+                            String name = op.getName() != null ? op.getName() : uuidStr;
+
+                            result.add(buildOfflinePlayerJson(uuid, name, snap));
+                        } catch (IllegalArgumentException ignored) {
+                            // Dateiname ist keine UUID → überspringen
+                        }
+                    });
+        } catch (Exception e) {
+            plugin.getLogger().warning("[WebAPI] Fehler beim Lesen der Offline-Spieler: " + e.getMessage());
+        }
+
+        return result;
+    }
+
+    /** GET /api/player/{uuid} → detailed player info (online only) */
     public void handlePlayerDetail(HttpExchange ex) throws IOException {
         if (!ex.getRequestMethod().equals("GET")) { send405(ex); return; }
         if (getSession(ex) == null) { sendJson(ex, 401, "{\"error\":\"Nicht authentifiziert\"}"); return; }
@@ -190,16 +252,30 @@ public class WebApiHandler {
         String uuidStr = path.substring("/api/player/".length());
 
         Player player = findPlayer(uuidStr);
-        if (player == null) {
-            sendJson(ex, 404, "{\"error\":\"Spieler nicht gefunden oder offline\"}");
+        if (player != null) {
+            sendJson(ex, 200, buildDetailedPlayerJson(player));
             return;
         }
 
-        sendJson(ex, 200, buildDetailedPlayerJson(player));
+        // Offline-Fallback: Snapshot zurückgeben
+        try {
+            UUID uuid = UUID.fromString(uuidStr);
+            OfflineInventoryStore store = plugin.getInventoryStoreManager().storeFor(uuid);
+            OfflineInventoryStore.PlayerSnapshot snap = store.getSnapshot();
+            if (snap != null) {
+                @SuppressWarnings("deprecation")
+                OfflinePlayer op = Bukkit.getOfflinePlayer(uuid);
+                String name = op.getName() != null ? op.getName() : uuidStr;
+                sendJson(ex, 200, buildOfflinePlayerJson(uuid, name, snap));
+                return;
+            }
+        } catch (IllegalArgumentException ignored) {}
+
+        sendJson(ex, 404, "{\"error\":\"Spieler nicht gefunden\"}");
     }
 
     // ═══════════════════════════════════════════════════
-    //  ACTION ENDPOINTS — all require POST + session
+    //  ACTION ENDPOINTS
     // ═══════════════════════════════════════════════════
 
     public void handleBan(HttpExchange ex) throws IOException {
@@ -208,17 +284,8 @@ public class WebApiHandler {
         String target = body.get("player");
         String duration = body.getOrDefault("duration", "perm");
         String reason = body.getOrDefault("reason", "Kein Grund angegeben");
-
-        Player player = Bukkit.getPlayer(target);
-        runSync(() -> {
-            if (player != null) {
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(),
-                        "ban " + target + " " + duration + " " + reason);
-            } else {
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(),
-                        "ban " + target + " " + duration + " " + reason);
-            }
-        });
+        runSync(() -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(),
+                "ban " + target + " " + duration + " " + reason));
         sendJson(ex, 200, "{\"success\":true,\"action\":\"ban\",\"player\":\"" + escapeJson(target) + "\"}");
     }
 
@@ -271,11 +338,7 @@ public class WebApiHandler {
         Map<String, String> body = parseBodyParams(ex);
         Player player = Bukkit.getPlayer(body.get("player"));
         if (player == null) { sendJson(ex, 404, "{\"error\":\"Spieler nicht online\"}"); return; }
-        runSync(() -> {
-            player.setHealth(player.getMaxHealth());
-            player.setFoodLevel(20);
-            player.setSaturation(20f);
-        });
+        runSync(() -> { player.setHealth(player.getMaxHealth()); player.setFoodLevel(20); player.setSaturation(20f); });
         sendJson(ex, 200, "{\"success\":true,\"action\":\"heal\"}");
     }
 
@@ -284,10 +347,7 @@ public class WebApiHandler {
         Map<String, String> body = parseBodyParams(ex);
         Player player = Bukkit.getPlayer(body.get("player"));
         if (player == null) { sendJson(ex, 404, "{\"error\":\"Spieler nicht online\"}"); return; }
-        runSync(() -> {
-            player.setFoodLevel(20);
-            player.setSaturation(20f);
-        });
+        runSync(() -> { player.setFoodLevel(20); player.setSaturation(20f); });
         sendJson(ex, 200, "{\"success\":true,\"action\":\"feed\"}");
     }
 
@@ -296,10 +356,7 @@ public class WebApiHandler {
         Map<String, String> body = parseBodyParams(ex);
         Player player = Bukkit.getPlayer(body.get("player"));
         if (player == null) { sendJson(ex, 404, "{\"error\":\"Spieler nicht online\"}"); return; }
-        runSync(() -> {
-            player.setFoodLevel(0);
-            player.setSaturation(0f);
-        });
+        runSync(() -> { player.setFoodLevel(0); player.setSaturation(0f); });
         sendJson(ex, 200, "{\"success\":true,\"action\":\"starve\"}");
     }
 
@@ -338,12 +395,12 @@ public class WebApiHandler {
         String uuidStr = path.substring("/api/inventory/".length());
         Player player = findPlayer(uuidStr);
 
-        if (player == null) {
-            sendJson(ex, 404, "{\"error\":\"Spieler nicht online\"}");
+        if (player != null) {
+            sendJson(ex, 200, buildInventoryJson(player));
             return;
         }
 
-        sendJson(ex, 200, buildInventoryJson(player));
+        sendJson(ex, 404, "{\"error\":\"Spieler nicht online\"}");
     }
 
     // ═══════════════════════════════════════════════════
@@ -351,11 +408,12 @@ public class WebApiHandler {
     // ═══════════════════════════════════════════════════
 
     private String buildPlayerJson(Player p) {
-        boolean vanished = plugin.getVanishmanager() != null && plugin.getVanishmanager().isVanished(p);
-        boolean adminMode = plugin.getAdminModeManager() != null && plugin.getAdminModeManager().isActive(p.getUniqueId());
+        boolean vanished   = plugin.getVanishmanager()    != null && plugin.getVanishmanager().isVanished(p);
+        boolean adminMode  = plugin.getAdminModeManager() != null && plugin.getAdminModeManager().isActive(p.getUniqueId());
 
         return String.format(
-                "{\"uuid\":\"%s\",\"name\":\"%s\",\"health\":%.1f,\"maxHealth\":%.1f," +
+                "{\"uuid\":\"%s\",\"name\":\"%s\",\"online\":true," +
+                        "\"health\":%.1f,\"maxHealth\":%.1f," +
                         "\"food\":%d,\"gamemode\":\"%s\",\"world\":\"%s\"," +
                         "\"x\":%.1f,\"y\":%.1f,\"z\":%.1f," +
                         "\"vanished\":%b,\"adminMode\":%b," +
@@ -370,12 +428,34 @@ public class WebApiHandler {
         );
     }
 
+    /**
+     * Baut ein JSON-Objekt für einen Offline-Spieler anhand seines Snapshots.
+     */
+    private String buildOfflinePlayerJson(UUID uuid, String name, OfflineInventoryStore.PlayerSnapshot snap) {
+        return String.format(
+                "{\"uuid\":\"%s\",\"name\":\"%s\",\"online\":false," +
+                        "\"health\":%.1f,\"maxHealth\":%.1f," +
+                        "\"food\":%d,\"gamemode\":\"%s\",\"world\":\"%s\"," +
+                        "\"x\":%.1f,\"y\":%.1f,\"z\":%.1f," +
+                        "\"vanished\":false,\"adminMode\":false," +
+                        "\"lastSeen\":%d," +
+                        "\"skinUrl\":\"https://mc-heads.net/avatar/%s/64\"}",
+                uuid, escapeJson(name),
+                snap.health, snap.maxHealth,
+                snap.foodLevel, snap.gameMode,
+                escapeJson(snap.worldName),
+                snap.x, snap.y, snap.z,
+                snap.snapshotAt,
+                escapeJson(name)
+        );
+    }
+
     private String buildDetailedPlayerJson(Player p) {
-        boolean vanished = plugin.getVanishmanager() != null && plugin.getVanishmanager().isVanished(p);
+        boolean vanished  = plugin.getVanishmanager()    != null && plugin.getVanishmanager().isVanished(p);
         boolean adminMode = plugin.getAdminModeManager() != null && plugin.getAdminModeManager().isActive(p.getUniqueId());
 
         return String.format(
-                "{\"uuid\":\"%s\",\"name\":\"%s\"," +
+                "{\"uuid\":\"%s\",\"name\":\"%s\",\"online\":true," +
                         "\"health\":%.1f,\"maxHealth\":%.1f,\"food\":%d,\"saturation\":%.1f," +
                         "\"gamemode\":\"%s\",\"world\":\"%s\"," +
                         "\"x\":%.2f,\"y\":%.2f,\"z\":%.2f,\"yaw\":%.1f,\"pitch\":%.1f," +
@@ -458,10 +538,6 @@ public class WebApiHandler {
         try (OutputStream os = ex.getResponseBody()) { os.write(bytes); }
     }
 
-    private void send404(HttpExchange ex) throws IOException {
-        sendJson(ex, 404, "{\"error\":\"Not Found\"}");
-    }
-
     private void send405(HttpExchange ex) throws IOException {
         sendJson(ex, 405, "{\"error\":\"Method Not Allowed\"}");
     }
@@ -489,25 +565,19 @@ public class WebApiHandler {
         if (query == null) return params;
         for (String pair : query.split("&")) {
             String[] kv = pair.split("=", 2);
-            if (kv.length == 2) {
-                params.put(decode(kv[0]), decode(kv[1]));
-            }
+            if (kv.length == 2) params.put(decode(kv[0]), decode(kv[1]));
         }
         return params;
     }
 
     private Map<String, String> parseBodyParams(HttpExchange ex) throws IOException {
         String body = new String(ex.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
-        // Support both JSON and form-encoded
-        if (body.startsWith("{")) {
-            return parseJsonFlat(body);
-        }
+        if (body.startsWith("{")) return parseJsonFlat(body);
         return parseQuery(body);
     }
 
     private Map<String, String> parseJsonFlat(String json) {
         Map<String, String> map = new HashMap<>();
-        // Simple key-value JSON parser (no nested objects)
         json = json.trim();
         if (json.startsWith("{")) json = json.substring(1);
         if (json.endsWith("}")) json = json.substring(0, json.length() - 1);
@@ -524,11 +594,9 @@ public class WebApiHandler {
 
     @SuppressWarnings("unchecked")
     private Map<String, Object> parseJsonObject(String json) {
-        // Minimal JSON parser for Discord API responses
         Map<String, Object> map = new HashMap<>();
         json = json.trim();
         if (json.startsWith("{")) json = json.substring(1, json.length() - 1);
-        // Extract string values
         java.util.regex.Matcher m = java.util.regex.Pattern
                 .compile("\"([^\"]+)\"\\s*:\\s*\"([^\"]*)\"")
                 .matcher(json);
@@ -537,11 +605,8 @@ public class WebApiHandler {
     }
 
     private String decode(String s) {
-        try {
-            return java.net.URLDecoder.decode(s, StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            return s;
-        }
+        try { return java.net.URLDecoder.decode(s, StandardCharsets.UTF_8); }
+        catch (Exception e) { return s; }
     }
 
     private String escapeJson(String s) {

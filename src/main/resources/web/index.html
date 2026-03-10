@@ -35,7 +35,6 @@
             overflow-x: hidden;
         }
 
-        /* ─── GRID NOISE BACKGROUND ─── */
         body::before {
             content: '';
             position: fixed; inset: 0;
@@ -69,28 +68,16 @@
             background: linear-gradient(90deg, transparent, var(--accent), transparent);
         }
 
-        .login-logo {
-            font-size: 13px; font-family: var(--mono);
-            color: var(--muted); letter-spacing: 4px; text-transform: uppercase;
-            margin-bottom: 32px;
-        }
-        .login-title {
-            font-size: 32px; font-weight: 800;
-            color: var(--text);
-            line-height: 1.1; margin-bottom: 12px;
-        }
-        .login-sub {
-            font-size: 14px; color: var(--muted); font-family: var(--mono);
-            margin-bottom: 40px; line-height: 1.6;
-        }
+        .login-logo { font-size: 13px; font-family: var(--mono); color: var(--muted); letter-spacing: 4px; text-transform: uppercase; margin-bottom: 32px; }
+        .login-title { font-size: 32px; font-weight: 800; color: var(--text); line-height: 1.1; margin-bottom: 12px; }
+        .login-sub { font-size: 14px; color: var(--muted); font-family: var(--mono); margin-bottom: 40px; line-height: 1.6; }
 
         .btn-discord {
             display: inline-flex; align-items: center; gap: 12px;
-            background: var(--accent);
-            color: white; font-family: var(--sans); font-weight: 600; font-size: 15px;
-            padding: 14px 28px; border: none; cursor: pointer; border-radius: 2px;
-            text-decoration: none; transition: all 0.2s;
-            letter-spacing: 0.5px;
+            background: var(--accent); color: white; font-family: var(--sans);
+            font-weight: 600; font-size: 15px; padding: 14px 28px; border: none;
+            cursor: pointer; border-radius: 2px; text-decoration: none;
+            transition: all 0.2s; letter-spacing: 0.5px;
         }
         .btn-discord:hover { background: var(--accent2); transform: translateY(-1px); }
         .btn-discord svg { width: 20px; height: 20px; }
@@ -114,10 +101,7 @@
             backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border);
         }
-        .topbar-brand {
-            font-family: var(--mono); font-size: 13px; font-weight: 700;
-            color: var(--accent); letter-spacing: 3px; text-transform: uppercase;
-        }
+        .topbar-brand { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--accent); letter-spacing: 3px; text-transform: uppercase; }
         .topbar-right { display: flex; align-items: center; gap: 16px; }
         .user-chip {
             display: flex; align-items: center; gap: 8px;
@@ -125,18 +109,9 @@
             font-family: var(--mono); font-size: 12px; color: var(--text);
         }
         .user-chip img { width: 22px; height: 22px; border-radius: 50%; }
-        .live-badge {
-            display: flex; align-items: center; gap: 6px;
-            font-family: var(--mono); font-size: 11px; color: var(--green);
-        }
-        .live-dot {
-            width: 6px; height: 6px; border-radius: 50%;
-            background: var(--green);
-            animation: pulse 2s ease-in-out infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; } 50% { opacity: 0.3; }
-        }
+        .live-badge { display: flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11px; color: var(--green); }
+        .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s ease-in-out infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
         .btn-logout {
             background: none; border: 1px solid var(--border); color: var(--muted);
             font-family: var(--mono); font-size: 11px; padding: 6px 12px; cursor: pointer;
@@ -145,18 +120,10 @@
         .btn-logout:hover { border-color: var(--red); color: var(--red); }
 
         /* ─── LAYOUT ─── */
-        .layout {
-            display: grid;
-            grid-template-columns: 320px 1fr;
-            height: calc(100vh - 56px);
-        }
+        .layout { display: grid; grid-template-columns: 320px 1fr; height: calc(100vh - 56px); }
 
         /* ─── SIDEBAR ─── */
-        .sidebar {
-            border-right: 1px solid var(--border);
-            overflow-y: auto;
-            background: var(--surface);
-        }
+        .sidebar { border-right: 1px solid var(--border); overflow-y: auto; background: var(--surface); }
         .sidebar-header {
             padding: 20px 20px 12px;
             font-family: var(--mono); font-size: 10px;
@@ -164,66 +131,54 @@
             border-bottom: 1px solid var(--border);
             display: flex; align-items: center; justify-content: space-between;
         }
-        .player-count {
-            background: var(--accent); color: white; font-size: 10px;
-            padding: 2px 6px; border-radius: 10px; font-weight: 700;
-        }
+        .player-counts { display: flex; gap: 6px; align-items: center; }
+        .player-count-online { background: var(--green); color: white; font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: 700; }
+        .player-count-offline { background: var(--surface3); color: var(--muted); font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: 700; border: 1px solid var(--border); }
 
         .section-label {
-            padding: 16px 20px 8px;
+            padding: 14px 20px 8px;
             font-family: var(--mono); font-size: 10px;
             letter-spacing: 2px; text-transform: uppercase; color: var(--muted);
+            display: flex; align-items: center; justify-content: space-between;
         }
+        .section-collapse {
+            cursor: pointer; padding: 2px 6px;
+            border: 1px solid var(--border); font-size: 9px;
+            color: var(--muted); background: none;
+            transition: all 0.15s;
+        }
+        .section-collapse:hover { color: var(--text); border-color: var(--muted); }
 
-        /* ─── PLAYER CARD (sidebar) ─── */
+        /* ─── PLAYER ITEM (sidebar) ─── */
         .player-item {
             display: flex; align-items: center; gap: 12px;
             padding: 10px 20px; cursor: pointer;
             transition: background 0.15s; border-left: 2px solid transparent;
         }
         .player-item:hover { background: var(--surface2); }
-        .player-item.active {
-            background: rgba(88,101,242,0.1);
-            border-left-color: var(--accent);
-        }
-        .player-item.offline { opacity: 0.5; }
+        .player-item.active { background: rgba(88,101,242,0.1); border-left-color: var(--accent); }
 
-        .player-avatar {
-            position: relative; flex-shrink: 0;
-        }
-        .player-avatar img {
-            width: 36px; height: 36px;
-            image-rendering: pixelated;
-            border: 1px solid var(--border);
-        }
-        .status-dot {
-            position: absolute; bottom: -1px; right: -1px;
-            width: 9px; height: 9px; border-radius: 50%;
-            border: 2px solid var(--surface);
-        }
+        .player-avatar { position: relative; flex-shrink: 0; }
+        .player-avatar img { width: 36px; height: 36px; image-rendering: pixelated; border: 1px solid var(--border); }
+        .status-dot { position: absolute; bottom: -1px; right: -1px; width: 9px; height: 9px; border-radius: 50%; border: 2px solid var(--surface); }
         .status-dot.online { background: var(--green); }
         .status-dot.offline { background: var(--muted); }
 
         .player-info { flex: 1; min-width: 0; }
-        .player-name {
-            font-weight: 600; font-size: 13px; color: var(--text);
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-        .player-meta {
-            font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 2px;
-        }
-        .badge {
-            font-family: var(--mono); font-size: 9px; padding: 2px 5px;
-            border-radius: 2px; font-weight: 700; margin-left: 4px;
-        }
+        .player-name { font-weight: 600; font-size: 13px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .player-name.offline-name { color: var(--muted); }
+        .player-meta { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 2px; }
+        .badge { font-family: var(--mono); font-size: 9px; padding: 2px 5px; border-radius: 2px; font-weight: 700; margin-left: 4px; }
         .badge-vanish { background: rgba(250,166,26,0.2); color: var(--yellow); }
         .badge-admin { background: rgba(237,66,69,0.2); color: var(--red); }
+        .badge-offline { background: rgba(107,107,128,0.2); color: var(--muted); }
+
+        /* Offline-Sektion einklappbar */
+        .offline-section { transition: max-height 0.3s ease, opacity 0.3s ease; overflow: hidden; }
+        .offline-section.collapsed { max-height: 0 !important; opacity: 0; pointer-events: none; }
 
         /* ─── MAIN PANEL ─── */
-        .main-panel {
-            overflow-y: auto;
-            background: var(--bg);
-        }
+        .main-panel { overflow-y: auto; background: var(--bg); }
 
         /* ─── EMPTY STATE ─── */
         .empty-state {
@@ -237,15 +192,10 @@
         /* ─── PLAYER DETAIL ─── */
         .detail-header {
             display: flex; align-items: center; gap: 24px;
-            padding: 28px 32px;
-            border-bottom: 1px solid var(--border);
+            padding: 28px 32px; border-bottom: 1px solid var(--border);
             background: var(--surface);
         }
-        .detail-avatar img {
-            width: 80px; height: 80px;
-            image-rendering: pixelated;
-            border: 2px solid var(--border);
-        }
+        .detail-avatar img { width: 80px; height: 80px; image-rendering: pixelated; border: 2px solid var(--border); }
         .detail-info { flex: 1; }
         .detail-name { font-size: 28px; font-weight: 800; color: var(--text); }
         .detail-uuid { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 4px; }
@@ -255,6 +205,7 @@
             border-radius: 2px; font-weight: 700; letter-spacing: 1px;
         }
         .status-badge.online { background: rgba(59,165,93,0.2); color: var(--green); border: 1px solid rgba(59,165,93,0.3); }
+        .status-badge.offline { background: rgba(107,107,128,0.15); color: var(--muted); border: 1px solid rgba(107,107,128,0.3); }
         .status-badge.vanish { background: rgba(250,166,26,0.2); color: var(--yellow); border: 1px solid rgba(250,166,26,0.3); }
         .status-badge.admin { background: rgba(237,66,69,0.2); color: var(--red); border: 1px solid rgba(237,66,69,0.3); }
         .status-badge.op { background: rgba(88,101,242,0.2); color: var(--accent2); border: 1px solid rgba(88,101,242,0.3); }
@@ -262,14 +213,10 @@
         /* ─── STATS GRID ─── */
         .stats-grid {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 1px; background: var(--border);
-            border: 1px solid var(--border);
+            gap: 1px; background: var(--border); border: 1px solid var(--border);
             margin: 24px 32px;
         }
-        .stat-item {
-            background: var(--surface);
-            padding: 16px;
-        }
+        .stat-item { background: var(--surface); padding: 16px; }
         .stat-label { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
         .stat-value { font-size: 18px; font-weight: 700; color: var(--text); margin-top: 4px; font-family: var(--mono); }
         .stat-value.health { color: var(--red); }
@@ -277,20 +224,15 @@
 
         /* ─── HEALTH BAR ─── */
         .bar-wrap { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
-        .bar {
-            flex: 1; height: 4px; background: var(--border);
-            border-radius: 2px; overflow: hidden;
-        }
+        .bar { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
         .bar-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
         .bar-fill.health { background: var(--red); }
         .bar-fill.food { background: var(--yellow); }
 
         /* ─── COORDS ─── */
         .coords-card {
-            margin: 0 32px 24px;
-            padding: 16px 20px;
-            background: var(--surface);
-            border: 1px solid var(--border);
+            margin: 0 32px 24px; padding: 16px 20px;
+            background: var(--surface); border: 1px solid var(--border);
             font-family: var(--mono); font-size: 13px;
             display: flex; gap: 24px; flex-wrap: wrap; align-items: center;
         }
@@ -298,30 +240,22 @@
         .coord span { color: var(--text); font-weight: 600; }
         .coord-world { color: var(--accent2); }
 
+        /* ─── OFFLINE NOTICE ─── */
+        .offline-notice {
+            margin: 0 32px 24px; padding: 14px 20px;
+            background: rgba(107,107,128,0.08); border: 1px solid rgba(107,107,128,0.25);
+            font-family: var(--mono); font-size: 12px; color: var(--muted);
+            display: flex; align-items: center; gap: 10px;
+        }
+        .offline-notice-icon { font-size: 16px; }
+
         /* ─── ACTIONS ─── */
-        .actions-section {
-            padding: 0 32px 24px;
-        }
-        .actions-title {
-            font-family: var(--mono); font-size: 10px; letter-spacing: 3px;
-            text-transform: uppercase; color: var(--muted); margin-bottom: 12px;
-        }
-
+        .actions-section { padding: 0 32px 24px; }
+        .actions-title { font-family: var(--mono); font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
         .action-groups { display: flex; flex-direction: column; gap: 12px; }
-
-        .action-group {
-            background: var(--surface);
-            border: 1px solid var(--border);
-        }
-        .action-group-label {
-            padding: 10px 16px;
-            font-family: var(--mono); font-size: 10px; letter-spacing: 2px;
-            text-transform: uppercase; color: var(--muted);
-            border-bottom: 1px solid var(--border);
-        }
-        .action-group-btns {
-            padding: 12px; display: flex; flex-wrap: wrap; gap: 8px;
-        }
+        .action-group { background: var(--surface); border: 1px solid var(--border); }
+        .action-group-label { padding: 10px 16px; font-family: var(--mono); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); }
+        .action-group-btns { padding: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
 
         .btn {
             display: inline-flex; align-items: center; gap: 6px;
@@ -333,6 +267,7 @@
         }
         .btn:hover { border-color: currentColor; transform: translateY(-1px); }
         .btn:active { transform: translateY(0); }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
         .btn.red { color: var(--red); }
         .btn.red:hover { background: rgba(237,66,69,0.1); }
         .btn.yellow { color: var(--yellow); }
@@ -347,125 +282,51 @@
         .btn.danger:hover { background: rgba(237,66,69,0.15); }
 
         /* ─── INVENTORY VIEWER ─── */
-        .inv-section {
-            padding: 0 32px 32px;
-        }
-        .inv-tabs {
-            display: flex; gap: 0; margin-bottom: 0;
-            border-bottom: 1px solid var(--border);
-        }
-        .inv-tab {
-            padding: 10px 20px; font-family: var(--mono); font-size: 11px;
-            cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent;
-            letter-spacing: 1px; transition: all 0.15s;
-        }
+        .inv-section { padding: 0 32px 32px; }
+        .inv-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); }
+        .inv-tab { padding: 10px 20px; font-family: var(--mono); font-size: 11px; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; letter-spacing: 1px; transition: all 0.15s; }
         .inv-tab.active { color: var(--text); border-bottom-color: var(--accent); }
         .inv-tab:hover { color: var(--text); }
-
-        .inv-grid {
-            display: grid; gap: 2px;
-            background: var(--border);
-            border: 1px solid var(--border);
-            padding: 2px;
-            margin-top: 0;
-        }
-        .inv-grid.main { grid-template-columns: repeat(9, 40px); }
-        .inv-grid.armor { grid-template-columns: repeat(4, 40px); }
-        .inv-grid.ender { grid-template-columns: repeat(9, 40px); }
-
-        .inv-slot {
-            width: 40px; height: 40px;
-            background: var(--surface2);
-            display: flex; align-items: center; justify-content: center;
-            position: relative; cursor: default;
-            transition: background 0.1s;
-        }
+        .inv-grid { display: grid; gap: 2px; background: var(--border); border: 1px solid var(--border); padding: 2px; }
+        .inv-slot { width: 40px; height: 40px; background: var(--surface2); display: flex; align-items: center; justify-content: center; position: relative; cursor: default; transition: background 0.1s; }
         .inv-slot:hover { background: var(--surface3); }
         .inv-slot.filled { cursor: pointer; }
-        .inv-slot-type {
-            font-size: 9px; font-family: var(--mono); color: var(--muted);
-            text-align: center; padding: 2px; word-break: break-all; line-height: 1.1;
-        }
-        .inv-slot-count {
-            position: absolute; bottom: 2px; right: 3px;
-            font-family: var(--mono); font-size: 8px; color: white;
-            text-shadow: 1px 1px 0 #000;
-        }
+        .inv-slot-type { font-size: 9px; font-family: var(--mono); color: var(--muted); text-align: center; padding: 2px; word-break: break-all; line-height: 1.1; }
+        .inv-slot-count { position: absolute; bottom: 2px; right: 3px; font-family: var(--mono); font-size: 8px; color: white; text-shadow: 1px 1px 0 #000; }
         .inv-container { margin-top: 16px; }
-        .inv-container-label {
-            font-family: var(--mono); font-size: 10px; color: var(--muted);
-            letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px;
-        }
+        .inv-container-label { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
 
         /* ─── MODAL ─── */
         .modal-overlay {
             position: fixed; inset: 0; z-index: 200;
             background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
-            display: flex; align-items: center; justify-content: center;
+            align-items: center; justify-content: center;
             display: none;
         }
         .modal-overlay.open { display: flex; }
-        .modal {
-            background: var(--surface); border: 1px solid var(--border);
-            width: 420px; max-width: 90vw;
-            position: relative;
-            animation: modalIn 0.2s ease;
-        }
-        @keyframes modalIn {
-            from { transform: translateY(12px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        .modal::before {
-            content: '';
-            position: absolute; top: 0; left: 0; right: 0; height: 2px;
-            background: linear-gradient(90deg, transparent, var(--accent), transparent);
-        }
-        .modal-header {
-            padding: 20px 24px; border-bottom: 1px solid var(--border);
-            display: flex; align-items: center; justify-content: space-between;
-        }
+        .modal { background: var(--surface); border: 1px solid var(--border); width: 420px; max-width: 90vw; position: relative; animation: modalIn 0.2s ease; }
+        @keyframes modalIn { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--accent), transparent); }
+        .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
         .modal-title { font-weight: 700; font-size: 15px; }
-        .modal-close {
-            background: none; border: none; color: var(--muted);
-            cursor: pointer; font-size: 18px; line-height: 1;
-            transition: color 0.15s; padding: 4px;
-        }
+        .modal-close { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 18px; line-height: 1; transition: color 0.15s; padding: 4px; }
         .modal-close:hover { color: var(--text); }
         .modal-body { padding: 24px; }
-        .modal-footer {
-            padding: 16px 24px; border-top: 1px solid var(--border);
-            display: flex; gap: 8px; justify-content: flex-end;
-        }
+        .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; }
 
         .form-group { margin-bottom: 16px; }
         .form-label { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-bottom: 6px; display: block; letter-spacing: 1px; }
-        .form-input, .form-select {
-            width: 100%; padding: 10px 12px;
-            background: var(--surface2); border: 1px solid var(--border);
-            color: var(--text); font-family: var(--mono); font-size: 13px;
-            outline: none; transition: border-color 0.15s; border-radius: 2px;
-        }
+        .form-input, .form-select { width: 100%; padding: 10px 12px; background: var(--surface2); border: 1px solid var(--border); color: var(--text); font-family: var(--mono); font-size: 13px; outline: none; transition: border-color 0.15s; border-radius: 2px; }
         .form-input:focus, .form-select:focus { border-color: var(--accent); }
         .form-select option { background: var(--surface2); }
 
         /* ─── TOAST ─── */
-        #toast-container {
-            position: fixed; bottom: 24px; right: 24px;
-            z-index: 1000; display: flex; flex-direction: column; gap: 8px;
-        }
-        .toast {
-            padding: 12px 20px; font-family: var(--mono); font-size: 12px;
-            border-left: 3px solid; min-width: 240px; max-width: 360px;
-            animation: toastIn 0.3s ease;
-            background: var(--surface);
-        }
+        #toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
+        .toast { padding: 12px 20px; font-family: var(--mono); font-size: 12px; border-left: 3px solid; min-width: 240px; max-width: 360px; animation: toastIn 0.3s ease; background: var(--surface); }
         .toast.success { border-color: var(--green); color: var(--green); }
         .toast.error { border-color: var(--red); color: var(--red); }
         .toast.info { border-color: var(--accent); color: var(--accent2); }
-        @keyframes toastIn {
-            from { transform: translateX(20px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
+        @keyframes toastIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
         /* ─── SCROLLBAR ─── */
         ::-webkit-scrollbar { width: 4px; }
@@ -516,15 +377,29 @@
         <aside class="sidebar">
             <div class="sidebar-header">
                 Spieler
-                <span class="player-count" id="online-count">0</span>
+                <div class="player-counts">
+                    <span class="player-count-online" id="online-count" title="Online">0 online</span>
+                    <span class="player-count-offline" id="offline-count" title="Offline">0 offline</span>
+                </div>
             </div>
 
-            <div class="section-label">Online</div>
-            <div id="online-list"></div>
+            <!-- Online Section -->
+            <div class="section-label">
+                <span>Online</span>
+            </div>
+            <div id="online-list">
+                <div style="padding:16px 20px;font-family:var(--mono);font-size:11px;color:var(--muted)">Niemand online</div>
+            </div>
 
-            <div class="section-label">Offline</div>
-            <div id="offline-list" style="opacity:0.5;font-family:var(--mono);font-size:11px;padding:16px 20px;color:var(--muted);">
-                Nur Online-Spieler werden angezeigt
+            <!-- Offline Section -->
+            <div class="section-label">
+                <span>Offline</span>
+                <button class="section-collapse" id="offline-toggle" onclick="toggleOffline()">▲</button>
+            </div>
+            <div id="offline-section" class="offline-section">
+                <div id="offline-list">
+                    <div style="padding:16px 20px;font-family:var(--mono);font-size:11px;color:var(--muted)">Keine Daten vorhanden</div>
+                </div>
             </div>
         </aside>
 
@@ -558,33 +433,27 @@
     // ═══════════════════════════════════════════════════
     //  STATE
     // ═══════════════════════════════════════════════════
-    let currentPlayer = null;
+    let currentPlayer  = null;
     let refreshInterval = null;
     let invTab = 'inventory';
-    let players = [];
+    let onlinePlayers  = [];
+    let offlinePlayers = [];
+    let offlineCollapsed = false;
 
     // ═══════════════════════════════════════════════════
     //  INIT
     // ═══════════════════════════════════════════════════
     (async function init() {
-        // Check for login errors in URL
         const params = new URLSearchParams(location.search);
         if (params.get('error') === 'no_permission') {
             document.getElementById('login-error').style.display = 'block';
         }
-
-        // Check auth status
         try {
-            const res = await fetch('/api/auth/me');
+            const res  = await fetch('/api/auth/me');
             const data = await res.json();
-            if (data.authenticated) {
-                showApp(data);
-            } else {
-                showLogin();
-            }
-        } catch {
-            showLogin();
-        }
+            if (data.authenticated) showApp(data);
+            else showLogin();
+        } catch { showLogin(); }
     })();
 
     function showLogin() {
@@ -605,33 +474,41 @@
     // ═══════════════════════════════════════════════════
     async function fetchPlayers() {
         try {
-            const res = await fetch('/api/players');
+            const res  = await fetch('/api/players');
             if (!res.ok) return;
             const data = await res.json();
-            players = data.online || [];
+
+            onlinePlayers  = data.online  || [];
+            offlinePlayers = data.offline || [];
+
             renderSidebar();
+
+            // Aktuellen Spieler in neuem Datensatz suchen
             if (currentPlayer) {
-                const updated = players.find(p => p.uuid === currentPlayer.uuid);
-                if (updated) {
-                    currentPlayer = updated;
-                    renderPlayerDetail(currentPlayer);
+                const updOnline  = onlinePlayers.find(p => p.uuid === currentPlayer.uuid);
+                const updOffline = offlinePlayers.find(p => p.uuid === currentPlayer.uuid);
+                if (updOnline) {
+                    currentPlayer = updOnline;
+                } else if (updOffline) {
+                    currentPlayer = updOffline;
                 }
             }
-            document.getElementById('online-count').textContent = players.length;
+
+            document.getElementById('online-count').textContent  = onlinePlayers.length  + ' online';
+            document.getElementById('offline-count').textContent = offlinePlayers.length + ' offline';
         } catch {}
     }
 
     function startRefresh() {
         fetchPlayers();
-        fetchDetailIfOpen();
         refreshInterval = setInterval(() => {
             fetchPlayers();
             fetchDetailIfOpen();
-        }, 1000);
+        }, 2000);
     }
 
     async function fetchDetailIfOpen() {
-        if (!currentPlayer) return;
+        if (!currentPlayer || !currentPlayer.online) return;
         try {
             const res = await fetch('/api/player/' + currentPlayer.uuid);
             if (res.ok) {
@@ -643,35 +520,91 @@
     }
 
     function renderSidebar() {
-        const list = document.getElementById('online-list');
-        list.innerHTML = players.map(p => `
-    <div class="player-item ${currentPlayer?.uuid === p.uuid ? 'active' : ''}"
-         onclick="selectPlayer('${p.uuid}')">
-      <div class="player-avatar">
-        <img src="${p.skinUrl}" alt="${p.name}" loading="lazy">
-        <div class="status-dot online"></div>
-      </div>
-      <div class="player-info">
-        <div class="player-name">
-          ${esc(p.name)}
-          ${p.vanished ? '<span class="badge badge-vanish">VANISH</span>' : ''}
-          ${p.adminMode ? '<span class="badge badge-admin">ADMIN</span>' : ''}
+        // ── Online ──────────────────────────────────────
+        const onlineList = document.getElementById('online-list');
+        if (onlinePlayers.length === 0) {
+            onlineList.innerHTML = '<div style="padding:16px 20px;font-family:var(--mono);font-size:11px;color:var(--muted)">Niemand online</div>';
+        } else {
+            onlineList.innerHTML = onlinePlayers.map(p => playerItemHtml(p, true)).join('');
+        }
+
+        // ── Offline ─────────────────────────────────────
+        const offlineList = document.getElementById('offline-list');
+        if (offlinePlayers.length === 0) {
+            offlineList.innerHTML = '<div style="padding:16px 20px;font-family:var(--mono);font-size:11px;color:var(--muted)">Keine bekannten Spieler</div>';
+        } else {
+            // Sortieren: zuletzt gesehen zuerst
+            const sorted = [...offlinePlayers].sort((a, b) => (b.lastSeen || 0) - (a.lastSeen || 0));
+            offlineList.innerHTML = sorted.map(p => playerItemHtml(p, false)).join('');
+        }
+    }
+
+    function playerItemHtml(p, isOnline) {
+        const active     = currentPlayer?.uuid === p.uuid ? 'active' : '';
+        const nameClass  = isOnline ? '' : 'offline-name';
+        const dotClass   = isOnline ? 'online' : 'offline';
+        const meta       = isOnline
+            ? `${p.gamemode} · ${esc(p.world)}`
+            : formatLastSeen(p.lastSeen);
+
+        return `
+      <div class="player-item ${active}" onclick="selectPlayer('${p.uuid}', ${isOnline})">
+        <div class="player-avatar">
+          <img src="${p.skinUrl}" alt="${esc(p.name)}" loading="lazy">
+          <div class="status-dot ${dotClass}"></div>
         </div>
-        <div class="player-meta">${p.gamemode} · ${esc(p.world)}</div>
-      </div>
-    </div>
-  `).join('');
+        <div class="player-info">
+          <div class="player-name ${nameClass}">
+            ${esc(p.name)}
+            ${isOnline && p.vanished   ? '<span class="badge badge-vanish">VANISH</span>'  : ''}
+            ${isOnline && p.adminMode  ? '<span class="badge badge-admin">ADMIN</span>'   : ''}
+            ${!isOnline                ? '<span class="badge badge-offline">OFFLINE</span>': ''}
+          </div>
+          <div class="player-meta">${meta}</div>
+        </div>
+      </div>`;
+    }
+
+    function formatLastSeen(ts) {
+        if (!ts) return 'Zuletzt gesehen: unbekannt';
+        const diff = Date.now() - ts;
+        const mins  = Math.floor(diff / 60000);
+        const hours = Math.floor(diff / 3600000);
+        const days  = Math.floor(diff / 86400000);
+        if (mins  < 1)  return 'Gerade eben offline';
+        if (mins  < 60) return `Vor ${mins} Min.`;
+        if (hours < 24) return `Vor ${hours} Std.`;
+        return `Vor ${days} Tag${days > 1 ? 'en' : ''}`;
+    }
+
+    function toggleOffline() {
+        offlineCollapsed = !offlineCollapsed;
+        const section = document.getElementById('offline-section');
+        const btn     = document.getElementById('offline-toggle');
+        if (offlineCollapsed) {
+            section.style.maxHeight = '0';
+            section.classList.add('collapsed');
+            btn.textContent = '▼';
+        } else {
+            section.style.maxHeight = section.scrollHeight + 'px';
+            section.classList.remove('collapsed');
+            btn.textContent = '▲';
+        }
     }
 
     // ═══════════════════════════════════════════════════
     //  PLAYER DETAIL
     // ═══════════════════════════════════════════════════
-    async function selectPlayer(uuid) {
-        const player = players.find(p => p.uuid === uuid);
+    async function selectPlayer(uuid, isOnline) {
+        // Spieler aus aktuellem State holen
+        let player = onlinePlayers.find(p => p.uuid === uuid)
+            || offlinePlayers.find(p => p.uuid === uuid);
         if (!player) return;
-        currentPlayer = player;
-        renderSidebar();
 
+        currentPlayer = player;
+        renderSidebar(); // aktiven Status aktualisieren
+
+        // Detailansicht laden
         try {
             const res = await fetch('/api/player/' + uuid);
             if (res.ok) currentPlayer = await res.json();
@@ -683,145 +616,159 @@
     }
 
     function renderPlayerDetail(p) {
-        const detail = document.getElementById('player-detail');
-        const hpPct = Math.round((p.health / p.maxHealth) * 100);
-        const foodPct = Math.round((p.food / 20) * 100);
+        const isOnline  = p.online === true;
+        const hpPct     = Math.round((p.health / (p.maxHealth || 20)) * 100);
+        const foodPct   = Math.round(((p.food || 0) / 20) * 100);
+        const detail    = document.getElementById('player-detail');
+
+        // Aktionen: Online-only Actions für Offline-Spieler deaktivieren
+        const onlineOnly = isOnline ? '' : 'disabled title="Spieler ist offline"';
 
         detail.innerHTML = `
-    <!-- Header -->
-    <div class="detail-header">
-      <div class="detail-avatar">
-        <img src="${p.skinUrl || `https://mc-heads.net/avatar/${p.name}/128`}" alt="${esc(p.name)}">
-      </div>
-      <div class="detail-info">
-        <div class="detail-name">${esc(p.name)}</div>
-        <div class="detail-uuid">${p.uuid}</div>
-        <div class="detail-badges">
-          <span class="status-badge online">● ONLINE</span>
-          ${p.vanished ? '<span class="status-badge vanish">VANISH</span>' : ''}
-          ${p.adminMode ? '<span class="status-badge admin">ADMIN-MODUS</span>' : ''}
-          ${p.op ? '<span class="status-badge op">OP</span>' : ''}
+      <!-- Header -->
+      <div class="detail-header">
+        <div class="detail-avatar">
+          <img src="${p.skinUrl || `https://mc-heads.net/avatar/${esc(p.name)}/128`}" alt="${esc(p.name)}">
         </div>
-      </div>
-    </div>
-
-    <!-- Stats -->
-    <div class="stats-grid" id="stats-grid">
-      <div class="stat-item">
-        <div class="stat-label">Leben</div>
-        <div class="stat-value health" id="stat-health">${p.health?.toFixed(1)} / ${p.maxHealth?.toFixed(1)}</div>
-        <div class="bar-wrap">
-          <div class="bar"><div class="bar-fill health" id="bar-health" style="width:${hpPct}%"></div></div>
-          <span style="font-family:var(--mono);font-size:10px;color:var(--muted)">${hpPct}%</span>
-        </div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-label">Hunger</div>
-        <div class="stat-value food" id="stat-food">${p.food} / 20</div>
-        <div class="bar-wrap">
-          <div class="bar"><div class="bar-fill food" id="bar-food" style="width:${foodPct}%"></div></div>
-          <span style="font-family:var(--mono);font-size:10px;color:var(--muted)">${foodPct}%</span>
-        </div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-label">Spielmodus</div>
-        <div class="stat-value" id="stat-gm" style="font-size:14px">${p.gamemode || '—'}</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-label">Level</div>
-        <div class="stat-value" id="stat-level">${p.level ?? '—'}</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-label">Ping</div>
-        <div class="stat-value" id="stat-ping" style="color:${pingColor(p.ping)}">${p.ping ?? '—'} ms</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-label">Welt</div>
-        <div class="stat-value" id="stat-world" style="font-size:13px;color:var(--accent2)">${esc(p.world) || '—'}</div>
-      </div>
-    </div>
-
-    <!-- Coordinates -->
-    <div class="coords-card" id="stat-coords">
-      <div class="coord"><span id="coord-x">${p.x?.toFixed(1) ?? '—'}</span> X</div>
-      <div class="coord"><span id="coord-y">${p.y?.toFixed(1) ?? '—'}</span> Y</div>
-      <div class="coord"><span id="coord-z">${p.z?.toFixed(1) ?? '—'}</span> Z</div>
-      <div class="coord"><span id="coord-yaw">${p.yaw?.toFixed(0) ?? '—'}°</span> Yaw</div>
-      <div style="flex:1"></div>
-      <div class="coord-world" id="coord-world">${esc(p.world) || ''}</div>
-    </div>
-
-    <!-- Actions -->
-    <div class="actions-section">
-      <div class="actions-title">Aktionen</div>
-      <div class="action-groups">
-
-        <div class="action-group">
-          <div class="action-group-label">Strafen</div>
-          <div class="action-group-btns">
-            <button class="btn red" onclick="openBanModal('${esc(p.name)}')">⊘ Bannen</button>
-            <button class="btn yellow" onclick="openMuteModal('${esc(p.name)}')">⊝ Muten</button>
-            <button class="btn orange" onclick="openWarnModal('${esc(p.name)}')">⚠ Verwarnen</button>
-            <button class="btn" onclick="openKickModal('${esc(p.name)}')">⊡ Kicken</button>
+        <div class="detail-info">
+          <div class="detail-name">${esc(p.name)}</div>
+          <div class="detail-uuid">${p.uuid}</div>
+          <div class="detail-badges">
+            ${isOnline
+            ? '<span class="status-badge online">● ONLINE</span>'
+            : '<span class="status-badge offline">○ OFFLINE</span>'}
+            ${isOnline && p.vanished   ? '<span class="status-badge vanish">VANISH</span>'      : ''}
+            ${isOnline && p.adminMode  ? '<span class="status-badge admin">ADMIN-MODUS</span>'  : ''}
+            ${isOnline && p.op         ? '<span class="status-badge op">OP</span>'              : ''}
           </div>
         </div>
+      </div>
 
-        <div class="action-group">
-          <div class="action-group-label">Status</div>
-          <div class="action-group-btns">
-            <button class="btn blue" onclick="toggleVanish('${esc(p.name)}', ${p.vanished})">${p.vanished ? '👁 Sichtbar machen' : '🙈 Vanish'}</button>
-            <button class="btn blue" onclick="toggleAdminMode('${esc(p.name)}', ${p.adminMode})">${p.adminMode ? '⬡ Admin-Modus OFF' : '⬡ Admin-Modus ON'}</button>
+      ${!isOnline ? `
+      <div class="offline-notice">
+        <span class="offline-notice-icon">🕐</span>
+        <span>Zuletzt gesehen: <strong>${formatLastSeen(p.lastSeen)}</strong> — Snapshot-Daten werden angezeigt</span>
+      </div>` : ''}
+
+      <!-- Stats -->
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-item">
+          <div class="stat-label">Leben</div>
+          <div class="stat-value health" id="stat-health">${(p.health||0).toFixed(1)} / ${(p.maxHealth||20).toFixed(1)}</div>
+          <div class="bar-wrap">
+            <div class="bar"><div class="bar-fill health" id="bar-health" style="width:${hpPct}%"></div></div>
+            <span style="font-family:var(--mono);font-size:10px;color:var(--muted)">${hpPct}%</span>
           </div>
         </div>
-
-        <div class="action-group">
-          <div class="action-group-label">Vitalwerte</div>
-          <div class="action-group-btns">
-            <button class="btn green" onclick="quickAction('heal','${esc(p.name)}','Heilen')">❤ Heilen</button>
-            <button class="btn green" onclick="quickAction('feed','${esc(p.name)}','Sättigen')">🍗 Sättigen</button>
-            <button class="btn yellow" onclick="quickAction('starve','${esc(p.name)}','Hunger')">💀 Hungern</button>
-            <button class="btn danger" onclick="confirmKill('${esc(p.name)}')">☠ Töten</button>
+        <div class="stat-item">
+          <div class="stat-label">Hunger</div>
+          <div class="stat-value food" id="stat-food">${p.food||0} / 20</div>
+          <div class="bar-wrap">
+            <div class="bar"><div class="bar-fill food" id="bar-food" style="width:${foodPct}%"></div></div>
+            <span style="font-family:var(--mono);font-size:10px;color:var(--muted)">${foodPct}%</span>
           </div>
         </div>
-
+        <div class="stat-item">
+          <div class="stat-label">Spielmodus</div>
+          <div class="stat-value" id="stat-gm" style="font-size:14px">${p.gamemode || '—'}</div>
+        </div>
+        ${isOnline ? `
+        <div class="stat-item">
+          <div class="stat-label">Level</div>
+          <div class="stat-value" id="stat-level">${p.level ?? '—'}</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Ping</div>
+          <div class="stat-value" id="stat-ping" style="color:${pingColor(p.ping)}">${p.ping ?? '—'} ms</div>
+        </div>` : ''}
+        <div class="stat-item">
+          <div class="stat-label">Welt</div>
+          <div class="stat-value" id="stat-world" style="font-size:13px;color:var(--accent2)">${esc(p.world) || '—'}</div>
+        </div>
       </div>
-    </div>
 
-    <!-- Inventory -->
-    <div class="inv-section">
-      <div class="inv-tabs">
-        <div class="inv-tab ${invTab==='inventory'?'active':''}" onclick="switchInvTab('inventory')">INVENTAR</div>
-        <div class="inv-tab ${invTab==='ender'?'active':''}" onclick="switchInvTab('ender')">ENDERCHEST</div>
-        <div class="inv-tab ${invTab==='armor'?'active':''}" onclick="switchInvTab('armor')">RÜSTUNG</div>
+      <!-- Coordinates -->
+      <div class="coords-card" id="stat-coords">
+        <div class="coord"><span id="coord-x">${(p.x||0).toFixed(1)}</span> X</div>
+        <div class="coord"><span id="coord-y">${(p.y||0).toFixed(1)}</span> Y</div>
+        <div class="coord"><span id="coord-z">${(p.z||0).toFixed(1)}</span> Z</div>
+        ${isOnline ? `<div class="coord"><span id="coord-yaw">${(p.yaw||0).toFixed(0)}°</span> Yaw</div>` : ''}
+        <div style="flex:1"></div>
+        <div class="coord-world" id="coord-world">${esc(p.world) || ''}</div>
       </div>
-      <div id="inv-content" style="margin-top:16px;"></div>
-    </div>
-  `;
 
-        loadInventory(p.uuid);
+      <!-- Actions -->
+      <div class="actions-section">
+        <div class="actions-title">Aktionen</div>
+        <div class="action-groups">
+
+          <div class="action-group">
+            <div class="action-group-label">Strafen</div>
+            <div class="action-group-btns">
+              <button class="btn red" onclick="openBanModal('${esc(p.name)}')">⊘ Bannen</button>
+              <button class="btn yellow" ${onlineOnly} onclick="openMuteModal('${esc(p.name)}')">⊝ Muten</button>
+              <button class="btn orange" ${onlineOnly} onclick="openWarnModal('${esc(p.name)}')">⚠ Verwarnen</button>
+              <button class="btn" ${onlineOnly} onclick="openKickModal('${esc(p.name)}')">⊡ Kicken</button>
+            </div>
+          </div>
+
+          ${isOnline ? `
+          <div class="action-group">
+            <div class="action-group-label">Status</div>
+            <div class="action-group-btns">
+              <button class="btn blue" onclick="toggleVanish('${esc(p.name)}', ${p.vanished})">${p.vanished ? '👁 Sichtbar machen' : '🙈 Vanish'}</button>
+              <button class="btn blue" onclick="toggleAdminMode('${esc(p.name)}', ${p.adminMode})">${p.adminMode ? '⬡ Admin-Modus OFF' : '⬡ Admin-Modus ON'}</button>
+            </div>
+          </div>
+
+          <div class="action-group">
+            <div class="action-group-label">Vitalwerte</div>
+            <div class="action-group-btns">
+              <button class="btn green" onclick="quickAction('heal','${esc(p.name)}')">❤ Heilen</button>
+              <button class="btn green" onclick="quickAction('feed','${esc(p.name)}')">🍗 Sättigen</button>
+              <button class="btn yellow" onclick="quickAction('starve','${esc(p.name)}')">💀 Hungern</button>
+              <button class="btn danger" onclick="confirmKill('${esc(p.name)}')">☠ Töten</button>
+            </div>
+          </div>` : ''}
+
+        </div>
+      </div>
+
+      ${isOnline ? `
+      <!-- Inventory -->
+      <div class="inv-section">
+        <div class="inv-tabs">
+          <div class="inv-tab ${invTab==='inventory'?'active':''}" onclick="switchInvTab('inventory', event)">INVENTAR</div>
+          <div class="inv-tab ${invTab==='ender'?'active':''}" onclick="switchInvTab('ender', event)">ENDERCHEST</div>
+          <div class="inv-tab ${invTab==='armor'?'active':''}" onclick="switchInvTab('armor', event)">RÜSTUNG</div>
+        </div>
+        <div id="inv-content" style="margin-top:16px;"></div>
+      </div>` : ''}
+    `;
+
+        if (isOnline) loadInventory(p.uuid);
     }
 
     function updateDetailStats(p) {
-        const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-        const setW = (id, val) => { const el = document.getElementById(id); if (el) el.style.width = val; };
+        const set  = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+        const setW = (id, val) => { const el = document.getElementById(id); if (el) el.style.width  = val; };
 
-        const hpPct = Math.round((p.health / p.maxHealth) * 100);
+        const hpPct   = Math.round((p.health / p.maxHealth) * 100);
         const foodPct = Math.round((p.food / 20) * 100);
 
         set('stat-health', `${p.health?.toFixed(1)} / ${p.maxHealth?.toFixed(1)}`);
-        set('stat-food', `${p.food} / 20`);
-        set('stat-gm', p.gamemode);
-        set('stat-level', p.level);
-        set('stat-ping', `${p.ping} ms`);
-        set('stat-world', p.world);
-        set('coord-x', p.x?.toFixed(1));
-        set('coord-y', p.y?.toFixed(1));
-        set('coord-z', p.z?.toFixed(1));
-        set('coord-yaw', `${p.yaw?.toFixed(0)}°`);
+        set('stat-food',   `${p.food} / 20`);
+        set('stat-gm',     p.gamemode);
+        set('stat-level',  p.level);
+        set('stat-ping',   `${p.ping} ms`);
+        set('stat-world',  p.world);
+        set('coord-x',     p.x?.toFixed(1));
+        set('coord-y',     p.y?.toFixed(1));
+        set('coord-z',     p.z?.toFixed(1));
+        set('coord-yaw',   `${p.yaw?.toFixed(0)}°`);
         set('coord-world', p.world);
-
-        setW('bar-health', hpPct + '%');
-        setW('bar-food', foodPct + '%');
+        setW('bar-health', hpPct  + '%');
+        setW('bar-food',   foodPct + '%');
 
         const pingEl = document.getElementById('stat-ping');
         if (pingEl) pingEl.style.color = pingColor(p.ping);
@@ -829,7 +776,7 @@
 
     function pingColor(ping) {
         if (!ping || ping < 80) return 'var(--green)';
-        if (ping < 150) return 'var(--yellow)';
+        if (ping < 150)         return 'var(--yellow)';
         return 'var(--red)';
     }
 
@@ -847,11 +794,10 @@
         } catch {}
     }
 
-    function switchInvTab(tab) {
+    function switchInvTab(tab, event) {
         invTab = tab;
-        // Update active tab styling
         document.querySelectorAll('.inv-tab').forEach(t => t.classList.remove('active'));
-        event.target.classList.add('active');
+        if (event?.target) event.target.classList.add('active');
         renderInventory();
     }
 
@@ -861,24 +807,26 @@
         if (!container) return;
 
         let items, cols, label;
-        if (invTab === 'inventory') { items = cachedInv.inventory; cols = 9; label = 'Haupt-Inventar (36 Slots)'; }
+        if (invTab === 'inventory') { items = cachedInv.inventory;  cols = 9; label = 'Haupt-Inventar (36 Slots)'; }
         else if (invTab === 'ender') { items = cachedInv.enderchest; cols = 9; label = 'Enderchest (27 Slots)'; }
         else { items = cachedInv.armor; cols = 4; label = 'Rüstungs-Slots'; }
 
-        if (!items) { container.innerHTML = '<div style="color:var(--muted);font-family:var(--mono);font-size:12px;padding:16px">Keine Daten</div>'; return; }
+        if (!items) {
+            container.innerHTML = '<div style="color:var(--muted);font-family:var(--mono);font-size:12px;padding:16px">Keine Daten</div>';
+            return;
+        }
 
         container.innerHTML = `
-    <div class="inv-container-label">${label}</div>
-    <div class="inv-grid" style="grid-template-columns: repeat(${cols}, 40px)">
-      ${items.map(slot => slot.empty
+      <div class="inv-container-label">${label}</div>
+      <div class="inv-grid" style="grid-template-columns: repeat(${cols}, 40px)">
+        ${items.map(slot => slot.empty
             ? `<div class="inv-slot"></div>`
             : `<div class="inv-slot filled" title="${esc(slot.displayName || slot.type)} ×${slot.amount}">
-            <div class="inv-slot-type">${abbrev(slot.type)}</div>
-            <div class="inv-slot-count">${slot.amount > 1 ? slot.amount : ''}</div>
-           </div>`
+                <div class="inv-slot-type">${abbrev(slot.type)}</div>
+                <div class="inv-slot-count">${slot.amount > 1 ? slot.amount : ''}</div>
+               </div>`
         ).join('')}
-    </div>
-  `;
+      </div>`;
     }
 
     function abbrev(type) {
@@ -891,125 +839,112 @@
     // ═══════════════════════════════════════════════════
     function openBanModal(name) {
         openModal('Spieler bannen: ' + name, `
-    <div class="form-group">
-      <label class="form-label">DAUER</label>
-      <select class="form-select" id="ban-duration">
-        <option value="1h">1 Stunde</option>
-        <option value="12h">12 Stunden</option>
-        <option value="1d">1 Tag</option>
-        <option value="7d">7 Tage</option>
-        <option value="30d">30 Tage</option>
-        <option value="perm" selected>Permanent</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">GRUND</label>
-      <input class="form-input" id="ban-reason" placeholder="Grund eingeben..." value="Regelverstoß">
-    </div>
-  `, [
+      <div class="form-group">
+        <label class="form-label">DAUER</label>
+        <select class="form-select" id="ban-duration">
+          <option value="1h">1 Stunde</option>
+          <option value="12h">12 Stunden</option>
+          <option value="1d">1 Tag</option>
+          <option value="7d">7 Tage</option>
+          <option value="30d">30 Tage</option>
+          <option value="perm" selected>Permanent</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">GRUND</label>
+        <input class="form-input" id="ban-reason" placeholder="Grund eingeben..." value="Regelverstoß">
+      </div>`, [
             { label: 'Abbrechen', onclick: 'closeModal()', cls: '' },
-            { label: '⊘ Bannen', onclick: `executeBan('${name}')`, cls: 'danger' },
+            { label: '⊘ Bannen',  onclick: `executeBan('${name}')`, cls: 'danger' },
         ]);
     }
 
     function openMuteModal(name) {
         openModal('Spieler muten: ' + name, `
-    <div class="form-group">
-      <label class="form-label">DAUER</label>
-      <select class="form-select" id="mute-duration">
-        <option value="10m">10 Minuten</option>
-        <option value="1h" selected>1 Stunde</option>
-        <option value="24h">24 Stunden</option>
-        <option value="7d">7 Tage</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">GRUND</label>
-      <input class="form-input" id="mute-reason" placeholder="Grund eingeben..." value="Spam">
-    </div>
-  `, [
+      <div class="form-group">
+        <label class="form-label">DAUER</label>
+        <select class="form-select" id="mute-duration">
+          <option value="10m">10 Minuten</option>
+          <option value="1h" selected>1 Stunde</option>
+          <option value="24h">24 Stunden</option>
+          <option value="7d">7 Tage</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">GRUND</label>
+        <input class="form-input" id="mute-reason" placeholder="Grund eingeben..." value="Spam">
+      </div>`, [
             { label: 'Abbrechen', onclick: 'closeModal()', cls: '' },
-            { label: '⊝ Muten', onclick: `executeMute('${name}')`, cls: 'yellow' },
+            { label: '⊝ Muten',   onclick: `executeMute('${name}')`, cls: 'yellow' },
         ]);
     }
 
     function openWarnModal(name) {
         openModal('Spieler verwarnen: ' + name, `
-    <div class="form-group">
-      <label class="form-label">GRUND</label>
-      <input class="form-input" id="warn-reason" placeholder="Grund eingeben..." value="Regelverstoß">
-    </div>
-  `, [
-            { label: 'Abbrechen', onclick: 'closeModal()', cls: '' },
+      <div class="form-group">
+        <label class="form-label">GRUND</label>
+        <input class="form-input" id="warn-reason" placeholder="Grund eingeben..." value="Regelverstoß">
+      </div>`, [
+            { label: 'Abbrechen',   onclick: 'closeModal()', cls: '' },
             { label: '⚠ Verwarnen', onclick: `executeWarn('${name}')`, cls: 'orange' },
         ]);
     }
 
     function openKickModal(name) {
         openModal('Spieler kicken: ' + name, `
-    <div class="form-group">
-      <label class="form-label">GRUND</label>
-      <input class="form-input" id="kick-reason" placeholder="Grund eingeben..." value="Kein Grund angegeben">
-    </div>
-  `, [
+      <div class="form-group">
+        <label class="form-label">GRUND</label>
+        <input class="form-input" id="kick-reason" placeholder="Grund eingeben..." value="Kein Grund angegeben">
+      </div>`, [
             { label: 'Abbrechen', onclick: 'closeModal()', cls: '' },
-            { label: '⊡ Kicken', onclick: `executeKick('${name}')`, cls: '' },
+            { label: '⊡ Kicken',  onclick: `executeKick('${name}')`, cls: '' },
         ]);
     }
 
     function confirmKill(name) {
         openModal('Spieler töten: ' + name, `
-    <p style="font-family:var(--mono);font-size:13px;color:var(--muted);line-height:1.6">
-      Soll <strong style="color:var(--red)">${esc(name)}</strong> wirklich getötet werden?<br>
-      Diese Aktion kann nicht rückgängig gemacht werden.
-    </p>
-  `, [
+      <p style="font-family:var(--mono);font-size:13px;color:var(--muted);line-height:1.6">
+        Soll <strong style="color:var(--red)">${esc(name)}</strong> wirklich getötet werden?<br>
+        Diese Aktion kann nicht rückgängig gemacht werden.
+      </p>`, [
             { label: 'Abbrechen', onclick: 'closeModal()', cls: '' },
-            { label: '☠ Töten', onclick: `executeKill('${name}')`, cls: 'danger' },
+            { label: '☠ Töten',   onclick: `executeKill('${name}')`, cls: 'danger' },
         ]);
     }
 
-    // ─── Execute actions ───
     async function executeBan(name) {
         const duration = document.getElementById('ban-duration').value;
-        const reason = document.getElementById('ban-reason').value;
+        const reason   = document.getElementById('ban-reason').value;
         closeModal();
         await postAction('ban', { player: name, duration, reason });
     }
-
     async function executeMute(name) {
         const duration = document.getElementById('mute-duration').value;
-        const reason = document.getElementById('mute-reason').value;
+        const reason   = document.getElementById('mute-reason').value;
         closeModal();
         await postAction('mute', { player: name, duration, reason });
     }
-
     async function executeWarn(name) {
         const reason = document.getElementById('warn-reason').value;
         closeModal();
         await postAction('warn', { player: name, reason });
     }
-
     async function executeKick(name) {
         const reason = document.getElementById('kick-reason').value;
         closeModal();
         await postAction('kick', { player: name, reason });
     }
-
     async function executeKill(name) {
         closeModal();
         await postAction('kill', { player: name });
     }
-
-    async function quickAction(action, name, label) {
+    async function quickAction(action, name) {
         await postAction(action, { player: name });
     }
-
     async function toggleVanish(name, isVanished) {
         await postAction('vanish', { player: name });
         toast('Vanish ' + (isVanished ? 'deaktiviert' : 'aktiviert') + ' für ' + name, 'info');
     }
-
     async function toggleAdminMode(name, isActive) {
         await postAction('adminmode', { player: name });
         toast('Admin-Modus ' + (isActive ? 'deaktiviert' : 'aktiviert') + ' für ' + name, 'info');
@@ -1017,7 +952,7 @@
 
     async function postAction(action, data) {
         try {
-            const res = await fetch('/api/action/' + action, {
+            const res    = await fetch('/api/action/' + action, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
@@ -1029,7 +964,7 @@
             } else {
                 toast('Fehler: ' + (result.error || 'Unbekannt'), 'error');
             }
-        } catch (e) {
+        } catch {
             toast('Netzwerkfehler', 'error');
         }
     }
@@ -1039,8 +974,8 @@
     // ═══════════════════════════════════════════════════
     function openModal(title, bodyHtml, buttons) {
         document.getElementById('modal-title').textContent = title;
-        document.getElementById('modal-body').innerHTML = bodyHtml;
-        document.getElementById('modal-footer').innerHTML = buttons.map(b =>
+        document.getElementById('modal-body').innerHTML    = bodyHtml;
+        document.getElementById('modal-footer').innerHTML  = buttons.map(b =>
             `<button class="btn ${b.cls}" onclick="${b.onclick}">${b.label}</button>`
         ).join('');
         document.getElementById('modal-overlay').classList.add('open');
@@ -1058,9 +993,9 @@
     //  TOAST
     // ═══════════════════════════════════════════════════
     function toast(msg, type = 'info') {
-        const c = document.getElementById('toast-container');
+        const c  = document.getElementById('toast-container');
         const el = document.createElement('div');
-        el.className = 'toast ' + type;
+        el.className   = 'toast ' + type;
         el.textContent = msg;
         c.appendChild(el);
         setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity 0.3s'; setTimeout(() => el.remove(), 300); }, 3000);
