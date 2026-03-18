@@ -11,6 +11,7 @@ import de.MaxBrassLoud.disMineBridge.managers.*;
 import de.MaxBrassLoud.disMineBridge.features.web.WebPermissionManager;
 import de.MaxBrassLoud.disMineBridge.features.web.WebServer;
 import de.MaxBrassLoud.disMineBridge.features.web.WebSessionManager;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class DisMineBridge extends JavaPlugin {
@@ -29,6 +30,7 @@ public class DisMineBridge extends JavaPlugin {
     private WebServer webServer;
     private WebSessionManager webSessionManager;
     private WebPermissionManager webPermissionManager;
+    private ChatManager chatManager;
 
 
 
@@ -80,6 +82,8 @@ public class DisMineBridge extends JavaPlugin {
         this.webPermissionManager = new WebPermissionManager(this);
         this.webServer = new WebServer(this);
         this.webServer.start();
+
+        this.chatManager = new ChatManager(this);
 
         // Default Punishments laden (beim ersten Start)
         DefaultPunishmentsLoader defaultLoader = new DefaultPunishmentsLoader(this);
@@ -133,6 +137,11 @@ public class DisMineBridge extends JavaPlugin {
 
         getCommand("invsee").setExecutor(new InvSeeCommand(this));
         getCommand("adminmode").setExecutor(new AdminModeCommand(this));
+
+        getCommand("chatdelete").setExecutor(new ChatDeleteCommand(this));   // NEU
+        getCommand("chattp").setExecutor(new ChatTpCommand(this));           // NEU
+        // TabCompleter für chattp:
+        getCommand("chattp").setTabCompleter(new ChatTpCommand(this));
 
         //getCommand("dmb").setExecutor(new DmbCommand(this));
 
@@ -194,10 +203,12 @@ public class DisMineBridge extends JavaPlugin {
 
     public InventoryStoreManager getInventoryStoreManager() { return  inventoryStoreManager;}
 
-    //public WebServer getWebServer() { return webServer; }
+    public ChatManager getChatManager() { return chatManager; }
 
-    //public WebSessionManager getWebSessionManager() { return webSessionManager; }
+    public WebServer getWebServer() { return webServer; }
 
-    //public WebPermissionManager getWebPermissionManager() { return webPermissionManager; }
+    public WebSessionManager getWebSessionManager() { return webSessionManager; }
+
+    public WebPermissionManager getWebPermissionManager() { return webPermissionManager; }
 
 }

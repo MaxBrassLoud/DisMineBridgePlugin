@@ -17,7 +17,12 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Verhindert, dass gemutete Spieler im Chat schreiben oder Chat-Befehle nutzen
+ * Verarbeitet alle Chat-Ereignisse.
+ *
+ * Aufgaben:
+ *  1. Gemutete Spieler am Chatten / Chat-Befehlen hindern (unverändertes Verhalten)
+ *  2. Den Vanilla-Chat abfangen und durch das formatierte DMB-Chat-System ersetzen
+ *     → Nachrichten laufen über ChatManager.sendMessage() (System-Kanal, nicht reportbar)
  */
 public class ChatListener implements Listener {
 
@@ -30,166 +35,138 @@ public class ChatListener implements Listener {
         this.plugin = plugin;
         this.muteManager = plugin.getMuteManager();
         this.language = plugin.getLanguageManager();
-
-        // Lade blockierte Commands aus Config
         this.blockedCommands = loadBlockedCommands();
     }
 
-    /**
-     * Lädt blockierte Commands aus der Config
-     */
-    private List<String> loadBlockedCommands() {
-        List<String> commands = new ArrayList<>();
-
-        // Versuche aus Config zu laden
-        if (plugin.getConfig().contains("mute.blocked-commands")) {
-            commands.addAll(plugin.getConfig().getStringList("mute.blocked-commands"));
-        }
-
-        // Fallback: Standard-Commands falls Config leer
-        if (commands.isEmpty()) {
-            commands.addAll(Arrays.asList(
-                    "tell", "msg", "w", "whisper", "m", "pm", "dm",     // Private Nachrichten
-                    "me", "action",                                      // Action Messages
-                    "say", "broadcast", "bc", "shout", "announce",      // Broadcast
-                    "r", "reply",                                        // Reply
-                    "mail", "email",                                     // Mail Plugins
-                    "helpop",                                            // HelpOP
-                    "ac", "adminchat", "sc", "staffchat",               // Staff Chat
-                    "gc", "globalchat", "lc", "localchat",              // Chat Channels
-                    "ch", "channel",                                     // Channel Commands
-                    "party", "p",                                        // Party Chat
-                    "guild", "g", "gchat",                               // Guild Chat
-                    "clan", "c", "cchat",                                // Clan Chat
-                    "team", "t", "tchat",                                // Team Chat
-                    "faction", "f", "fchat",                             // Faction Chat
-                    "trade", "tradechat", "tc",                          // Trade Chat
-                    "emote"                                              // Emote
-            ));
-        }
-
-        plugin.getLogger().info("Mute-System: " + commands.size() + " Chat-Befehle werden blockiert");
-        return commands;
-    }
+    // ─────────────────────────────────────────────────────────────────────────
+    //  Haupt-Chat-Event: Vanilla abfangen → ChatManager übernimmt
+    // ─────────────────────────────────────────────────────────────────────────
 
     /**
-     * Behandelt Spieler-Join für Voice-Chat Mute-Synchronisation
+     * HIGHEST-Priorität damit andere Plugins (z.B. WorldGuard) zuerst abbrechen können.
+     * Wenn das Event nicht gecancelt ist, übernimmt der ChatManager die Formatierung
+     * und cancelt dann selbst das vanilla Event.
      */
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void onPlayerJoin(PlayerJoinEvent event) {
-        Player player = event.getPlayer();
-
-        // Informiere MuteManager über Join (für Voice-Chat Synchronisation)
-        muteManager.onPlayerJoin(player);
-
-        // Optional: Zeige Mute-Status bei Join
-        if (muteManager.isMuted(player.getUniqueId())) {
-            long expireTime = muteManager.getMuteExpireTime(player.getUniqueId());
-            long remaining = expireTime - System.currentTimeMillis();
-            String timeLeft = formatDuration(remaining);
-
-            player.sendMessage(language.getMessage("minecraft.mute.chat-blocked")
-                    .replace("{time}", timeLeft));
-
-            if (muteManager.isVoiceChatEnabled()) {
-                player.sendMessage(language.getMessage("minecraft.mute.voice-blocked"));
-            }
-        }
-    }
-
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
 
-        // Prüfe ob Spieler gemutet ist
+        // ── 1. Mute-Prüfung ───────────────────────────────────────────────
         if (muteManager.isMuted(uuid)) {
             event.setCancelled(true);
-
-            // Berechne verbleibende Zeit
-            long expireTime = muteManager.getMuteExpireTime(uuid);
-            long remaining = expireTime - System.currentTimeMillis();
-            String timeLeft = formatDuration(remaining);
-
-            // Sende Nachricht an Spieler
+            long remaining = muteManager.getMuteExpireTime(uuid) - System.currentTimeMillis();
             player.sendMessage(language.getMessage("minecraft.mute.chat-blocked")
-                    .replace("{time}", timeLeft));
+                    .replace("{time}", formatDuration(remaining)));
+            return;
         }
+
+        // ── 2. Vanilla-Chat unterdrücken ──────────────────────────────────
+        // Das Event wird gecancelt; die Nachricht übernimmt ChatManager.
+        event.setCancelled(true);
+
+        final String raw = event.getMessage();
+
+        // ChatManager.sendMessage() muss auf dem Haupt-Thread laufen,
+        // da wir Player#sendMessage() und Bukkit-API nutzen.
+        // AsyncPlayerChatEvent läuft im Async-Thread → runTask().
+        org.bukkit.Bukkit.getScheduler().runTask(plugin, () -> {
+            // Nochmal prüfen: Spieler könnte in der Zwischenzeit offline gegangen sein
+            if (!player.isOnline()) return;
+            plugin.getChatManager().sendMessage(player, raw);
+        });
     }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    //  Blockierte Befehle für Gemutete (unverändert)
+    // ─────────────────────────────────────────────────────────────────────────
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerCommand(PlayerCommandPreprocessEvent event) {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
 
-        // Prüfe ob Spieler gemutet ist
-        if (!muteManager.isMuted(uuid)) {
-            return;
-        }
+        if (!muteManager.isMuted(uuid)) return;
 
-        // Hole den Befehl (ohne /)
         String message = event.getMessage().toLowerCase();
-        String command = message.split(" ")[0].substring(1); // Entferne das /
+        String command = message.split(" ")[0].substring(1);
 
-        // Prüfe ob es ein blockierter Chat-Befehl ist
         if (isBlockedCommand(command)) {
             event.setCancelled(true);
-
-            // Berechne verbleibende Zeit
-            long expireTime = muteManager.getMuteExpireTime(uuid);
-            long remaining = expireTime - System.currentTimeMillis();
-            String timeLeft = formatDuration(remaining);
-
-            // Sende Nachricht an Spieler
+            long remaining = muteManager.getMuteExpireTime(uuid) - System.currentTimeMillis();
             player.sendMessage(language.getMessage("minecraft.mute.command-blocked")
-                    .replace("{time}", timeLeft)
+                    .replace("{time}", formatDuration(remaining))
                     .replace("{command}", command));
         }
     }
 
-    /**
-     * Prüft ob ein Command geblockt werden soll
-     */
-    private boolean isBlockedCommand(String command) {
-        // Direkte Übereinstimmung
-        if (blockedCommands.contains(command)) {
-            return true;
-        }
+    // ─────────────────────────────────────────────────────────────────────────
+    //  Join – Mute-Status anzeigen (unverändert)
+    // ─────────────────────────────────────────────────────────────────────────
 
-        // Prüfe ob es mit einem blockierten Befehl beginnt (für Aliases)
-        for (String blocked : blockedCommands) {
-            if (command.startsWith(blocked)) {
-                return true;
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        muteManager.onPlayerJoin(player);
+
+        if (muteManager.isMuted(player.getUniqueId())) {
+            long expireTime = muteManager.getMuteExpireTime(player.getUniqueId());
+            long remaining = expireTime - System.currentTimeMillis();
+            player.sendMessage(language.getMessage("minecraft.mute.chat-blocked")
+                    .replace("{time}", formatDuration(remaining)));
+            if (muteManager.isVoiceChatEnabled()) {
+                player.sendMessage(language.getMessage("minecraft.mute.voice-blocked"));
             }
         }
+    }
 
-        // Spezielle Prüfungen für Minecraft-eigene Commands
-        // Beispiel: /minecraft:tell sollte auch geblockt werden
-        if (command.contains(":")) {
-            String actualCommand = command.split(":")[1];
-            return isBlockedCommand(actualCommand);
+    // ─────────────────────────────────────────────────────────────────────────
+    //  Hilfsmethoden
+    // ─────────────────────────────────────────────────────────────────────────
+
+    private List<String> loadBlockedCommands() {
+        List<String> commands = new ArrayList<>();
+        if (plugin.getConfig().contains("mute.blocked-commands")) {
+            commands.addAll(plugin.getConfig().getStringList("mute.blocked-commands"));
         }
+        if (commands.isEmpty()) {
+            commands.addAll(Arrays.asList(
+                    "tell", "msg", "w", "whisper", "m", "pm", "dm",
+                    "me", "action", "say", "broadcast", "bc", "shout", "announce",
+                    "r", "reply", "mail", "email", "helpop",
+                    "ac", "adminchat", "sc", "staffchat",
+                    "gc", "globalchat", "lc", "localchat",
+                    "ch", "channel", "party", "p", "guild", "g", "gchat",
+                    "clan", "c", "cchat", "team", "t", "tchat",
+                    "faction", "f", "fchat", "trade", "tradechat", "tc", "emote"
+            ));
+        }
+        plugin.getLogger().info("Mute-System: " + commands.size() + " Chat-Befehle werden blockiert");
+        return commands;
+    }
 
+    private boolean isBlockedCommand(String command) {
+        if (blockedCommands.contains(command)) return true;
+        for (String blocked : blockedCommands) {
+            if (command.startsWith(blocked)) return true;
+        }
+        if (command.contains(":")) {
+            return isBlockedCommand(command.split(":")[1]);
+        }
         return false;
     }
 
-    /**
-     * Formatiert Millisekunden zu lesbarem String
-     */
     private String formatDuration(long millis) {
         if (millis < 0) millis = 0;
-
-        long days = millis / 86400000L;
-        long hours = (millis % 86400000L) / 3600000L;
+        long days    = millis / 86400000L;
+        long hours   = (millis % 86400000L) / 3600000L;
         long minutes = (millis % 3600000L) / 60000L;
         long seconds = (millis % 60000L) / 1000L;
-
         StringBuilder sb = new StringBuilder();
-        if (days > 0) sb.append(days).append("d ");
-        if (hours > 0) sb.append(hours).append("h ");
+        if (days    > 0) sb.append(days).append("d ");
+        if (hours   > 0) sb.append(hours).append("h ");
         if (minutes > 0) sb.append(minutes).append("m ");
         if (sb.isEmpty() || seconds > 0) sb.append(seconds).append("s");
-
         return sb.toString().trim();
     }
 }

@@ -73,6 +73,16 @@ commands:
     usage: /invsee [inv| end] {Player}
     permission: dmb.invsee
 
+  chatdelete:
+    description: Löscht eine Chat-Nachricht anhand ihrer ID (für alle sichtbar)
+    usage: /chatdelete <Nachrichten-ID>
+    permission: dmb.chat.moderate
+
+  chattp:
+    description: Teleportiert dich sofort zum Absender einer Chat-Nachricht
+    usage: /chattp <Spieler>
+    permission: dmb.chat.moderate
+
 
 
 permissions:
@@ -188,6 +198,10 @@ permissions:
     children:
       dmb.ban: true
       dmb.unban: true
+
+  dmb.chat.moderate:
+    description: Kann Chat-Nachrichten löschen und zu Spielern teleportieren
+    default: op
 
   dmb.admin:
     description: Voller Zugriff auf alle Plugin-Funktionen

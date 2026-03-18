@@ -395,6 +395,58 @@ minecraft:
       instant-permban: "&c&lPERMANENTER BAN!\n\n&7Grund: &f{reason}\n\n&cDieser Verstoß führt zu einem permanenten Ausschluss!"
       instant-permban-broadcast: "&c&l⚠ {player} wurde PERMANENT gebannt! &7(Grund: {reason})"
 
+    # ═══════════════════════════════════════════════════════════
+    #  NEUE EINTRÄGE FÜR de-DE.yml
+    #  Block in den "minecraft:" Abschnitt einfügen
+    # ═══════════════════════════════════════════════════════════
+
+    # ─── Chat-System ────────────────────────────────────────
+  chat:
+
+    # Prefix-Labels je Rang (werden vor dem Namen angezeigt)
+    prefix-admin: "&8[&4&lADMIN&8]"
+    prefix-mod: "&8[&9MOD&8]"
+    prefix-support: "&8[&bSUPPORT&8]"
+    prefix-player: "&8[&7SPIELER&8]"
+
+    # Namenfarben je Rang
+    namecolor-admin: "&c"
+    namecolor-mod: "&9"
+    namecolor-support: "&b"
+    namecolor-player: "&f"
+
+    # Trennzeichen zwischen Name und Nachricht
+    separator: " &8» "
+
+    # Farbe des Nachrichtentexts
+    message-color: "&f"
+
+    # Moderator-Aktions-Buttons (hinter der Nachricht)
+    # {id}     wird durch die Nachrichten-UUID ersetzt
+    # {player} wird durch den Spielernamen ersetzt
+    btn-delete: "&c&l[X]"
+    btn-tp: "&b[TP]"
+
+    # Hinweis für Moderatoren unter den Buttons (optional, kompakter Tipp)
+    mod-hint: "&8  &8/chatdelete {id} &8| &8/chattp {player}"
+
+    # Nachricht wenn eine Nachricht gelöscht wurde
+    message-deleted: "&8[&c✗&8] &7Die Nachricht von &e{player} &7wurde von &e{deleter} &7entfernt."
+
+    # ── /chatdelete Rückmeldungen ────────────────────────
+    delete-no-permission: "&cDu hast keine Berechtigung Nachrichten zu löschen!"
+    delete-usage: "&cVerwendung: /chatdelete <Nachrichten-ID>"
+    delete-invalid-id: "&cUngültige Nachrichten-ID!"
+    delete-not-found: "&cNachricht nicht gefunden oder bereits gelöscht."
+    delete-success: "&a✓ Nachricht wurde für alle Spieler entfernt."
+
+    # ── /chattp Rückmeldungen ────────────────────────────
+    tp-no-permission: "&cDu hast keine Berechtigung diesen Befehl zu nutzen!"
+    tp-usage: "&cVerwendung: /chattp <Spieler>"
+    tp-not-found: "&cSpieler &e{player} &cist nicht online!"
+    tp-self: "&cDu kannst dich nicht zu dir selbst teleportieren."
+    tp-success: "&a✓ Du wurdest zu &e{player} &ateleportiert."
+
 # Discord Nachrichten
 discord:
   setup:
