@@ -1,7 +1,7 @@
 package de.MaxBrassLoud.disMineBridge.commands;
 
 import de.MaxBrassLoud.disMineBridge.DisMineBridge;
-import de.MaxBrassLoud.disMineBridge.web.WebPermissionManager;
+import de.MaxBrassLoud.disMineBridge.features.web.WebPermissionManager;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.*;

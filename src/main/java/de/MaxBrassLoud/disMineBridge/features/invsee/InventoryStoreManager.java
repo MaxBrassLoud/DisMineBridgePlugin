@@ -1,6 +1,7 @@
-package de.MaxBrassLoud.disMineBridge.managers;
+package de.MaxBrassLoud.disMineBridge.features.invsee;
 
 import de.MaxBrassLoud.disMineBridge.DisMineBridge;
+import de.MaxBrassLoud.disMineBridge.managers.LanguageManager;
 import de.MaxBrassLoud.disMineBridge.util.OfflineInventoryStore;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
