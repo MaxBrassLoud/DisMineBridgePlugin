@@ -3,15 +3,16 @@ package de.MaxBrassLoud.disMineBridge;
 import de.MaxBrassLoud.disMineBridge.commands.*;
 import de.MaxBrassLoud.disMineBridge.database.DatabaseManager;
 import de.MaxBrassLoud.disMineBridge.discord.DiscordBot;
+import de.MaxBrassLoud.disMineBridge.features.adminmode.AdminModeManager;
+import de.MaxBrassLoud.disMineBridge.features.invsee.InventoryStoreManager;
 import de.MaxBrassLoud.disMineBridge.features.vanish.VanishManager;
 import de.MaxBrassLoud.disMineBridge.listeners.*;
 import de.MaxBrassLoud.disMineBridge.managers.*;
-import de.MaxBrassLoud.disMineBridge.web.WebPermissionManager;
-import de.MaxBrassLoud.disMineBridge.web.WebServer;
-import de.MaxBrassLoud.disMineBridge.web.WebSessionManager;
-import net.dv8tion.jda.api.entities.Message;
+import de.MaxBrassLoud.disMineBridge.features.web.WebPermissionManager;
+import de.MaxBrassLoud.disMineBridge.features.web.WebServer;
+import de.MaxBrassLoud.disMineBridge.features.web.WebSessionManager;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.checkerframework.checker.units.qual.A;
 
 public class DisMineBridge extends JavaPlugin {
 
@@ -29,6 +30,7 @@ public class DisMineBridge extends JavaPlugin {
     private WebServer webServer;
     private WebSessionManager webSessionManager;
     private WebPermissionManager webPermissionManager;
+    private ChatManager chatManager;
 
 
 
@@ -80,6 +82,8 @@ public class DisMineBridge extends JavaPlugin {
         this.webPermissionManager = new WebPermissionManager(this);
         this.webServer = new WebServer(this);
         this.webServer.start();
+
+        this.chatManager = new ChatManager(this);
 
         // Default Punishments laden (beim ersten Start)
         DefaultPunishmentsLoader defaultLoader = new DefaultPunishmentsLoader(this);
@@ -134,7 +138,12 @@ public class DisMineBridge extends JavaPlugin {
         getCommand("invsee").setExecutor(new InvSeeCommand(this));
         getCommand("adminmode").setExecutor(new AdminModeCommand(this));
 
-        getCommand("dmb").setExecutor(new DmbCommand(this));
+        getCommand("chatdelete").setExecutor(new ChatDeleteCommand(this));   // NEU
+        getCommand("chattp").setExecutor(new ChatTpCommand(this));           // NEU
+        // TabCompleter für chattp:
+        getCommand("chattp").setTabCompleter(new ChatTpCommand(this));
+
+        //getCommand("dmb").setExecutor(new DmbCommand(this));
 
 
     }
@@ -193,6 +202,8 @@ public class DisMineBridge extends JavaPlugin {
     public AdminModeManager getAdminModeManager() {return adminModeManager;}
 
     public InventoryStoreManager getInventoryStoreManager() { return  inventoryStoreManager;}
+
+    public ChatManager getChatManager() { return chatManager; }
 
     public WebServer getWebServer() { return webServer; }
 

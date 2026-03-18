@@ -173,9 +173,19 @@
         .badge-admin { background: rgba(237,66,69,0.2); color: var(--red); }
         .badge-offline { background: rgba(107,107,128,0.2); color: var(--muted); }
 
-        /* Offline-Sektion einklappbar */
-        .offline-section { transition: max-height 0.3s ease, opacity 0.3s ease; overflow: hidden; }
-        .offline-section.collapsed { max-height: 0 !important; opacity: 0; pointer-events: none; }
+        /* FIX: Offline-Sektion einklappbar – korrekte Animationsmethode */
+        .offline-section {
+            overflow: hidden;
+            transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                        opacity 0.35s ease;
+            max-height: 9999px; /* Groß genug für beliebig viele Einträge */
+            opacity: 1;
+        }
+        .offline-section.collapsed {
+            max-height: 0 !important;
+            opacity: 0;
+            pointer-events: none;
+        }
 
         /* ─── MAIN PANEL ─── */
         .main-panel { overflow-y: auto; background: var(--bg); }
@@ -267,7 +277,7 @@
         }
         .btn:hover { border-color: currentColor; transform: translateY(-1px); }
         .btn:active { transform: translateY(0); }
-        .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; pointer-events: none; }
         .btn.red { color: var(--red); }
         .btn.red:hover { background: rgba(237,66,69,0.1); }
         .btn.yellow { color: var(--yellow); }
@@ -396,6 +406,7 @@
                 <span>Offline</span>
                 <button class="section-collapse" id="offline-toggle" onclick="toggleOffline()">▲</button>
             </div>
+            <!-- FIX: Kein inline max-height nötig, JS steuert via collapsed-Klasse -->
             <div id="offline-section" class="offline-section">
                 <div id="offline-list">
                     <div style="padding:16px 20px;font-family:var(--mono);font-size:11px;color:var(--muted)">Keine Daten vorhanden</div>
@@ -433,12 +444,15 @@
     // ═══════════════════════════════════════════════════
     //  STATE
     // ═══════════════════════════════════════════════════
-    let currentPlayer  = null;
+    let currentPlayer   = null;
     let refreshInterval = null;
-    let invTab = 'inventory';
-    let onlinePlayers  = [];
-    let offlinePlayers = [];
+    let invTab          = 'inventory';
+    let onlinePlayers   = [];
+    let offlinePlayers  = [];
     let offlineCollapsed = false;
+    // FIX: cachedInv pro Spieler – nicht global ohne Reset
+    let cachedInv       = null;
+    let cachedInvUuid   = null;
 
     // ═══════════════════════════════════════════════════
     //  INIT
@@ -449,7 +463,7 @@
             document.getElementById('login-error').style.display = 'block';
         }
         try {
-            const res  = await fetch('/api/auth/me');
+            const res  = await fetch('/api/auth/me', { credentials: 'include' });
             const data = await res.json();
             if (data.authenticated) showApp(data);
             else showLogin();
@@ -474,7 +488,13 @@
     // ═══════════════════════════════════════════════════
     async function fetchPlayers() {
         try {
-            const res  = await fetch('/api/players');
+            const res = await fetch('/api/players', { credentials: 'include' });
+            if (res.status === 401) {
+                // Session abgelaufen → zurück zum Login
+                clearInterval(refreshInterval);
+                showLogin();
+                return;
+            }
             if (!res.ok) return;
             const data = await res.json();
 
@@ -483,7 +503,7 @@
 
             renderSidebar();
 
-            // Aktuellen Spieler in neuem Datensatz suchen
+            // Aktuellen Spieler im neuen Datensatz suchen & aktualisieren
             if (currentPlayer) {
                 const updOnline  = onlinePlayers.find(p => p.uuid === currentPlayer.uuid);
                 const updOffline = offlinePlayers.find(p => p.uuid === currentPlayer.uuid);
@@ -507,14 +527,23 @@
         }, 2000);
     }
 
+    // FIX: Nur wenn Spieler online ist live aktualisieren
     async function fetchDetailIfOpen() {
         if (!currentPlayer || !currentPlayer.online) return;
         try {
-            const res = await fetch('/api/player/' + currentPlayer.uuid);
+            const res = await fetch('/api/player/' + currentPlayer.uuid, { credentials: 'include' });
             if (res.ok) {
                 const data = await res.json();
-                currentPlayer = data;
-                updateDetailStats(data);
+                // Prüfen ob Spieler noch online ist
+                if (data.online === false) {
+                    // Spieler ist inzwischen offline → Detail neu rendern
+                    currentPlayer = data;
+                    renderPlayerDetail(data);
+                    renderSidebar();
+                } else {
+                    currentPlayer = data;
+                    updateDetailStats(data);
+                }
             }
         } catch {}
     }
@@ -540,17 +569,18 @@
     }
 
     function playerItemHtml(p, isOnline) {
-        const active     = currentPlayer?.uuid === p.uuid ? 'active' : '';
-        const nameClass  = isOnline ? '' : 'offline-name';
-        const dotClass   = isOnline ? 'online' : 'offline';
-        const meta       = isOnline
-            ? `${p.gamemode} · ${esc(p.world)}`
+        const active    = currentPlayer?.uuid === p.uuid ? 'active' : '';
+        const nameClass = isOnline ? '' : 'offline-name';
+        const dotClass  = isOnline ? 'online' : 'offline';
+        const meta      = isOnline
+            ? esc(p.gamemode) + ' · ' + esc(p.world)
             : formatLastSeen(p.lastSeen);
 
+        // FIX: data-uuid statt onclick mit inline-String für XSS-Sicherheit
         return `
-      <div class="player-item ${active}" onclick="selectPlayer('${p.uuid}', ${isOnline})">
+      <div class="player-item ${active}" data-uuid="${esc(p.uuid)}" data-online="${isOnline}" onclick="handlePlayerClick(this)">
         <div class="player-avatar">
-          <img src="${p.skinUrl}" alt="${esc(p.name)}" loading="lazy">
+          <img src="${esc(p.skinUrl)}" alt="${esc(p.name)}" loading="lazy">
           <div class="status-dot ${dotClass}"></div>
         </div>
         <div class="player-info">
@@ -565,28 +595,36 @@
       </div>`;
     }
 
+    // FIX: Sicherer Click-Handler über data-Attribute statt inline-String
+    function handlePlayerClick(el) {
+        const uuid     = el.dataset.uuid;
+        const isOnline = el.dataset.online === 'true';
+        selectPlayer(uuid, isOnline);
+    }
+
+    // FIX: formatLastSeen mit ts=0 oder fehlendem Wert
     function formatLastSeen(ts) {
-        if (!ts) return 'Zuletzt gesehen: unbekannt';
-        const diff = Date.now() - ts;
+        if (!ts || ts <= 0) return 'Zuletzt gesehen: unbekannt';
+        const diff  = Date.now() - ts;
+        if (diff < 0) return 'Gerade eben offline';
         const mins  = Math.floor(diff / 60000);
         const hours = Math.floor(diff / 3600000);
         const days  = Math.floor(diff / 86400000);
         if (mins  < 1)  return 'Gerade eben offline';
-        if (mins  < 60) return `Vor ${mins} Min.`;
-        if (hours < 24) return `Vor ${hours} Std.`;
-        return `Vor ${days} Tag${days > 1 ? 'en' : ''}`;
+        if (mins  < 60) return 'Vor ' + mins + ' Min.';
+        if (hours < 24) return 'Vor ' + hours + ' Std.';
+        return 'Vor ' + days + ' Tag' + (days > 1 ? 'en' : '');
     }
 
+    // FIX: toggleOffline ohne scrollHeight-Bug – nutzt nur CSS-Klasse
     function toggleOffline() {
         offlineCollapsed = !offlineCollapsed;
         const section = document.getElementById('offline-section');
         const btn     = document.getElementById('offline-toggle');
         if (offlineCollapsed) {
-            section.style.maxHeight = '0';
             section.classList.add('collapsed');
             btn.textContent = '▼';
         } else {
-            section.style.maxHeight = section.scrollHeight + 'px';
             section.classList.remove('collapsed');
             btn.textContent = '▲';
         }
@@ -602,41 +640,55 @@
         if (!player) return;
 
         currentPlayer = player;
+
+        // FIX: invTab bei Spielerwechsel zurücksetzen
+        invTab = 'inventory';
+
+        // FIX: cachedInv beim Spielerwechsel invalidieren
+        if (cachedInvUuid !== uuid) {
+            cachedInv     = null;
+            cachedInvUuid = uuid;
+        }
+
         renderSidebar(); // aktiven Status aktualisieren
 
-        // Detailansicht laden
-        try {
-            const res = await fetch('/api/player/' + uuid);
-            if (res.ok) currentPlayer = await res.json();
-        } catch {}
-
+        // Detailansicht laden – zuerst Snapshot zeigen, dann Detail überschreiben
         document.getElementById('empty-state').style.display = 'none';
         document.getElementById('player-detail').style.display = 'block';
         renderPlayerDetail(currentPlayer);
+
+        try {
+            const res = await fetch('/api/player/' + uuid, { credentials: 'include' });
+            if (res.ok) {
+                const data = await res.json();
+                currentPlayer = data;
+                renderPlayerDetail(data);
+            }
+        } catch {}
     }
 
     function renderPlayerDetail(p) {
-        const isOnline  = p.online === true;
-        const hpPct     = Math.round((p.health / (p.maxHealth || 20)) * 100);
-        const foodPct   = Math.round(((p.food || 0) / 20) * 100);
-        const detail    = document.getElementById('player-detail');
+        const isOnline = p.online === true;
+        const hpPct    = Math.round(((p.health || 0) / (p.maxHealth || 20)) * 100);
+        const foodPct  = Math.round(((p.food   || 0) / 20) * 100);
+        const detail   = document.getElementById('player-detail');
 
-        // Aktionen: Online-only Actions für Offline-Spieler deaktivieren
-        const onlineOnly = isOnline ? '' : 'disabled title="Spieler ist offline"';
+        // FIX: Aktionen für Offline-Spieler korrekt via disabled-Attribut setzen
+        const disabledAttr = isOnline ? '' : 'disabled';
 
         detail.innerHTML = `
       <!-- Header -->
       <div class="detail-header">
         <div class="detail-avatar">
-          <img src="${p.skinUrl || `https://mc-heads.net/avatar/${esc(p.name)}/128`}" alt="${esc(p.name)}">
+          <img src="${esc(p.skinUrl || 'https://mc-heads.net/avatar/' + (p.name || 'Steve') + '/128')}" alt="${esc(p.name)}">
         </div>
         <div class="detail-info">
           <div class="detail-name">${esc(p.name)}</div>
-          <div class="detail-uuid">${p.uuid}</div>
+          <div class="detail-uuid">${esc(p.uuid)}</div>
           <div class="detail-badges">
             ${isOnline
-            ? '<span class="status-badge online">● ONLINE</span>'
-            : '<span class="status-badge offline">○ OFFLINE</span>'}
+                ? '<span class="status-badge online">● ONLINE</span>'
+                : '<span class="status-badge offline">○ OFFLINE</span>'}
             ${isOnline && p.vanished   ? '<span class="status-badge vanish">VANISH</span>'      : ''}
             ${isOnline && p.adminMode  ? '<span class="status-badge admin">ADMIN-MODUS</span>'  : ''}
             ${isOnline && p.op         ? '<span class="status-badge op">OP</span>'              : ''}
@@ -654,7 +706,7 @@
       <div class="stats-grid" id="stats-grid">
         <div class="stat-item">
           <div class="stat-label">Leben</div>
-          <div class="stat-value health" id="stat-health">${(p.health||0).toFixed(1)} / ${(p.maxHealth||20).toFixed(1)}</div>
+          <div class="stat-value health" id="stat-health">${(p.health || 0).toFixed(1)} / ${(p.maxHealth || 20).toFixed(1)}</div>
           <div class="bar-wrap">
             <div class="bar"><div class="bar-fill health" id="bar-health" style="width:${hpPct}%"></div></div>
             <span style="font-family:var(--mono);font-size:10px;color:var(--muted)">${hpPct}%</span>
@@ -662,7 +714,7 @@
         </div>
         <div class="stat-item">
           <div class="stat-label">Hunger</div>
-          <div class="stat-value food" id="stat-food">${p.food||0} / 20</div>
+          <div class="stat-value food" id="stat-food">${p.food || 0} / 20</div>
           <div class="bar-wrap">
             <div class="bar"><div class="bar-fill food" id="bar-food" style="width:${foodPct}%"></div></div>
             <span style="font-family:var(--mono);font-size:10px;color:var(--muted)">${foodPct}%</span>
@@ -670,7 +722,7 @@
         </div>
         <div class="stat-item">
           <div class="stat-label">Spielmodus</div>
-          <div class="stat-value" id="stat-gm" style="font-size:14px">${p.gamemode || '—'}</div>
+          <div class="stat-value" id="stat-gm" style="font-size:14px">${esc(p.gamemode) || '—'}</div>
         </div>
         ${isOnline ? `
         <div class="stat-item">
@@ -689,10 +741,10 @@
 
       <!-- Coordinates -->
       <div class="coords-card" id="stat-coords">
-        <div class="coord"><span id="coord-x">${(p.x||0).toFixed(1)}</span> X</div>
-        <div class="coord"><span id="coord-y">${(p.y||0).toFixed(1)}</span> Y</div>
-        <div class="coord"><span id="coord-z">${(p.z||0).toFixed(1)}</span> Z</div>
-        ${isOnline ? `<div class="coord"><span id="coord-yaw">${(p.yaw||0).toFixed(0)}°</span> Yaw</div>` : ''}
+        <div class="coord"><span id="coord-x">${(p.x || 0).toFixed(1)}</span> X</div>
+        <div class="coord"><span id="coord-y">${(p.y || 0).toFixed(1)}</span> Y</div>
+        <div class="coord"><span id="coord-z">${(p.z || 0).toFixed(1)}</span> Z</div>
+        ${isOnline ? `<div class="coord"><span id="coord-yaw">${(p.yaw || 0).toFixed(0)}°</span> Yaw</div>` : ''}
         <div style="flex:1"></div>
         <div class="coord-world" id="coord-world">${esc(p.world) || ''}</div>
       </div>
@@ -705,10 +757,11 @@
           <div class="action-group">
             <div class="action-group-label">Strafen</div>
             <div class="action-group-btns">
-              <button class="btn red" onclick="openBanModal('${esc(p.name)}')">⊘ Bannen</button>
-              <button class="btn yellow" ${onlineOnly} onclick="openMuteModal('${esc(p.name)}')">⊝ Muten</button>
-              <button class="btn orange" ${onlineOnly} onclick="openWarnModal('${esc(p.name)}')">⚠ Verwarnen</button>
-              <button class="btn" ${onlineOnly} onclick="openKickModal('${esc(p.name)}')">⊡ Kicken</button>
+              <!-- FIX: Buttons nutzen data-player statt onclick-String mit Name -->
+              <button class="btn red" data-player="${esc(p.name)}" onclick="openBanModal(this.dataset.player)">⊘ Bannen</button>
+              <button class="btn yellow" data-player="${esc(p.name)}" onclick="openMuteModal(this.dataset.player)" ${disabledAttr}>⊝ Muten</button>
+              <button class="btn orange" data-player="${esc(p.name)}" onclick="openWarnModal(this.dataset.player)" ${disabledAttr}>⚠ Verwarnen</button>
+              <button class="btn" data-player="${esc(p.name)}" onclick="openKickModal(this.dataset.player)" ${disabledAttr}>⊡ Kicken</button>
             </div>
           </div>
 
@@ -716,18 +769,18 @@
           <div class="action-group">
             <div class="action-group-label">Status</div>
             <div class="action-group-btns">
-              <button class="btn blue" onclick="toggleVanish('${esc(p.name)}', ${p.vanished})">${p.vanished ? '👁 Sichtbar machen' : '🙈 Vanish'}</button>
-              <button class="btn blue" onclick="toggleAdminMode('${esc(p.name)}', ${p.adminMode})">${p.adminMode ? '⬡ Admin-Modus OFF' : '⬡ Admin-Modus ON'}</button>
+              <button class="btn blue" data-player="${esc(p.name)}" data-vanished="${p.vanished}" onclick="toggleVanish(this.dataset.player, this.dataset.vanished==='true')">${p.vanished ? '👁 Sichtbar machen' : '🙈 Vanish'}</button>
+              <button class="btn blue" data-player="${esc(p.name)}" data-adminmode="${p.adminMode}" onclick="toggleAdminMode(this.dataset.player, this.dataset.adminmode==='true')">${p.adminMode ? '⬡ Admin-Modus OFF' : '⬡ Admin-Modus ON'}</button>
             </div>
           </div>
 
           <div class="action-group">
             <div class="action-group-label">Vitalwerte</div>
             <div class="action-group-btns">
-              <button class="btn green" onclick="quickAction('heal','${esc(p.name)}')">❤ Heilen</button>
-              <button class="btn green" onclick="quickAction('feed','${esc(p.name)}')">🍗 Sättigen</button>
-              <button class="btn yellow" onclick="quickAction('starve','${esc(p.name)}')">💀 Hungern</button>
-              <button class="btn danger" onclick="confirmKill('${esc(p.name)}')">☠ Töten</button>
+              <button class="btn green"  data-player="${esc(p.name)}" onclick="quickAction('heal',   this.dataset.player)">❤ Heilen</button>
+              <button class="btn green"  data-player="${esc(p.name)}" onclick="quickAction('feed',   this.dataset.player)">🍗 Sättigen</button>
+              <button class="btn yellow" data-player="${esc(p.name)}" onclick="quickAction('starve', this.dataset.player)">💀 Hungern</button>
+              <button class="btn danger" data-player="${esc(p.name)}" onclick="confirmKill(this.dataset.player)">☠ Töten</button>
             </div>
           </div>` : ''}
 
@@ -738,9 +791,9 @@
       <!-- Inventory -->
       <div class="inv-section">
         <div class="inv-tabs">
-          <div class="inv-tab ${invTab==='inventory'?'active':''}" onclick="switchInvTab('inventory', event)">INVENTAR</div>
-          <div class="inv-tab ${invTab==='ender'?'active':''}" onclick="switchInvTab('ender', event)">ENDERCHEST</div>
-          <div class="inv-tab ${invTab==='armor'?'active':''}" onclick="switchInvTab('armor', event)">RÜSTUNG</div>
+          <div class="inv-tab ${invTab==='inventory' ? 'active' : ''}" onclick="switchInvTab('inventory', event)">INVENTAR</div>
+          <div class="inv-tab ${invTab==='ender'     ? 'active' : ''}" onclick="switchInvTab('ender',     event)">ENDERCHEST</div>
+          <div class="inv-tab ${invTab==='armor'     ? 'active' : ''}" onclick="switchInvTab('armor',     event)">RÜSTUNG</div>
         </div>
         <div id="inv-content" style="margin-top:16px;"></div>
       </div>` : ''}
@@ -749,24 +802,27 @@
         if (isOnline) loadInventory(p.uuid);
     }
 
+    // FIX: updateDetailStats prüft ob Detail noch zum aktuellen Spieler gehört
     function updateDetailStats(p) {
+        if (!currentPlayer || currentPlayer.uuid !== p.uuid) return;
+
         const set  = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
         const setW = (id, val) => { const el = document.getElementById(id); if (el) el.style.width  = val; };
 
-        const hpPct   = Math.round((p.health / p.maxHealth) * 100);
-        const foodPct = Math.round((p.food / 20) * 100);
+        const hpPct   = Math.round(((p.health || 0) / (p.maxHealth || 20)) * 100);
+        const foodPct = Math.round(((p.food   || 0) / 20) * 100);
 
-        set('stat-health', `${p.health?.toFixed(1)} / ${p.maxHealth?.toFixed(1)}`);
-        set('stat-food',   `${p.food} / 20`);
-        set('stat-gm',     p.gamemode);
-        set('stat-level',  p.level);
-        set('stat-ping',   `${p.ping} ms`);
-        set('stat-world',  p.world);
-        set('coord-x',     p.x?.toFixed(1));
-        set('coord-y',     p.y?.toFixed(1));
-        set('coord-z',     p.z?.toFixed(1));
-        set('coord-yaw',   `${p.yaw?.toFixed(0)}°`);
-        set('coord-world', p.world);
+        set('stat-health', (p.health || 0).toFixed(1) + ' / ' + (p.maxHealth || 20).toFixed(1));
+        set('stat-food',   (p.food || 0) + ' / 20');
+        set('stat-gm',     p.gamemode || '—');
+        set('stat-level',  p.level ?? '—');
+        set('stat-ping',   (p.ping ?? '—') + ' ms');
+        set('stat-world',  p.world || '—');
+        set('coord-x',     (p.x || 0).toFixed(1));
+        set('coord-y',     (p.y || 0).toFixed(1));
+        set('coord-z',     (p.z || 0).toFixed(1));
+        set('coord-yaw',   (p.yaw || 0).toFixed(0) + '°');
+        set('coord-world', p.world || '');
         setW('bar-health', hpPct  + '%');
         setW('bar-food',   foodPct + '%');
 
@@ -783,13 +839,17 @@
     // ═══════════════════════════════════════════════════
     //  INVENTORY
     // ═══════════════════════════════════════════════════
-    let cachedInv = null;
-
     async function loadInventory(uuid) {
+        // FIX: Cache nur nutzen wenn UUID übereinstimmt
+        if (cachedInvUuid === uuid && cachedInv) {
+            renderInventory();
+            return;
+        }
         try {
-            const res = await fetch('/api/inventory/' + uuid);
+            const res = await fetch('/api/inventory/' + uuid, { credentials: 'include' });
             if (!res.ok) return;
-            cachedInv = await res.json();
+            cachedInv     = await res.json();
+            cachedInvUuid = uuid;
             renderInventory();
         } catch {}
     }
@@ -807,11 +867,15 @@
         if (!container) return;
 
         let items, cols, label;
-        if (invTab === 'inventory') { items = cachedInv.inventory;  cols = 9; label = 'Haupt-Inventar (36 Slots)'; }
-        else if (invTab === 'ender') { items = cachedInv.enderchest; cols = 9; label = 'Enderchest (27 Slots)'; }
-        else { items = cachedInv.armor; cols = 4; label = 'Rüstungs-Slots'; }
+        if (invTab === 'inventory') {
+            items = cachedInv.inventory;  cols = 9; label = 'Haupt-Inventar (36 Slots)';
+        } else if (invTab === 'ender') {
+            items = cachedInv.enderchest; cols = 9; label = 'Enderchest (27 Slots)';
+        } else {
+            items = cachedInv.armor;      cols = 4; label = 'Rüstungs-Slots';
+        }
 
-        if (!items) {
+        if (!items || items.length === 0) {
             container.innerHTML = '<div style="color:var(--muted);font-family:var(--mono);font-size:12px;padding:16px">Keine Daten</div>';
             return;
         }
@@ -836,9 +900,16 @@
 
     // ═══════════════════════════════════════════════════
     //  ACTION MODALS
+    //  FIX: Spielernamen werden nie mehr in onclick-Strings eingebettet.
+    //       Stattdessen werden sie in Modal-Daten-Attributen gespeichert.
     // ═══════════════════════════════════════════════════
+
+    // Temporärer Speicher für den aktuell bearbeiteten Spieler im Modal
+    let modalTargetName = '';
+
     function openBanModal(name) {
-        openModal('Spieler bannen: ' + name, `
+        modalTargetName = name;
+        openModal('Spieler bannen: ' + esc(name), `
       <div class="form-group">
         <label class="form-label">DAUER</label>
         <select class="form-select" id="ban-duration">
@@ -855,12 +926,13 @@
         <input class="form-input" id="ban-reason" placeholder="Grund eingeben..." value="Regelverstoß">
       </div>`, [
             { label: 'Abbrechen', onclick: 'closeModal()', cls: '' },
-            { label: '⊘ Bannen',  onclick: `executeBan('${name}')`, cls: 'danger' },
+            { label: '⊘ Bannen',  onclick: 'executeBan()',  cls: 'danger' },
         ]);
     }
 
     function openMuteModal(name) {
-        openModal('Spieler muten: ' + name, `
+        modalTargetName = name;
+        openModal('Spieler muten: ' + esc(name), `
       <div class="form-group">
         <label class="form-label">DAUER</label>
         <select class="form-select" id="mute-duration">
@@ -875,66 +947,74 @@
         <input class="form-input" id="mute-reason" placeholder="Grund eingeben..." value="Spam">
       </div>`, [
             { label: 'Abbrechen', onclick: 'closeModal()', cls: '' },
-            { label: '⊝ Muten',   onclick: `executeMute('${name}')`, cls: 'yellow' },
+            { label: '⊝ Muten',   onclick: 'executeMute()', cls: 'yellow' },
         ]);
     }
 
     function openWarnModal(name) {
-        openModal('Spieler verwarnen: ' + name, `
+        modalTargetName = name;
+        openModal('Spieler verwarnen: ' + esc(name), `
       <div class="form-group">
         <label class="form-label">GRUND</label>
         <input class="form-input" id="warn-reason" placeholder="Grund eingeben..." value="Regelverstoß">
       </div>`, [
             { label: 'Abbrechen',   onclick: 'closeModal()', cls: '' },
-            { label: '⚠ Verwarnen', onclick: `executeWarn('${name}')`, cls: 'orange' },
+            { label: '⚠ Verwarnen', onclick: 'executeWarn()', cls: 'orange' },
         ]);
     }
 
     function openKickModal(name) {
-        openModal('Spieler kicken: ' + name, `
+        modalTargetName = name;
+        openModal('Spieler kicken: ' + esc(name), `
       <div class="form-group">
         <label class="form-label">GRUND</label>
         <input class="form-input" id="kick-reason" placeholder="Grund eingeben..." value="Kein Grund angegeben">
       </div>`, [
             { label: 'Abbrechen', onclick: 'closeModal()', cls: '' },
-            { label: '⊡ Kicken',  onclick: `executeKick('${name}')`, cls: '' },
+            { label: '⊡ Kicken',  onclick: 'executeKick()', cls: '' },
         ]);
     }
 
     function confirmKill(name) {
-        openModal('Spieler töten: ' + name, `
+        modalTargetName = name;
+        openModal('Spieler töten: ' + esc(name), `
       <p style="font-family:var(--mono);font-size:13px;color:var(--muted);line-height:1.6">
         Soll <strong style="color:var(--red)">${esc(name)}</strong> wirklich getötet werden?<br>
         Diese Aktion kann nicht rückgängig gemacht werden.
       </p>`, [
             { label: 'Abbrechen', onclick: 'closeModal()', cls: '' },
-            { label: '☠ Töten',   onclick: `executeKill('${name}')`, cls: 'danger' },
+            { label: '☠ Töten',   onclick: 'executeKill()', cls: 'danger' },
         ]);
     }
 
-    async function executeBan(name) {
-        const duration = document.getElementById('ban-duration').value;
-        const reason   = document.getElementById('ban-reason').value;
+    async function executeBan() {
+        const name     = modalTargetName;
+        const duration = document.getElementById('ban-duration')?.value || 'perm';
+        const reason   = document.getElementById('ban-reason')?.value   || 'Kein Grund angegeben';
         closeModal();
         await postAction('ban', { player: name, duration, reason });
     }
-    async function executeMute(name) {
-        const duration = document.getElementById('mute-duration').value;
-        const reason   = document.getElementById('mute-reason').value;
+    async function executeMute() {
+        const name     = modalTargetName;
+        const duration = document.getElementById('mute-duration')?.value || '1h';
+        const reason   = document.getElementById('mute-reason')?.value   || 'Kein Grund angegeben';
         closeModal();
         await postAction('mute', { player: name, duration, reason });
     }
-    async function executeWarn(name) {
-        const reason = document.getElementById('warn-reason').value;
+    async function executeWarn() {
+        const name   = modalTargetName;
+        const reason = document.getElementById('warn-reason')?.value || 'Kein Grund angegeben';
         closeModal();
         await postAction('warn', { player: name, reason });
     }
-    async function executeKick(name) {
-        const reason = document.getElementById('kick-reason').value;
+    async function executeKick() {
+        const name   = modalTargetName;
+        const reason = document.getElementById('kick-reason')?.value || 'Kein Grund angegeben';
         closeModal();
         await postAction('kick', { player: name, reason });
     }
-    async function executeKill(name) {
+    async function executeKill() {
+        const name = modalTargetName;
         closeModal();
         await postAction('kill', { player: name });
     }
@@ -954,6 +1034,7 @@
         try {
             const res    = await fetch('/api/action/' + action, {
                 method: 'POST',
+                credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
             });
@@ -998,15 +1079,20 @@
         el.className   = 'toast ' + type;
         el.textContent = msg;
         c.appendChild(el);
-        setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity 0.3s'; setTimeout(() => el.remove(), 300); }, 3000);
+        setTimeout(() => {
+            el.style.opacity    = '0';
+            el.style.transition = 'opacity 0.3s';
+            setTimeout(() => el.remove(), 300);
+        }, 3000);
     }
 
     // ═══════════════════════════════════════════════════
     //  AUTH
     // ═══════════════════════════════════════════════════
     async function logout() {
-        await fetch('/api/auth/logout', { method: 'POST' });
+        await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
         clearInterval(refreshInterval);
+        currentPlayer = null;
         showLogin();
     }
 
@@ -1014,8 +1100,13 @@
     //  UTILS
     // ═══════════════════════════════════════════════════
     function esc(s) {
-        if (!s) return '';
-        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        if (s == null) return '';
+        return String(s)
+            .replace(/&/g,  '&amp;')
+            .replace(/</g,  '&lt;')
+            .replace(/>/g,  '&gt;')
+            .replace(/"/g,  '&quot;')
+            .replace(/'/g,  '&#039;');
     }
 </script>
 </body>

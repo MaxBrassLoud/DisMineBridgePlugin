@@ -1,7 +1,7 @@
 package de.MaxBrassLoud.disMineBridge.commands;
 
 import de.MaxBrassLoud.disMineBridge.DisMineBridge;
-import de.MaxBrassLoud.disMineBridge.managers.AdminModeManager;
+import de.MaxBrassLoud.disMineBridge.features.adminmode.AdminModeManager;
 import de.MaxBrassLoud.disMineBridge.managers.LanguageManager;
 import org.bukkit.Bukkit;
 import org.bukkit.command.*;

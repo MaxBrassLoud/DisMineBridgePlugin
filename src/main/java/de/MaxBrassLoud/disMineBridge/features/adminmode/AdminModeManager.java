@@ -1,8 +1,9 @@
-package de.MaxBrassLoud.disMineBridge.managers;
+package de.MaxBrassLoud.disMineBridge.features.adminmode;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import de.MaxBrassLoud.disMineBridge.DisMineBridge;
+import de.MaxBrassLoud.disMineBridge.managers.LanguageManager;
 import de.MaxBrassLoud.disMineBridge.util.AdminModeData;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;

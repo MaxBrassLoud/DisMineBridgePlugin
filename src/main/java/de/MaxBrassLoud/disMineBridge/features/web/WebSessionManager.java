@@ -1,4 +1,4 @@
-package de.MaxBrassLoud.disMineBridge.web;
+package de.MaxBrassLoud.disMineBridge.features.web;
 
 import java.security.SecureRandom;
 import java.util.Base64;

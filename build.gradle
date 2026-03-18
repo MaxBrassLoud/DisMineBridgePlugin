@@ -33,11 +33,29 @@ repositories {
         name = 'henkelmax.public'
         url = 'https://maven.maxhenkel.de/repository/public'
     }
+
+    // Vault (soft-dependency für Rang-Prefixes via LuckPerms o.ä.)
+    maven {
+        name = 'jitpack'
+        url = 'https://jitpack.io'
+    }
 }
 
 dependencies {
-    // Paper API (Minecraft 1.21)
+    // Paper API (Minecraft 1.21) – nur zum Kompilieren
+    // Paper bringt Adventure (net.kyori) bereits eingebaut mit.
+    // adventure-api, serializer-legacy etc. sind in der Paper-API enthalten.
     compileOnly 'io.papermc.paper:paper-api:1.21.3-R0.1-SNAPSHOT'
+
+    // ── Adventure API ────────────────────────────────────────────────────
+    // Werden ins shadowJar gebundelt damit der Code auch kompiliert wenn
+    // die IDE kein Paper-Server-JAR als SDK hat.
+    // Zur Laufzeit auf Paper werden die Server-Versionen bevorzugt.
+    // KEIN adventure-platform-bukkit mehr – wir nutzen Paper's native
+    // player.sendMessage(Component) direkt → ClickEvents bleiben erhalten.
+    implementation 'net.kyori:adventure-api:4.17.0'
+    implementation 'net.kyori:adventure-text-serializer-legacy:4.17.0'
+    implementation 'net.kyori:adventure-text-serializer-gson:4.17.0'
 
     // JDA (Discord Bot Library)
     implementation('net.dv8tion:JDA:5.2.1') {
@@ -59,6 +77,12 @@ dependencies {
 
     // Annotations
     compileOnly 'org.jetbrains:annotations:26.0.1'
+
+    // Vault API (soft-dependency für Rang-Prefixes via LuckPerms etc.)
+    compileOnly 'com.github.MilkBowl:VaultAPI:1.7.1'
+
+    // Checker Framework (für @A in DisMineBridge.java)
+    compileOnly 'org.checkerframework:checker-qual:3.48.3'
 }
 
 processResources {
@@ -69,7 +93,6 @@ processResources {
     ]
 
     inputs.properties props
-
     filteringCharset 'UTF-8'
 
     filesMatching('plugin.yml') {
@@ -78,13 +101,6 @@ processResources {
 }
 
 shadowJar {
-    // ❌ KEINE RELOCATION - Das verursacht den Fehler mit Java 21!
-    // Die Relocation verwendet ASM das Java 21 nicht unterstützt
-
-    // Shadow Plugin funktioniert nur OHNE Relocation bei Java 21
-    // Das ist okay - Konflikte sind sehr selten mit diesen Libraries
-
-    // Exclude unnötige Dateien um JAR zu verkleinern
     exclude 'META-INF/*.SF'
     exclude 'META-INF/*.DSA'
     exclude 'META-INF/*.RSA'
@@ -93,12 +109,10 @@ shadowJar {
     exclude 'META-INF/versions/**'
     exclude 'module-info.class'
 
-    // Output Name
     archiveBaseName.set('DisMineBridge')
     archiveClassifier.set('')
     archiveVersion.set(version)
 
-    // Manifest
     manifest {
         attributes(
                 'Main-Class': 'de.MaxBrassLoud.disMineBridge.DisMineBridge',
@@ -109,10 +123,8 @@ shadowJar {
         )
     }
 
-    // Merge Service Files (wichtig für SLF4J und JDA)
     mergeServiceFiles()
 
-    // Append statt Merge für LICENSE Dateien
     append('LICENSE')
     append('NOTICE')
 }
@@ -124,12 +136,9 @@ tasks.named('build') {
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
     options.release = 21
-
-    // Warnings unterdrücken (optional)
     options.compilerArgs += ['-Xlint:-deprecation', '-Xlint:-unchecked']
 }
 
-// Kopiere finale JAR in einen Output-Ordner
 task copyToOutput(type: Copy) {
     dependsOn shadowJar
     from shadowJar.archiveFile
@@ -138,12 +147,10 @@ task copyToOutput(type: Copy) {
 
 build.finalizedBy(copyToOutput)
 
-// Clean Task erweitern
 clean {
     delete 'build/output'
 }
 
-// Info nach erfolgreichem Build
 gradle.buildFinished { buildResult ->
     if (buildResult.failure == null) {
         println ""
